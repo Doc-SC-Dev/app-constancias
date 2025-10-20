@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema de Constancias de Doctorado
 
-## Getting Started
+## Requisitos previos
+- Node.js (versión 18 o superior)
+- PNPM (gestor de paquetes)
+- PostgreSQL
 
-First, run the development server:
+## Configuración inicial
 
+### 1. Clonar el repositorio
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [URL_DEL_REPOSITORIO]
+cd constancias-doctorado
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Instalar dependencias
+```bash
+pnpm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Configurar variables de entorno
+1. Copiar el archivo de ejemplo de variables de entorno:
+```bash
+cp env.example .env
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Editar el archivo `.env` y configurar las siguientes variables:
+- `DATABASE_URL`: URL de conexión a PostgreSQL
+- `BETTER_AUTH_SECRET`: Clave secreta para autenticación (generar con `openssl rand -base64 32`)
+- `BETTER_AUTH_URL`: URL base de la aplicación
+- `EMAIL_SERVER_*`: Configuración del servidor SMTP para emails
+- `NODE_ENV`: Entorno de ejecución
 
-## Learn More
+### 4. Configurar la base de datos
+Ejecutar las migraciones de Prisma para crear las tablas necesarias:
+```bash
+pnpm prisma migrate dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Desarrollo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Iniciar el entorno de desarrollo
+```bash
+pnpm dev
+```
+La aplicación estará disponible en `http://localhost:3000`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Acceder a Prisma Studio (gestión de base de datos)
+```bash
+pnpm prisma studio
+```
 
-## Deploy on Vercel
+## Producción
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Construir la aplicación
+```bash
+pnpm build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Iniciar en modo producción
+```bash
+pnpm start
+```
+
+## Comandos útiles
+
+- `pnpm dev`: Inicia el servidor de desarrollo
+- `pnpm build`: Construye la aplicación para producción
+- `pnpm start`: Inicia la aplicación en modo producción
+- `pnpm prisma generate`: Regenera el cliente de Prisma
+- `pnpm prisma migrate dev`: Aplica las migraciones de base de datos
+- `pnpm prisma studio`: Abre la interfaz de gestión de base de datos
+
+## Estructura del proyecto
+```
+├── prisma/           # Esquema y migraciones de base de datos
+├── public/           # Archivos estáticos
+├── src/
+│   ├── app/         # Rutas y componentes de Next.js
+│   ├── lib/         # Utilidades y configuraciones
+│   └── generated/   # Código generado por Prisma
+```
+
+## Notas importantes
+- Asegúrate de nunca compartir el archivo `.env` con valores reales
+- En producción, configura `BETTER_AUTH_TRUST_HOST="true"` si usas HTTPS
+- Mantén las dependencias actualizadas con `pnpm update`
