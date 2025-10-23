@@ -1,3 +1,4 @@
+import { createSelectSchema } from "drizzle-arktype";
 import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -59,3 +60,8 @@ export const verification = pgTable("verification", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+export const User = createSelectSchema(user);
+export const Session = createSelectSchema(session);
+export const Account = createSelectSchema(account);
+export const Verification = createSelectSchema(verification);
