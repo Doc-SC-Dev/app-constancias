@@ -3,6 +3,7 @@ import { boolean, pgTable, text, timestamp, uuid, pgEnum, decimal, integer, json
 
 // Enums
 export const userStatusEnum = pgEnum("user_status", ["active", "inactive", "suspended"]);
+export const clientStatusEnum = pgEnum("client_status", ["active", "inactive", "suspended"]);
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -108,6 +109,30 @@ export const userRole = pgTable("user_role", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Client table
+export const client = pgTable("client", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  businessName: text("business_name").notNull(),
+  taxId: text("tax_id").notNull().unique(),
+  contactName: text("contact_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  address: text("address"),
+  status: clientStatusEnum("status").default("active").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  // Audit fields
+  createdBy: text("created_by")
+    .notNull()
+    .references(() => user.id),
+  updatedBy: text("updated_by")
+    .references(() => user.id),
+});
+
 export const User = createSelectSchema(user);
 export const Session = createSelectSchema(session);
 export const Account = createSelectSchema(account);
@@ -116,3 +141,4 @@ export const Role = createSelectSchema(role);
 export const Permission = createSelectSchema(permission);
 export const RolePermission = createSelectSchema(rolePermission);
 export const UserRole = createSelectSchema(userRole);
+export const Client = createSelectSchema(client);
