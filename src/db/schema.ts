@@ -1,5 +1,8 @@
 import { createSelectSchema } from "drizzle-arktype";
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp, uuid, pgEnum, decimal, integer, jsonb } from "drizzle-orm/pg-core";
+
+// Enums
+export const userStatusEnum = pgEnum("user_status", ["active", "inactive", "suspended"]);
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -7,6 +10,7 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  status: userStatusEnum("status").default("active").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -61,7 +65,54 @@ export const verification = pgTable("verification", {
     .notNull(),
 });
 
+// RBAC Tables
+export const role = pgTable("role", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+export const permission = pgTable("permission", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  resource: text("resource").notNull(),
+  action: text("action").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const rolePermission = pgTable("role_permission", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  roleId: uuid("role_id")
+    .notNull()
+    .references(() => role.id, { onDelete: "cascade" }),
+  permissionId: uuid("permission_id")
+    .notNull()
+    .references(() => permission.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userRole = pgTable("user_role", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  roleId: uuid("role_id")
+    .notNull()
+    .references(() => role.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const User = createSelectSchema(user);
 export const Session = createSelectSchema(session);
 export const Account = createSelectSchema(account);
 export const Verification = createSelectSchema(verification);
+export const Role = createSelectSchema(role);
+export const Permission = createSelectSchema(permission);
+export const RolePermission = createSelectSchema(rolePermission);
+export const UserRole = createSelectSchema(userRole);
