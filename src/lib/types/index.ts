@@ -1,6 +1,2 @@
-import { type } from "arktype";
-
-export const loginSchema = type({
-    email: "string.email",
-    password: "string > 8",
-});
+// Re-export auth schemas for backward compatibility
+export { type LoginInput, loginSchema } from "@/lib/validations/auth";

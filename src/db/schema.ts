@@ -1,5 +1,5 @@
 import { createSelectSchema } from "drizzle-arktype";
-import { boolean, pgTable, text, timestamp, uuid, pgEnum, decimal, integer, jsonb } from "drizzle-orm/pg-core";
+import { boolean, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 // Enums
 export const userStatusEnum = pgEnum("user_status", ["active", "inactive", "suspended"]);

@@ -1,6 +1,7 @@
 "use client";
 
 import { Edit, Eye, MoreHorizontal, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -22,31 +23,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { deleteClient, getClients } from "../actions";
+import type { Client } from "../types";
 
-interface Client {
-  id: string;
-  businessName: string;
-  taxId: string;
-  contactName: string;
-  email: string;
-  phone: string | null;
-  address: string | null;
-  status: "active" | "inactive" | "suspended";
-  notes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface ClientListProps {
-  onEditClient?: (client: Client) => void;
-  onViewClient?: (client: Client) => void;
-}
-
-export function ClientList({ onEditClient, onViewClient }: ClientListProps) {
+export function ClientList() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<
+    "active" | "inactive" | "suspended"
+  >("active");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [hasMore, setHasMore] = useState(false);
@@ -66,15 +51,17 @@ export function ClientList({ onEditClient, onViewClient }: ClientListProps) {
       setTotalCount(result.totalCount);
       setHasMore(result.hasMore);
     } catch (error) {
+      console.error(error);
       toast.error("Failed to load clients");
     } finally {
       setLoading(false);
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: funcion cambia cada vez
   useEffect(() => {
     loadClients();
-  }, [search, statusFilter, currentPage]);
+  }, [search, statusFilter, currentPage]); // intentionally omitting loadClients from deps
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this client?")) return;
@@ -84,6 +71,7 @@ export function ClientList({ onEditClient, onViewClient }: ClientListProps) {
       toast.success("Client deleted successfully");
       loadClients();
     } catch (error) {
+      console.log(error);
       toast.error("Failed to delete client");
     }
   };
@@ -125,8 +113,13 @@ export function ClientList({ onEditClient, onViewClient }: ClientListProps) {
           />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) =>
+              setStatusFilter(
+                e.target.value as "active" | "suspended" | "inactive",
+              )
+            }
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            defaultValue={""}
           >
             <option value="">All Status</option>
             <option value="active">Active</option>
@@ -177,17 +170,11 @@ export function ClientList({ onEditClient, onViewClient }: ClientListProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          onClick={() => onViewClient?.(client)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onEditClient?.(client)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
+                        <DropdownMenuItem>
+                          <Link href={`/clients/${client.id}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem

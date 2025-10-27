@@ -14,29 +14,25 @@ interface ClientDetailPageProps {
 export default async function ClientDetailPage({
   params,
 }: ClientDetailPageProps) {
-  let client;
-  try {
-    client = await getClientById(params.id);
-  } catch {
-    notFound();
-  }
+  const client = await getClientById(params.id);
+  if (client) {
+    return (
+      <div className="container mx-auto py-6">
+        <div className="mb-6">
+          <Link href="/clients">
+            <Button variant="outline" className="mb-4">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Clients
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold">Client Details</h1>
+          <p className="text-muted-foreground">
+            View and manage client information
+          </p>
+        </div>
 
-  return (
-    <div className="container mx-auto py-6">
-      <div className="mb-6">
-        <Link href="/clients">
-          <Button variant="outline" className="mb-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Clients
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold">Client Details</h1>
-        <p className="text-muted-foreground">
-          View and manage client information
-        </p>
+        <ClientCard client={client} />
       </div>
-
-      <ClientCard client={client} />
-    </div>
-  );
+    );
+  } else notFound();
 }

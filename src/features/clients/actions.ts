@@ -1,17 +1,22 @@
 "use server";
 
+
 import { db } from "@/db/drizzle";
 import { client } from "@/db/schema";
-import { clientSchema, clientUpdateSchema, clientFilterSchema } from "@/lib/validations/client";
 import { requirePermission } from "@/lib/auth-helpers";
-import { eq, and, or, like, desc, asc } from "drizzle-orm";
+import { clientFilterSchema, clientSchema, clientUpdateSchema } from "@/lib/validations/client";
+import { ArkErrors } from "arktype";
+import { and, desc, eq, like, or } from "drizzle-orm";
 
 // Create a new client
 export async function createClient(data: typeof clientSchema.infer) {
   const session = await requirePermission("client", "create");
-  
+
   const validatedData = clientSchema(data);
-  
+  if (validatedData instanceof ArkErrors) {
+    throw new Error("Invalid client data");
+  }
+
   const [newClient] = await db
     .insert(client)
     .values({
@@ -20,22 +25,24 @@ export async function createClient(data: typeof clientSchema.infer) {
       updatedBy: session.user.id,
     })
     .returning();
-  
+
   return newClient;
 }
 
 // Get all clients with filtering and pagination
 export async function getClients(filters: typeof clientFilterSchema.infer = {}) {
   await requirePermission("client", "read");
-  
+
   const validatedFilters = clientFilterSchema(filters);
+  if (validatedFilters instanceof ArkErrors) {
+    throw new Error("Invalid filter data");
+  }
+
   const { search, status, limit = 50, offset = 0 } = validatedFilters;
-  
-  let query = db.select().from(client);
-  
-  // Apply filters
+
+  // Build conditions array
   const conditions = [];
-  
+
   if (search) {
     conditions.push(
       or(
@@ -46,27 +53,26 @@ export async function getClients(filters: typeof clientFilterSchema.infer = {}) 
       )
     );
   }
-  
+
   if (status) {
     conditions.push(eq(client.status, status));
   }
-  
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions));
-  }
-  
+
   // Apply pagination and ordering
-  const clients = await query
+  const clients = await db
+    .select()
+    .from(client)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(client.createdAt))
     .limit(limit)
     .offset(offset);
-  
+
   // Get total count for pagination
   const totalCount = await db
     .select({ count: client.id })
     .from(client)
     .where(conditions.length > 0 ? and(...conditions) : undefined);
-  
+
   return {
     clients,
     totalCount: totalCount.length,
@@ -77,26 +83,29 @@ export async function getClients(filters: typeof clientFilterSchema.infer = {}) 
 // Get a single client by ID
 export async function getClientById(id: string) {
   await requirePermission("client", "read");
-  
+
   const [clientRecord] = await db
     .select()
     .from(client)
     .where(eq(client.id, id))
     .limit(1);
-  
+
   if (!clientRecord) {
     throw new Error("Client not found");
   }
-  
+
   return clientRecord;
 }
 
 // Update a client
 export async function updateClient(id: string, data: typeof clientUpdateSchema.infer) {
   const session = await requirePermission("client", "update");
-  
+
   const validatedData = clientUpdateSchema(data);
-  
+  if (validatedData instanceof ArkErrors) {
+    throw new Error("Invalid client data");
+  }
+
   const [updatedClient] = await db
     .update(client)
     .set({
@@ -105,26 +114,26 @@ export async function updateClient(id: string, data: typeof clientUpdateSchema.i
     })
     .where(eq(client.id, id))
     .returning();
-  
+
   if (!updatedClient) {
     throw new Error("Client not found");
   }
-  
+
   return updatedClient;
 }
 
 // Delete a client
 export async function deleteClient(id: string) {
   await requirePermission("client", "delete");
-  
+
   const [deletedClient] = await db
     .delete(client)
     .where(eq(client.id, id))
     .returning();
-  
+
   if (!deletedClient) {
     throw new Error("Client not found");
   }
-  
+
   return deletedClient;
 }

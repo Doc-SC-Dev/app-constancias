@@ -1,4 +1,4 @@
-import type { ClientInput, ClientFilterInput, ClientUpdateInput } from "@/lib/validations/client";
+import type { ClientFilterInput, ClientInput, ClientUpdateInput } from "@/lib/validations/client";
 
 export type Client = {
     id: string;

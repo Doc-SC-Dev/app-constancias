@@ -1,9 +1,15 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Building, Calendar, Edit, Mail, MapPin, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Mail, Phone, MapPin, Building, Calendar } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface Client {
   id: string;
@@ -47,9 +53,7 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               <Building className="h-5 w-5" />
               {client.businessName}
             </CardTitle>
-            <CardDescription>
-              Tax ID: {client.taxId}
-            </CardDescription>
+            <CardDescription>Tax ID: {client.taxId}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <Badge className={getStatusColor(client.status)}>
@@ -74,19 +78,19 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               <span className="font-medium">Contact:</span>
               <span>{client.contactName}</span>
             </div>
-            
+
             <div className="flex items-center gap-2 text-sm">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <span>{client.email}</span>
             </div>
-            
+
             {client.phone && (
               <div className="flex items-center gap-2 text-sm">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <span>{client.phone}</span>
               </div>
             )}
-            
+
             {client.address && (
               <div className="flex items-start gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
@@ -94,20 +98,24 @@ export function ClientCard({ client, onEdit }: ClientCardProps) {
               </div>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>Created: {new Date(client.createdAt).toLocaleDateString()}</span>
+              <span>
+                Created: {new Date(client.createdAt).toLocaleDateString()}
+              </span>
             </div>
-            
+
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>Updated: {new Date(client.updatedAt).toLocaleDateString()}</span>
+              <span>
+                Updated: {new Date(client.updatedAt).toLocaleDateString()}
+              </span>
             </div>
           </div>
         </div>
-        
+
         {client.notes && (
           <div className="pt-4 border-t">
             <h4 className="font-medium text-sm mb-2">Notes</h4>
