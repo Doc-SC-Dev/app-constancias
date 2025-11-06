@@ -1,27 +1,61 @@
-FROM node:20-alpine AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PATH"
-RUN corepack enable
-
-FROM base AS build
+# Dockerfile para Next.js 15 con pnpm y Prisma
+# Etapa 1: Dependencias
+FROM node:20-alpine AS deps
+RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
-COPY . .
+
+# Copiar archivos de dependencias
 COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-ENV NODE_ENV=production
-ENV DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19LR3pvNkF4VzdYMGNSOWFQSWZfQmQiLCJhcGlfa2V5IjoiMDFLN1NOMFRQRlFKRFRZMTRNN0QwMTE5UTIiLCJ0ZW5hbnRfaWQiOiJlZDVjYjU0MWE5ZWY4NmRmMThlOTRhYjlkOGQ4NjE3MGM4YzE1OTU5NDQzMzE0YjAyMDE5YjA5OTkyZGYwZjEyIiwiaW50ZXJuYWxfc2VjcmV0IjoiNDhjYjY3ZTQtMGI0Mi00Mjk4LWEzNTItYzQ2MDg4NGUxNjUzIn0.Zyc0Db0ReYhKZJc9kpqi1TX8tanB0FSHfWVTJ-dS3L8"
-ENV BETTER_AUTH_SECRET=GYLUqo5h2XAad761s4PnmxzTJcHOzLOD
-ENV BETTER_AUTH_URL=http://localhost:3000
-RUN pnpm run build
+COPY prisma ./prisma/
 
-FROM base AS dokploy
+# Instalar dependencias
+RUN pnpm install --frozen-lockfile
+
+# Etapa 2: Builder
+FROM node:20-alpine AS builder
+RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
+
+# Copiar dependencias instaladas
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Generar cliente de Prisma
+RUN pnpm prisma generate --no-engine
+
+# Variables de entorno para build
+ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Copy only the necessary files
-COPY --from=build /app/.next/stand./dist
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/node_modules ./node_modules
+# Construir aplicación
+RUN pnpm build
+
+# Etapa 3: Runner
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Crear usuario no privilegiado
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copiar archivos necesarios
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/src/generated ./src/generated
+COPY --from=builder /app/prisma ./prisma
+
+# Cambiar permisos
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
 
 EXPOSE 3000
-CMD ["pnpm", "start"]
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
