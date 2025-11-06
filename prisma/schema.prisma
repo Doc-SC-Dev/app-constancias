@@ -15,13 +15,14 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String     @id
+  rut           String
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean    @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
 
@@ -29,8 +30,13 @@ model User {
   banned     Boolean?  @default(false)
   banReason  String?
   banExpires DateTime?
+  professors    Professor?
+  student       Student?
+  guests        Guest[]
+  requests      Request[]
+  logs          Log[]
 
-  @@unique([email])
+  @@unique([rut, email])
   @@map("user")
 }
 
@@ -67,6 +73,7 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
+  @@unique([accountId, providerId])
   @@map("account")
 }
 
@@ -79,4 +86,129 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+model Professor {
+  id         String     @id
+  updatedAt  DateTime   @updatedAt
+  createdAt  DateTime   @default(now())
+  userId     String     @unique
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities Activity[]
+}
+
+model Student {
+  id                 Int                 @id
+  userId             String
+  isRegularStudent   Boolean
+  updatedAt          DateTime            @updatedAt
+  createdAt          DateTime            @default(now())
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otherRequests      OtherRequest[]
+  qualificationExams QualificationExam[]
+
+  @@unique([userId])
+}
+
+model OtherRequest {
+  id        String @id @default(uuid())
+  studentId Int
+  name      String
+
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model QualificationExam {
+  id        String   @id @default(uuid())
+  studentId Int
+  title     String
+  grade     Int
+  date      DateTime
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+enum ActivityType {
+  CHARLA
+  EXAMEN_CALIFICACION
+  CLASES
+  AUTORIA
+  CO_TUTOR
+  COLABORADOR
+  TUTOR_TESIS
+}
+
+model Activity {
+  id            String       @id @default(uuid())
+  teacherId     String
+  name          String
+  startAt       DateTime
+  endAt         DateTime
+  hours         Int
+  nAssistant    Int?
+  nParticipants Int
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  type          String
+  professor     Professor    @relation(fields: [teacherId], references: [id])
+  activityType  ActivityType
+  guests        Guest[]
+}
+
+model Guest {
+  charlaId          String
+  guestId           String
+  participationType String
+  hours             Int
+  date              DateTime
+  createdAt         DateTime @default(now())
+  activity          Activity @relation(fields: [charlaId], references: [id])
+  user              User     @relation(fields: [guestId], references: [id])
+
+  @@id([charlaId, guestId])
+}
+
+model Certificate {
+  id      String @id @default(uuid())
+  pdfLink String
+
+  requests Request[]
+}
+
+model Request {
+  id            String   @id @default(uuid())
+  userId        String
+  certificateId String
+  state         String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id])
+  certificate Certificate @relation(fields: [certificateId], references: [id])
+}
+
+enum Action {
+  CREATE
+  UPDATE
+  READ
+  DELETE
+}
+
+enum Resource {
+  USER
+  REQUEST
+  ACTIVITY
+}
+
+model Log {
+  id       String   @id @default(uuid())
+  userId   String
+  action   Action
+  resource Resource
+  result   String
+  date     DateTime
+
+  user User @relation(fields: [userId], references: [id])
 }
