@@ -1,13 +1,13 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AppAvatar } from "./app-avatar";
 import { AppSideBarTrigger } from "./app-sidebar-trigger";
 
 export function AppNavBar() {
   return (
-    <nav className="flex justify-between items-center p-4 bg-primary">
+    <nav className="w-full flex justify-between items-center p-4 bg-primary top-0 sticky ">
       <div>
         <AppSideBarTrigger />
       </div>
-      <div className="flex flex-row space-x-3 h-full items-center">
+      <div className="flex flex-row space-x-3 h-full items-center px-4">
         <div className="flex flex-col">
           <span className="text-primary-foreground text-base font-bold">
             Nombre Usuario
@@ -16,10 +16,7 @@ export function AppNavBar() {
             Tipo usuario
           </span>
         </div>
-        <Avatar>
-          <AvatarImage src="/avatar.png" alt="Avatar" />
-          <AvatarFallback>AB</AvatarFallback>
-        </Avatar>
+        <AppAvatar />
       </div>
     </nav>
   );
