@@ -21,7 +21,7 @@ export default function RootLayout({
           <AppSideBar />
           <SidebarInset>
             <AppNavBar />
-            <main className="p-10">{children}</main>
+            <main className="p-10 h-full">{children}</main>
           </SidebarInset>
         </SidebarProvider>
       </body>
