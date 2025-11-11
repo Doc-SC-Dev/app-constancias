@@ -8,7 +8,7 @@ import {
   guest,
   professor,
   student,
-  subAdmin,
+  sub_admin,
 } from "@/lib/authorization/permissions";
 import { db } from "../../db";
 
@@ -19,11 +19,20 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  user: {
+    additionalFields: {
+      rut: {
+        type: "string",
+        defaultValue: "",
+        input: true,
+      },
+    },
+  },
   plugins: [
     nextCookies(),
     admin({
       ac: ac,
-      roles: { professor, guest, subAdmin, student, administrator },
+      roles: { professor, guest, sub_admin, student, administrator },
     }),
   ],
 });
