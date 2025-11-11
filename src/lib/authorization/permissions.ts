@@ -33,7 +33,7 @@ export const guest = ac.newRole({
   request: ["create", "read"],
 });
 
-export const subAdmin = ac.newRole({
+export const sub_admin = ac.newRole({
   ...adminAc.statements,
   activity: ["create", "read", "update"],
   request: ["create", "read", "update"],
