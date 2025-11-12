@@ -35,7 +35,6 @@ export default function LoginPage() {
     }
 
     setError("");
-    console.log("🟡 [CLIENT] Enviando login:", form);
 
     startTransition(async () => {
       try {

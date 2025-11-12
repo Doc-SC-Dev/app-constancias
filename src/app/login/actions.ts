@@ -7,28 +7,6 @@ interface ActionResponse {
   message: string;
 }
 
-export async function registerAction(
-  formData: FormData
-): Promise<ActionResponse> {
-  const email = formData.get("email")?.toString() || "";
-  const password = formData.get("password")?.toString() || "";
-  const name = formData.get("name")?.toString() || "";
-
-  try {
-    const res = await auth.api.signUpEmail({ body: { email, password, name } });
-
-    if (!res?.token) {
-      console.error("Registration error:", res);
-      return { success: false, message: "Failed to register user" };
-    }
-
-    return { success: true, message: "User registered successfully" };
-  } catch (error) {
-    console.error("Exception in registerAction:", error);
-    return { success: false, message: "An error occurred during registration" };
-  }
-}
-
 export async function loginAction(formData: FormData): Promise<ActionResponse> {
   const email = formData.get("email")?.toString() || "";
   const password = formData.get("password")?.toString() || "";
@@ -50,6 +28,28 @@ export async function loginAction(formData: FormData): Promise<ActionResponse> {
   } catch (error) {
     console.error("Exception in loginAction:", error);
     return { success: false, message: "An error occurred during login" };
+  }
+}
+
+export async function registerAction(
+  formData: FormData
+): Promise<ActionResponse> {
+  const email = formData.get("email")?.toString() || "";
+  const password = formData.get("password")?.toString() || "";
+  const name = formData.get("name")?.toString() || "";
+
+  try {
+    const res = await auth.api.signUpEmail({ body: { email, password, name } });
+
+    if (!res?.token) {
+      console.error("Registration error:", res);
+      return { success: false, message: "Failed to register user" };
+    }
+
+    return { success: true, message: "User registered successfully" };
+  } catch (error) {
+    console.error("Exception in registerAction:", error);
+    return { success: false, message: "An error occurred during registration" };
   }
 }
 
