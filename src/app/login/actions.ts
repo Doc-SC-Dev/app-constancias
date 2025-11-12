@@ -1,96 +1,63 @@
 "use server";
-
 import { auth } from "@/lib/auth";
 import { cookies } from "next/headers";
 
-export async function registerAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const name = formData.get("name") as string;
+interface ActionResponse {
+  success: boolean;
+  message: string;
+}
 
-  console.log("🟢 [SERVER] registerAction ejecutado");
-  console.log("📥 Datos recibidos:", { email, name });
+export async function registerAction(
+  formData: FormData
+): Promise<ActionResponse> {
+  const email = formData.get("email")?.toString() || "";
+  const password = formData.get("password")?.toString() || "";
+  const name = formData.get("name")?.toString() || "";
 
   try {
-    const res = await auth.signUp.email({ email, password, name });
-    console.log("📤 Respuesta de auth.signUp.email:", res);
+    const res = await auth.api.signUpEmail({ body: { email, password, name } });
 
-    if (res.error) {
-      console.error("🟥 Error al registrar:", res.error.message);
-      return { success: false, message: res.error.message };
+    if (!res?.token) {
+      console.error("Registration error:", res);
+      return { success: false, message: "Failed to register user" };
     }
 
-    console.log("✅ Registro exitoso");
-    return { success: true, message: "Usuario registrado correctamente" };
+    return { success: true, message: "User registered successfully" };
   } catch (error) {
-    console.error("🟥 Excepción en registerAction:", error);
-    return { success: false, message: "Error al registrar el usuario" };
+    console.error("Exception in registerAction:", error);
+    return { success: false, message: "An error occurred during registration" };
   }
 }
 
-export async function loginAction(formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-
-  console.log("🟡 [SERVER] loginAction ejecutado");
-  console.log("📥 Datos recibidos:", { email });
+export async function loginAction(formData: FormData): Promise<ActionResponse> {
+  const email = formData.get("email")?.toString() || "";
+  const password = formData.get("password")?.toString() || "";
 
   try {
-    const res = await auth.signIn.email({ email, password });
-    console.log("📤 Respuesta de auth.signIn.email:", res);
+    const res = await auth.api.signInEmail({ body: { email, password } });
 
-    if (res.error) {
-      console.error("🟥 Error en login:", res.error.message);
-      return { success: false, message: res.error.message };
+    if (!res?.token) {
+      console.error("Login error:", res);
+      return {
+        success: false,
+        message: "Invalid credentials or authentication failed",
+      };
     }
 
-    const session = res.data?.session;
-    if (session) {
-      console.log("🔐 Guardando sesión en cookies:", session);
-      const cookieStore = await cookies();
-      cookieStore.set("session_token", session.token, {
-        httpOnly: true,
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      });
-    } else {
-      console.warn("⚠️ No se recibió sesión en la respuesta de login");
-    }
-
-    console.log("✅ Login exitoso");
-    return { success: true, message: "Inicio de sesión exitoso" };
+    await setSessionCookie(res.token);
+    console.log("Login successful");
+    return { success: true, message: "Login successful" };
   } catch (error) {
-    console.error("🟥 Excepción en loginAction:", error);
-    return { success: false, message: "Error al iniciar sesión" };
+    console.error("Exception in loginAction:", error);
+    return { success: false, message: "An error occurred during login" };
   }
 }
 
-export async function logoutAction() {
-  console.log("🔴 [SERVER] logoutAction ejecutado");
-  try {
-    const cookieStore = await cookies();
-    cookieStore.delete("session_token");
-    await auth.signOut();
-    console.log("✅ Sesión cerrada correctamente");
-    return { success: true, message: "Sesión cerrada correctamente" };
-  } catch (error) {
-    console.error("🟥 Error en logoutAction:", error);
-    return { success: false, message: "Error al cerrar sesión" };
-  }
-}
-
-export async function getSessionAction() {
-  console.log("🟣 [SERVER] getSessionAction ejecutado");
-  try {
-    const session = await auth.getSession();
-    console.log("📤 Sesión obtenida:", session);
-    if (!session) {
-      console.warn("⚠️ No hay sesión activa");
-      return { authenticated: false, user: null };
-    }
-    return { authenticated: true, user: session.user };
-  } catch (error) {
-    console.error("🟥 Error al obtener sesión:", error);
-    return { authenticated: false, user: null };
-  }
+async function setSessionCookie(token: string) {
+  const cookieStore = await cookies();
+  cookieStore.set("session_token", token, {
+    httpOnly: true,
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
 }
