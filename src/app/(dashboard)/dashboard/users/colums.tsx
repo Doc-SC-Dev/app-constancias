@@ -16,6 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import type { auth } from "@/lib/auth";
+import DropdownDialog from "./_components/dropdown-dialog";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -70,31 +71,7 @@ export const columns: ColumnDef<user>[] = [
     cell: ({ row }) => {
       // Todo: usar para realizar acciones sobrel el usuario
       const user = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir Menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem>
-              <Eye />
-              Ver
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Edit />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive">
-              <Trash />
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <DropdownDialog user={user} />;
     },
   },
 ];
