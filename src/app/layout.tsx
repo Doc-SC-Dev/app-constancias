@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "App Constancias Doctorado en ciencias medicas",
@@ -15,6 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <main>{children}</main>
+        <Toaster />
       </body>
     </html>
   );

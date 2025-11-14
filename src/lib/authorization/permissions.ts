@@ -1,3 +1,4 @@
+import type { keyof } from "better-auth";
 import { createAccessControl } from "better-auth/plugins/access";
 import {
   adminAc,
@@ -33,7 +34,7 @@ export const guest = ac.newRole({
   request: ["create", "read"],
 });
 
-export const sub_admin = ac.newRole({
+export const admin = ac.newRole({
   ...adminAc.statements,
   activity: ["create", "read", "update"],
   request: ["create", "read", "update"],
@@ -42,10 +43,20 @@ export const sub_admin = ac.newRole({
   user: ["ban", "create", "update", "set-role", "set-password", "list", "get"],
 });
 
-export const admin = ac.newRole({
+export const superadmin = ac.newRole({
   ...adminAc.statements,
   activity: ["create", "read", "update", "delete"],
   request: ["create", "read", "update", "delete"],
   qualificationExam: ["create", "read", "update", "delete"],
   guest: ["create", "read", "update", "delete"],
 });
+
+export enum Roles {
+  ADMIN = "admin",
+  STUDENT = "student",
+  PROFESSOR = "professor",
+  SUPERADMIN = "superadmin",
+  GUEST = "guest",
+}
+
+export type Role = `${Roles}`;
