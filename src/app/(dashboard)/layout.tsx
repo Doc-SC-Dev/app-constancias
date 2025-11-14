@@ -15,16 +15,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <SidebarProvider>
-          <AppSideBar />
-          <SidebarInset>
-            <AppNavBar />
-            <main className="p-10 h-full">{children}</main>
-          </SidebarInset>
-        </SidebarProvider>
-      </body>
-    </html>
+    <SidebarProvider>
+      <AppSideBar />
+      <div className="flex flex-col w-full h-screen">
+        <AppNavBar />
+        <SidebarInset className="flex-1 m-0">
+          <main className="overflow-auto p-8">{children}</main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }

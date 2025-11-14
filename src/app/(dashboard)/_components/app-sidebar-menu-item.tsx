@@ -1,7 +1,6 @@
 "use client";
 import type { LucideProps } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ComponentType, ElementType } from "react";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
@@ -12,18 +11,18 @@ type Props = {
 };
 export function AppSidebarMenuItem({ title, url, icon: Icon }: Props) {
   const pathName = usePathname();
+  const router = useRouter();
   return (
-    <SidebarMenuItem key={url} className="h-14">
+    <SidebarMenuItem key={url}>
       <SidebarMenuButton
-        asChild
+        size="default"
         isActive={url === "/" ? pathName === url : pathName.includes(url)}
-        className="h-full rounded-none px-5"
+        className="rounded-none px-2"
+        tooltip={title}
+        onClick={() => router.push(url)}
       >
-        <Link href={`${url}`} className="h-full rounded-none">
-          {/*Todo agregar chequeo de capacidadpara ver que botones mostart*/}
-          <Icon />
-          <span>{title}</span>
-        </Link>
+        <Icon />
+        <span>{title}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );

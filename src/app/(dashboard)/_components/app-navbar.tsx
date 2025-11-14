@@ -3,7 +3,7 @@ import { AppSideBarTrigger } from "./app-sidebar-trigger";
 
 export function AppNavBar() {
   return (
-    <nav className="w-full flex justify-between items-center p-4 bg-primary top-0 sticky ">
+    <nav className="w-full flex justify-between items-center p-4 bg-primary border-l-accent">
       <div>
         <AppSideBarTrigger />
       </div>
