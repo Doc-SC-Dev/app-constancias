@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -24,6 +25,9 @@ export default function DeleteDialog({
     <DialogContent className="w-4xl">
       <DialogHeader>
         <DialogTitle>¿Estas seguro?</DialogTitle>
+        <DialogDescription>
+          Estas apunto de eliminar un usuario
+        </DialogDescription>
       </DialogHeader>
       <div className="text-muted-foreground text-sm/normal">
         <span>Si eliminas este usuario:</span>

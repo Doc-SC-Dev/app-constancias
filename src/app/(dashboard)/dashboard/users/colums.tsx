@@ -25,13 +25,15 @@ export type user = typeof auth.$Infer.Session.user;
 export const columns: ColumnDef<user>[] = [
   {
     accessorKey: "banned",
-    header: "Estado",
+    header(_) {
+      return <p className="text-center">Estado</p>;
+    },
     enableGlobalFilter: false,
     cell({ row }) {
       // TODO: usar para realizar acciones sobre el usuario
       const user = row.original;
       return (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-center space-x-2">
           <Switch
             id={`switch-${row.id}`}
             checked={!row.getValue("banned") as boolean}

@@ -1,6 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { DialogContent, DialogHeader } from "@/components/ui/dialog";
+import {
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { User } from "@/lib/types/users";
 
 type DialogContentProps = {
@@ -17,7 +21,7 @@ export default function ViewDialog({ user }: DialogContentProps) {
             <AvatarFallback>{user.name.slice(0, 2)}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col gap-0">
-            <span className="text-lg font-semibold">{user.name}</span>
+            <DialogTitle>{user.name}</DialogTitle>
             <span className="text-sm/normal text-muted-foreground">
               {user.email}
             </span>
