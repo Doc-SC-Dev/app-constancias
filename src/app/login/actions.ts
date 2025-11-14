@@ -15,19 +15,20 @@ export async function loginAction(formData: FormData): Promise<ActionResponse> {
     const res = await auth.api.signInEmail({ body: { email, password } });
 
     if (!res?.token) {
-      console.error("Login error:", res);
-      return {
-        success: false,
-        message: "Invalid credentials or authentication failed",
-      };
+       return { success: false, message: "Error en el inicio de sesión" };
     }
 
     await setSessionCookie(res.token);
-    console.log("Login successful");
-    return { success: true, message: "Login successful" };
-  } catch (error) {
-    console.error("Exception in loginAction:", error);
-    return { success: false, message: "An error occurred during login" };
+    return { success: true, message: "Inicio de sesion exitoso" };
+
+  } catch (error: any) { 
+    const errorCode = error?.body?.code || ""; 
+
+    if (errorCode === "INVALID_EMAIL_OR_PASSWORD") {
+      return { success: false, message: "Contraseña o Email incorrecto" };
+    }
+    
+    return { success: false, message: "Error en el inicio de sesión" };
   }
 }
 
