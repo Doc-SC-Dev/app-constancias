@@ -15,26 +15,26 @@ datasource db {
 }
 
 model User {
-  id            String     @id
+  id            String    @id
   rut           String
   name          String
   email         String
-  emailVerified Boolean    @default(false)
+  emailVerified Boolean   @default(false)
   image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
 
   role       String?
-  banned     Boolean?  @default(false)
+  banned     Boolean?   @default(false)
   banReason  String?
   banExpires DateTime?
-  professors    Professor?
-  student       Student?
-  guests        Guest[]
-  requests      Request[]
-  logs          Log[]
+  professors Professor?
+  student    Student?
+  guests     Guest[]
+  requests   Request[]
+  logs       Log[]
 
   @@unique([rut, email])
   @@map("user")
@@ -158,16 +158,14 @@ model Activity {
 }
 
 model Guest {
-  charlaId          String
-  guestId           String
+  activityId        String
+  userId            String   @id
   participationType String
   hours             Int
   date              DateTime
   createdAt         DateTime @default(now())
-  activity          Activity @relation(fields: [charlaId], references: [id])
-  user              User     @relation(fields: [guestId], references: [id])
-
-  @@id([charlaId, guestId])
+  activity          Activity @relation(fields: [activityId], references: [id])
+  user              User     @relation(fields: [userId], references: [id])
 }
 
 model Certificate {
