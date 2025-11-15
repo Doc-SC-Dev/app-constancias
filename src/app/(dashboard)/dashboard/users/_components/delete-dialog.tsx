@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DialogClose,
@@ -7,6 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
+import { authClient, getErrorMessage } from "@/lib/auth/better-auth/client";
 import type { User } from "@/lib/types/users";
 
 type DialogContentProps = {
@@ -18,7 +24,19 @@ export default function DeleteDialog({
   user,
   closeDialog,
 }: DialogContentProps) {
-  function handleClick() {
+  const [isPending, setIsPending] = useState<boolean>(false);
+  async function handleClick() {
+    setIsPending(true);
+    const { data, error } = await authClient.admin.removeUser({
+      userId: user.id,
+    });
+    setIsPending(false);
+    if (error) {
+      if (error.code) toast.error(getErrorMessage(error.code, "es"));
+    }
+    if (!data) {
+      toast.error(`No se pudo eliminar el usuario con nombre ${user.name}`);
+    }
     closeDialog();
   }
   return (
@@ -45,7 +63,12 @@ export default function DeleteDialog({
         <DialogClose asChild>
           <Button variant="outline">Cancelar</Button>
         </DialogClose>
-        <Button variant="destructive" onClick={handleClick}>
+        <Button
+          variant="destructive"
+          onClick={handleClick}
+          disabled={isPending}
+        >
+          {isPending && <Spinner />}
           Eliminar
         </Button>
       </DialogFooter>
