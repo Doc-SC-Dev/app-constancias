@@ -71,13 +71,13 @@ export function FormBase<
       render={({ field, fieldState }) => {
         const labelElement = (
           <>
-            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+            <FieldLabel htmlFor={`field-${field.name}`}>{label}</FieldLabel>
             {description && <FieldDescription>{description}</FieldDescription>}
           </>
         );
         const control = children({
           ...field,
-          id: field.name,
+          id: `field-${field.name}`,
           "aria-invalid": fieldState.invalid,
         });
         const errorElem = fieldState.invalid && (
