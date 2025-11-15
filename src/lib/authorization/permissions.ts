@@ -34,7 +34,7 @@ export const guest = ac.newRole({
   request: ["create", "read"],
 });
 
-export const admin = ac.newRole({
+export const administrator = ac.newRole({
   ...adminAc.statements,
   activity: ["create", "read", "update"],
   request: ["create", "read", "update"],
@@ -52,7 +52,7 @@ export const superadmin = ac.newRole({
 });
 
 export enum Roles {
-  ADMIN = "admin",
+  ADMIN = "administrator",
   STUDENT = "student",
   PROFESSOR = "professor",
   SUPERADMIN = "superadmin",
