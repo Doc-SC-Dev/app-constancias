@@ -1,5 +1,7 @@
 "use server";
+import { PrismaClientKnownRequestError } from "@/generated/prisma/runtime/library";
 import { auth } from "@/lib/auth";
+import { APIError } from "better-auth";
 import { cookies } from "next/headers";
 
 interface ActionResponse {
@@ -21,38 +23,24 @@ export async function loginAction(formData: FormData): Promise<ActionResponse> {
     await setSessionCookie(res.token);
     return { success: true, message: "Inicio de sesion exitoso" };
 
-  } catch (error: any) { 
-    const errorCode = error?.body?.code || ""; 
+  } catch (error) { 
 
-    if (errorCode === "INVALID_EMAIL_OR_PASSWORD") {
-      return { success: false, message: "Contraseña o Email incorrecto" };
+    if (error instanceof APIError){
+      console.error(error )
+      if (error.status === "UNAUTHORIZED"){
+        return { success: false, message: "Correo o contraseña incorrecta" };
+      }
     }
-    
+    if (error instanceof PrismaClientKnownRequestError){
+      console.error(error)
+      if (error.code === 'P5010'){
+        return {success: false, message: "Sin conexión a internet"};
+      }
+    }
     return { success: false, message: "Error en el inicio de sesión" };
   }
 }
 
-export async function registerAction(
-  formData: FormData
-): Promise<ActionResponse> {
-  const email = formData.get("email")?.toString() || "";
-  const password = formData.get("password")?.toString() || "";
-  const name = formData.get("name")?.toString() || "";
-
-  try {
-    const res = await auth.api.signUpEmail({ body: { email, password, name } });
-
-    if (!res?.token) {
-      console.error("Registration error:", res);
-      return { success: false, message: "Failed to register user" };
-    }
-
-    return { success: true, message: "User registered successfully" };
-  } catch (error) {
-    console.error("Exception in registerAction:", error);
-    return { success: false, message: "An error occurred during registration" };
-  }
-}
 
 async function setSessionCookie(token: string) {
   const cookieStore = await cookies();
