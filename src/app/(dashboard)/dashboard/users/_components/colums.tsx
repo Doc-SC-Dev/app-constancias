@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -23,7 +22,6 @@ export const columns: ColumnDef<User>[] = [
     cell({ row }) {
       // TODO: usar para realizar acciones sobre el usuario
       const user = row.original;
-      const router = useRouter();
       const [isLoading, setIsLoading] = useState<boolean>(false);
       const [checked, setChecked] = useState<boolean>(!user.banned as boolean);
       const handleSwitchChange = async () => {
@@ -51,7 +49,7 @@ export const columns: ColumnDef<User>[] = [
             disabled={isLoading}
           />
           <Label htmlFor={`switch-${row.id}`}>
-            {(!row.getValue("banned") as boolean) ? "Activo" : "Desactivo"}
+            {checked ? "Activo" : "Desactivo"}
           </Label>
         </div>
       );
