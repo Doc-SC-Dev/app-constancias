@@ -9,9 +9,7 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Plus } from "lucide-react";
 import { type ReactNode, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,12 +25,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   children: ReactNode;
+  placeholder: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   children,
+  placeholder,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState<"">("");
 
@@ -69,7 +69,7 @@ export function DataTable<TData, TValue>({
           <Input
             id="fuzzy-input"
             className="max-w-sm"
-            placeholder="Filtrar por nombre, email, rut, matricula o rol"
+            placeholder={placeholder}
             value={globalFilter ?? ""}
             onChange={(e) => table.setGlobalFilter(String(e.target.value))}
           />

@@ -17,15 +17,17 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
 import { createUser } from "../actions";
 
 type DialogContentProps = {
-  closeDialog: () => void;
+  closeDialog?: () => void;
 };
 
 export default function NewUserDialog({ closeDialog }: DialogContentProps) {
+  const { data } = useSession();
   const { handleSubmit, control, formState, reset, watch } =
     useForm<UserCreate>({
       resolver: arktypeResolver(userCreateSchema),
@@ -51,14 +53,14 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
     if (data) {
       toast.success("Se creo el usuario correctamente", {
         description: (
-          <p className="text-foreground">
+          <p className="text-background">
             `Se creo un nuevo usuario con nombre ${data.name} y rol ${data.role}
             `
           </p>
         ),
       });
       reset();
-      closeDialog();
+      if (closeDialog) closeDialog();
     }
   };
   return (
@@ -71,18 +73,51 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
       </DialogHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FieldGroup className="gap-4">
-          <FormInput label="Nombre" control={control} name="name" />
-          <FormInput label="Email" control={control} name="email" />
-          <FormSelect label="Rol" control={control} name="role">
-            {[...Object.values(Roles)].map((rol) => (
-              <SelectItem value={rol} key={rol}>
-                {rol}
-              </SelectItem>
-            ))}
+          <FormInput
+            label="Nombre"
+            control={control}
+            name="name"
+            description="Ingresar el nombre completo del nuevo usuario"
+          />
+          <FormInput
+            label="Email"
+            control={control}
+            name="email"
+            description="Ingresar el correo que tendra asociado la cuenta del nuevo usuario"
+          />
+          <FormSelect
+            label="Rol"
+            control={control}
+            name="role"
+            description="Seleccione el rol que tendra en la plataforma en nuevo usuario"
+          >
+            {[...Object.values(Roles)].map((rol) => {
+              if (
+                data?.user.role !== Roles.SUPERADMIN &&
+                rol === Roles.SUPERADMIN
+              ) {
+                return undefined;
+              }
+              return (
+                <SelectItem value={rol} key={rol}>
+                  {rol}
+                </SelectItem>
+              );
+            })}
           </FormSelect>
-          <FormInput label="Rut" control={control} name="rut" />
+          <FormInput
+            label="Rut"
+            control={control}
+            name="rut"
+            description="Las contraseña de los nuevo usuario sera su RUT sin puntos y con guión"
+          />
           {role === "student" && (
-            <FormInput label="Matricula" control={control} name="studentId" />
+            <FormInput
+              label="Matricula"
+              control={control}
+              name="studentId"
+              description="Ingresar el numero de matricual del nuevo estudiante"
+            />
           )}
         </FieldGroup>
         <DialogFooter className="mt-6">

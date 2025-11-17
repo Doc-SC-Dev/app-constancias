@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { authClient, getErrorMessage } from "@/lib/auth/better-auth/client";
+import { admin, getErrorMessage } from "@/lib/auth/better-auth/client";
 import type { User } from "@/lib/types/users";
 
 type DialogContentProps = {
@@ -25,18 +26,23 @@ export default function DeleteDialog({
   closeDialog,
 }: DialogContentProps) {
   const [isPending, setIsPending] = useState<boolean>(false);
+  const router = useRouter();
   async function handleClick() {
     setIsPending(true);
-    const { data, error } = await authClient.admin.removeUser({
+    const { data, error } = await admin.removeUser({
       userId: user.id,
     });
     setIsPending(false);
     if (error) {
       if (error.code) toast.error(getErrorMessage(error.code, "es"));
+    } else {
+      if (!data) {
+        toast.error(`No se pudo eliminar el usuario con nombre ${user.name}`);
+      } else {
+        toast.success(`Se elimino existosamente el usuario ${user.name}`);
+      }
     }
-    if (!data) {
-      toast.error(`No se pudo eliminar el usuario con nombre ${user.name}`);
-    }
+    router.refresh();
     closeDialog();
   }
   return (

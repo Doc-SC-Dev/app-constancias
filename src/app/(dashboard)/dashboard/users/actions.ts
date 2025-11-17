@@ -1,6 +1,7 @@
 "use server";
 
 import { APIError } from "better-auth";
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -27,24 +28,30 @@ export async function updateUser(userData: UserEdit, id: string) {
 }
 
 export async function createUser(userData: UserCreate) {
-  console.log("en accion crear usuario");
+  const { studentId, rut, ...newUserData } = userData;
+
+  const password = userData.rut.replaceAll(".", "");
   try {
     const data = await auth.api.createUser({
       headers: await headers(),
       body: {
-        ...userData,
-        password: userData.rut.replace(".", ""),
+        ...newUserData,
+        password,
+        data: {
+          rut,
+        },
       },
     });
-    if (userData.studentId) {
+    if (studentId) {
       await db.student.create({
         data: {
-          id: parseInt(userData.studentId, 10),
+          id: parseInt(studentId, 10),
           isRegularStudent: false,
           userId: data.user.id,
         },
       });
     }
+    revalidatePath("/dashboard/users");
     return { data: data.user };
   } catch (error) {
     if (error instanceof APIError) {
@@ -52,6 +59,7 @@ export async function createUser(userData: UserCreate) {
         return { error: "No estas autorizado para crear usuarios" };
       return { error: error.status };
     }
+    console.error(error);
     return { error: "Algo salio mal al intentar crear el usuario" };
   }
 }
