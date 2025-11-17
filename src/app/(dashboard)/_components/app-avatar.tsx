@@ -1,5 +1,6 @@
 "use client";
 import { LogOut } from "lucide-react";
+import { useForm } from "react-hook-form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,8 +18,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Spinner } from "@/components/ui/spinner";
+import { logoutAction } from "../action";
 
 export function AppAvatar() {
+  const { handleSubmit, formState } = useForm();
   return (
     <AlertDialog>
       <DropdownMenu>
@@ -49,7 +53,12 @@ export function AppAvatar() {
         </AlertDialogDescription>
         <AlertDialogFooter className="flex gap-4">
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction className="bg-destructive hover:bg-destructive/75">
+          <AlertDialogAction
+            className="bg-destructive hover:bg-destructive/75"
+            onClick={handleSubmit(logoutAction)}
+            disabled={formState.isSubmitting}
+          >
+            {formState.isSubmitting && <Spinner />}
             Cerrar sesión
           </AlertDialogAction>
         </AlertDialogFooter>
