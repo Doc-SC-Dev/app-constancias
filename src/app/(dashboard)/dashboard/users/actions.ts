@@ -1,9 +1,11 @@
 "use server";
 
 import { APIError } from "better-auth";
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import type { UserEdit } from "@/lib/types/users";
+import { db } from "@/lib/db";
+import type { UserCreate, UserEdit } from "@/lib/types/users";
 
 export async function updateUser(userData: UserEdit, id: string) {
   try {
@@ -22,5 +24,42 @@ export async function updateUser(userData: UserEdit, id: string) {
       return { error: error.message };
     }
     return { error: "Algo salio mal al intentar actualizar el usuario" };
+  }
+}
+
+export async function createUser(userData: UserCreate) {
+  const { studentId, rut, ...newUserData } = userData;
+
+  const password = userData.rut.replaceAll(".", "");
+  try {
+    const data = await auth.api.createUser({
+      headers: await headers(),
+      body: {
+        ...newUserData,
+        password,
+        data: {
+          rut,
+        },
+      },
+    });
+    if (studentId) {
+      await db.student.create({
+        data: {
+          id: parseInt(studentId, 10),
+          isRegularStudent: false,
+          userId: data.user.id,
+        },
+      });
+    }
+    revalidatePath("/dashboard/users");
+    return { data: data.user };
+  } catch (error) {
+    if (error instanceof APIError) {
+      if (error.status === "UNAUTHORIZED")
+        return { error: "No estas autorizado para crear usuarios" };
+      return { error: error.status };
+    }
+    console.error(error);
+    return { error: "Algo salio mal al intentar crear el usuario" };
   }
 }

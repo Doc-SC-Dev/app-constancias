@@ -1,7 +1,12 @@
+import type { User } from "@/lib/types/users";
 import { AppAvatar } from "./app-avatar";
 import { AppSideBarTrigger } from "./app-sidebar-trigger";
 
-export function AppNavBar() {
+type NavBarProps = {
+  user: User;
+};
+
+export async function AppNavBar({ user }: NavBarProps) {
   return (
     <nav className="w-full flex justify-between items-center p-4 bg-primary border-l-accent">
       <div>
@@ -10,10 +15,10 @@ export function AppNavBar() {
       <div className="flex flex-row space-x-3 h-full items-center px-4">
         <div className="flex flex-col">
           <span className="text-primary-foreground text-base font-bold">
-            Nombre Usuario
+            {user.name}
           </span>
           <span className="text-primary-foreground text-xs font-normal text-right">
-            Tipo usuario
+            {user.role}
           </span>
         </div>
         <AppAvatar />

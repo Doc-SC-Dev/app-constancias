@@ -4,11 +4,11 @@ import {
   type ControllerProps,
   type FieldPath,
   type FieldValues,
-} from "react-hook-form"; 
+} from "react-hook-form";
 import {
   Field,
   FieldContent,
-  FieldDescription, 
+  FieldDescription,
   FieldError,
   FieldLabel,
 } from "../ui/field";
@@ -48,7 +48,8 @@ export type FormControlFunc<
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
   TTransformedValues = TFieldValues,
 >(
-  props: FormControlProps<TFieldValues, TName, TTransformedValues> & ExtraProps,
+  props: FormControlProps<TFieldValues, TName, TTransformedValues> &
+    ExtraProps & { password?: boolean },
 ) => ReactNode;
 
 export function FormBase<
@@ -71,13 +72,13 @@ export function FormBase<
       render={({ field, fieldState }) => {
         const labelElement = (
           <>
-            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+            <FieldLabel htmlFor={`field-${field.name}`}>{label}</FieldLabel>
             {description && <FieldDescription>{description}</FieldDescription>}
           </>
         );
         const control = children({
           ...field,
-          id: field.name,
+          id: `field-${field.name}`,
           "aria-invalid": fieldState.invalid,
         });
         const errorElem = fieldState.invalid && (

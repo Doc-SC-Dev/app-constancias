@@ -4,7 +4,7 @@ import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
 import {
   ac,
-  admin as administrator,
+  administrator,
   guest,
   professor,
   student,
@@ -26,6 +26,7 @@ export const auth = betterAuth({
         required: true,
         input: true,
         returned: true,
+        unique: true,
       },
     },
   },
@@ -34,7 +35,7 @@ export const auth = betterAuth({
     admin({
       ac: ac,
       roles: { professor, guest, superadmin, student, administrator },
-      adminRoles: ["admin", "superadmin"],
+      adminRoles: ["administrator", "superadmin"],
     }),
   ],
 });

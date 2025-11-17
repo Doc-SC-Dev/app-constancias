@@ -1,6 +1,7 @@
-import { ArrowUpRightIcon, FolderMinus, Plus } from "lucide-react";
+import { FolderMinus, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
   Empty,
   EmptyContent,
@@ -9,6 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import NewUserDialog from "./newuser-dialog";
 
 export function UsersEmpty() {
   return (
@@ -25,10 +27,15 @@ export function UsersEmpty() {
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
-            <Button>
-              <Plus />
-              Crear usuario
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus />
+                  Crear usuario
+                </Button>
+              </DialogTrigger>
+              <NewUserDialog />
+            </Dialog>
           </div>
         </EmptyContent>
       </Empty>

@@ -5,7 +5,7 @@ export type User = typeof auth.$Infer.Session.user;
 export type Session = typeof auth.$Infer.Session;
 
 const roles = type(
-  "'admin' | 'professor' | 'student' | 'superadmin'| 'guest' ",
+  "'administrator' | 'professor' | 'student' | 'superadmin'| 'guest'",
 );
 
 export const userEditSchema = type({
@@ -19,9 +19,10 @@ export type UserEdit = typeof userEditSchema.infer;
 
 export const userCreateSchema = type({
   name: "string > 1",
-  rut: "/^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/",
+  rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
   email: "string.email",
   role: roles,
+  "studentId?": "string.numeric",
 });
 
 export type UserCreate = typeof userCreateSchema.infer;

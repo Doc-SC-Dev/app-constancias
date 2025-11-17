@@ -47,7 +47,7 @@ export default function UsersLoading() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[...Array(10)].map((row) => (
+            {[...new Array(10).fill(null).map((_, i) => i + 1)].map((row) => (
               <TableRow key={`loading-row-${row}`}>
                 {headers.map((cell) => (
                   <TableCell key={`tc-s-${cell}-${row}`}>

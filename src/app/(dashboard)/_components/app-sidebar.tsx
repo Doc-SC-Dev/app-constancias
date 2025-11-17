@@ -1,6 +1,6 @@
 "use client";
-
 import { Activity, History, Home, User, Users } from "lucide-react";
+import { redirect } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -11,13 +11,43 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebarMenuItem } from "./app-sidebar-menu-item";
 
-export function AppSideBar() {
+type SideBarProps = {
+  hasUser: boolean;
+  hasActivities: boolean;
+  hasRequest: boolean;
+};
+
+export function AppSideBar({
+  hasActivities,
+  hasRequest,
+  hasUser,
+}: SideBarProps) {
   const items = [
-    { title: "Inicio", url: "/", icon: Home },
-    { title: "Usuarios", url: "/dashboard/users", icon: User },
-    { title: "Historial", url: "/history", icon: History },
-    { title: "Estudiantes", url: "/student", icon: Users },
-    { title: "Actividades", url: "/activity", icon: Activity },
+    { title: "Inicio", url: "/", icon: Home, permission: true },
+    {
+      title: "Usuarios",
+      url: "/dashboard/users",
+      icon: User,
+      permission: hasUser,
+    },
+    {
+      title: "Historial",
+      url: "/dashboard/history",
+      icon: History,
+      permission: hasRequest,
+    },
+    {
+      title: "Estudiantes",
+      url: "/dashboard/student",
+      icon: Users,
+      permission: hasUser,
+    },
+    {
+      title: "Actividades",
+      url: "/dashboard/activity",
+      icon: Activity,
+      permission: hasActivities,
+    },
   ];
   return (
     <Sidebar
@@ -33,14 +63,18 @@ export function AppSideBar() {
             Secciones
           </SidebarGroupLabel>
           <SidebarMenu className="h-full">
-            {items.map((item) => (
-              <AppSidebarMenuItem
-                key={item.title}
-                title={item.title}
-                url={item.url}
-                icon={item.icon}
-              />
-            ))}
+            {items.map((item) =>
+              item.permission ? (
+                <AppSidebarMenuItem
+                  key={item.title}
+                  title={item.title}
+                  url={item.url}
+                  icon={item.icon}
+                />
+              ) : (
+                ""
+              ),
+            )}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
