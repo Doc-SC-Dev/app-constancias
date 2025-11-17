@@ -3,7 +3,13 @@ import { FormBase, type FormControlFunc } from "./base";
 export const FormInput: FormControlFunc = (props) => {
   return (
     <FormBase {...props}>
-      {(field) => <Input {...field} autoComplete="" />}
+      {(field) => (
+        <Input
+          {...field}
+          autoComplete=""
+          type={props.password ? "password" : "text"}
+        />
+      )}
     </FormBase>
   );
 };
