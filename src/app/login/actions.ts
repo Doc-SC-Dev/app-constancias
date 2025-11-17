@@ -50,3 +50,4 @@ async function setSessionCookie(token: string) {
     secure: process.env.NODE_ENV === "production",
   });
 }
+
