@@ -1,10 +1,25 @@
-import { createAuthClient } from "better-auth/client";
 import { adminClient } from "better-auth/client/plugins";
+import { createAuthClient } from "better-auth/react";
+import {
+  ac,
+  administrator,
+  guest,
+  professor,
+  student,
+  superadmin,
+} from "@/lib/authorization/permissions";
 
-export const authClient = createAuthClient({
-  plugins: [adminClient()],
+const authClient = createAuthClient({
+  plugins: [
+    adminClient({
+      ac,
+      roles: { administrator, guest, student, professor, superadmin },
+    }),
+  ],
 });
 
+export const { useSession, deleteUser, signIn, signUp, signOut, admin } =
+  authClient;
 type ErrorTypes = Partial<
   Record<
     keyof typeof authClient.$ERROR_CODES,

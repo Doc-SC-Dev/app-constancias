@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner"
-
-
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "App Constancias Doctorado en ciencias medicas",
@@ -16,8 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body
-        className={`antialiased`}>
+      <body className={`antialiased`}>
         <main>{children}</main>
 
         <Toaster
@@ -25,7 +22,7 @@ export default function RootLayout({
           position="top-center"
           toastOptions={{
             classNames: {
-              title: 'text-lg',
+              title: "text-lg",
             },
           }}
         />
@@ -33,4 +30,3 @@ export default function RootLayout({
     </html>
   );
 }
-
