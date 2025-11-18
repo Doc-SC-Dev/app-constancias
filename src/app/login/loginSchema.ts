@@ -1,8 +1,8 @@
-import { type } from "arktype"
+import { type } from "arktype";
 
 export const loginSchema = type({
-  email: "string.email", 
+  email: "string.email",
   password: "string>=1",
-})
+});
 
-export type LoginData = typeof loginSchema.infer
+export type LoginData = typeof loginSchema.infer;

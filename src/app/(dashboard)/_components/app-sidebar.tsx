@@ -1,6 +1,5 @@
 "use client";
 import { Activity, History, Home, User, Users } from "lucide-react";
-import { redirect } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -56,7 +55,7 @@ export function AppSideBar({
       collapsible="offcanvas"
       className="group-data-[side=left]:border-0"
     >
-      <SidebarHeader className="bg-primary min-h-18 border-accent"></SidebarHeader>
+      <SidebarHeader className="bg-primary min-h-21 border-accent"></SidebarHeader>
       <SidebarContent>
         <SidebarGroup className="h-full px-0">
           <SidebarGroupLabel className="text-foreground text-sm h-15 px-6">
