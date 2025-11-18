@@ -13,7 +13,7 @@ export async function AppNavBar({ user }: NavBarProps) {
       <div className="flex gap-4 items-center">
         <Image
           src="/assets/images/logo-horizontal-blanco.png"
-          alt="Logo doctorado ciencias medicas"
+          alt="Logo doctorado en ciencias medicas"
           width={160}
           height={74}
           loading="eager"
