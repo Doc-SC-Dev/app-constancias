@@ -8,10 +8,10 @@ import {
 import type { User } from "@/lib/types/users";
 
 type DialogContentProps = {
-  user: User;
+  data: User;
 };
 
-export default function ViewDialog({ user }: DialogContentProps) {
+export default function ViewDialog({ data: user }: DialogContentProps) {
   return (
     <DialogContent className="w-4xl">
       <DialogHeader className="px-8">
