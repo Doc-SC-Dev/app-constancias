@@ -17,12 +17,12 @@ import { admin, getErrorMessage } from "@/lib/auth/better-auth/client";
 import type { User } from "@/lib/types/users";
 
 type DialogContentProps = {
-  user: User;
+  data: User;
   closeDialog: () => void;
 };
 
 export default function DeleteDialog({
-  user,
+  data: user,
   closeDialog,
 }: DialogContentProps) {
   const [isPending, setIsPending] = useState<boolean>(false);
