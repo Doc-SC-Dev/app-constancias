@@ -1,10 +1,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
+import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { auth } from "@/lib/auth";
 import type { User } from "@/lib/types/users";
 import { columns } from "./_components/colums";
-import DropdownDialog from "./_components/dropdown-dialog";
+import NewUserDialog from "./_components/newuser-dialog";
 import { UsersEmpty } from "./_components/users-empty";
 
 export default async function UsersPage() {
@@ -20,7 +21,7 @@ export default async function UsersPage() {
       permissions: { user: ["list"] },
     },
   });
-  if (!permission) {
+  if (!permission.success) {
     redirect("/dashboard");
   }
   const data = await auth.api.listUsers({
@@ -40,7 +41,7 @@ export default async function UsersPage() {
       data={data.users as User[]}
       placeholder="Filtrar por Nombre, Role, Email y Rut"
     >
-      <DropdownDialog />
+      <ActionDialogManager createDialog={NewUserDialog} />
     </DataTable>
   );
 }
