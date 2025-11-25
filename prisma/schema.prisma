@@ -109,7 +109,7 @@ model Student {
 
   @@unique([userId])
 }
-
+ 
 model OtherRequest {
   id        String @id @default(uuid())
   studentId Int
