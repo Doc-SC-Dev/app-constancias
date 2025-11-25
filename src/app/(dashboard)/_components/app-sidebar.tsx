@@ -9,7 +9,7 @@ import {
   SidebarMenu,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { User } from "@/lib/types/users";
+import type { UserWithRut } from "@/lib/types/users";
 import { AppAvatar } from "./app-avatar";
 import { AppSidebarMenuItem } from "./app-sidebar-menu-item";
 
@@ -17,7 +17,7 @@ type SideBarProps = {
   hasUser: boolean;
   hasActivities: boolean;
   hasRequest: boolean;
-  user: User;
+  user: UserWithRut;
 };
 
 export function AppSideBar({
@@ -36,7 +36,7 @@ export function AppSideBar({
       permission: hasUser,
     },
     {
-      title: "Historial",
+      title: "Constancias",
       url: "/dashboard/history",
       icon: History,
       permission: hasRequest,
