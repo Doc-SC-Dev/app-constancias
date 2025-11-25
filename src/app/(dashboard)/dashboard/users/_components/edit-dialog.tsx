@@ -17,11 +17,15 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { type Role, Roles } from "@/lib/authorization/permissions";
-import { type User, type UserEdit, userEditSchema } from "@/lib/types/users";
+import {
+  type UserEdit,
+  type UserWithRut,
+  userEditSchema,
+} from "@/lib/types/users";
 import { updateUser } from "../actions";
 
 type DialogContentProps = {
-  data: User;
+  data: UserWithRut;
   closeDialog: () => void;
 };
 
@@ -40,15 +44,13 @@ export default function EditDialog({
     },
   });
   const onSubmit = async (userData: UserEdit) => {
-    const { data, error } = await updateUser(userData, user.id);
-    if (error) {
-      toast.error(error);
+    const { success, message } = await updateUser(userData, user.id);
+    if (!success) {
+      toast.error(message);
       return;
     }
-    if (data) {
-      toast.success(
-        `Se actualizo exitosamente el usario de nombre ${data.name}`,
-      );
+    if (success) {
+      toast.success(message);
       closeDialog();
     }
   };

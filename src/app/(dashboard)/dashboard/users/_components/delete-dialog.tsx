@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,11 +12,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { admin, getErrorMessage } from "@/lib/auth/better-auth/client";
-import type { User } from "@/lib/types/users";
+import type { UserWithRut } from "@/lib/types/users";
+import { deleteUser } from "../actions";
 
 type DialogContentProps = {
-  data: User;
+  data: UserWithRut;
   closeDialog: () => void;
 };
 
@@ -25,26 +24,19 @@ export default function DeleteDialog({
   data: user,
   closeDialog,
 }: DialogContentProps) {
-  const [isPending, setIsPending] = useState<boolean>(false);
-  const router = useRouter();
+  const form = useForm();
   async function handleClick() {
-    setIsPending(true);
-    const { data, error } = await admin.removeUser({
+    const { success, message } = await deleteUser({
       userId: user.id,
     });
-    setIsPending(false);
-    if (error) {
-      if (error.code) toast.error(getErrorMessage(error.code, "es"));
+    if (!success) {
+      toast.error(message);
     } else {
-      if (!data) {
-        toast.error(`No se pudo eliminar el usuario con nombre ${user.name}`);
-      } else {
-        toast.success(`Se elimino existosamente el usuario ${user.name}`);
-      }
+      toast.success(`Se elimino existosamente el usuario ${user.name}`);
     }
-    router.refresh();
     closeDialog();
   }
+
   return (
     <DialogContent className="w-4xl">
       <DialogHeader>
@@ -69,14 +61,16 @@ export default function DeleteDialog({
         <DialogClose asChild>
           <Button variant="outline">Cancelar</Button>
         </DialogClose>
-        <Button
-          variant="destructive"
-          onClick={handleClick}
-          disabled={isPending}
-        >
-          {isPending && <Spinner />}
-          Eliminar
-        </Button>
+        <form onSubmit={form.handleSubmit(handleClick)}>
+          <Button
+            variant="destructive"
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting && <Spinner />}
+            {form.formState.isSubmitting ? "Eliminando..." : "Eliminar"}
+          </Button>
+        </form>
       </DialogFooter>
     </DialogContent>
   );

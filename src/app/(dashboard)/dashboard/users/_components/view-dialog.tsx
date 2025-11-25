@@ -5,10 +5,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { User } from "@/lib/types/users";
+import type { UserWithRut } from "@/lib/types/users";
 
 type DialogContentProps = {
-  data: User;
+  data: UserWithRut;
 };
 
 export default function ViewDialog({ data: user }: DialogContentProps) {

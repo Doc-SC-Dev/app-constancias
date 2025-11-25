@@ -43,21 +43,15 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
     });
   const role = watch("role");
   const onSubmit = async (user: UserCreate) => {
-    console.log(user);
-    const { data, error } = await createUser(user);
-    if (error) {
+    const { success, message } = await createUser(user);
+    if (!success) {
       toast.error("No se pudo crear el usuario", {
-        description: <p className="text-foreground">{error}</p>,
+        description: <p className="text-foreground">{message}</p>,
       });
     }
-    if (data) {
+    if (success) {
       toast.success("Se creo el usuario correctamente", {
-        description: (
-          <p className="text-background">
-            `Se creo un nuevo usuario con nombre ${data.name} y rol ${data.role}
-            `
-          </p>
-        ),
+        description: <p className="text-background">{message}</p>,
       });
       reset();
       if (closeDialog) closeDialog();

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { auth } from "@/lib/auth";
-import type { User } from "@/lib/types/users";
+import type { UserWithRut } from "@/lib/types/users";
 import { columns } from "./_components/colums";
 import NewUserDialog from "./_components/newuser-dialog";
 import { UsersEmpty } from "./_components/users-empty";
@@ -38,7 +38,7 @@ export default async function UsersPage() {
   return (
     <DataTable
       columns={columns}
-      data={data.users as User[]}
+      data={data.users as UserWithRut[]}
       placeholder="Filtrar por Nombre, Role, Email y Rut"
     >
       <ActionDialogManager createDialog={NewUserDialog} />
