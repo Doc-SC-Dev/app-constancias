@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "App Constancias Doctorado en ciencias medicas",
@@ -15,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="h-screen w-screen">
-        <main className="h-full">{children}</main>
+        <Providers>{children}</Providers>
         <Toaster
           richColors
           position="top-center"
