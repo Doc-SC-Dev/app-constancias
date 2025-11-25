@@ -10,6 +10,11 @@ import ViewDialog from "../../users/_components/view-dialog";
 
 export const columns: ColumnDef<HistoryEntry>[] = [
   {
+    accessorKey: "certName",
+    header: "Constancia",
+  },
+
+  {
     accessorKey: "name",
     header: "Nombre",
   },
@@ -22,11 +27,6 @@ export const columns: ColumnDef<HistoryEntry>[] = [
   {
     accessorKey: "role",
     header: "Rol",
-  },
-
-  {
-    accessorKey: "certName",
-    header: "Constancia",
   },
 
   {
