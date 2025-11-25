@@ -169,9 +169,9 @@ model Guest {
 }
 
 model Certificate {
-  id      String @id @default(uuid())
-  pdfLink String
-
+  id       String    @id @default(uuid())
+  pdfLink  String
+  name     String    @unique
   requests Request[]
 }
 
