@@ -61,7 +61,7 @@ export default async function RootLayout({
       />
       <SidebarInset>
         <AppNavBar user={session.user} />
-        <div className="p-8 h-full w-full">{children}</div>
+        <main className="p-8 h-full w-full">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
