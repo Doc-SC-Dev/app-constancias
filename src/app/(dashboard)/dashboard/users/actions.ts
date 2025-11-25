@@ -3,36 +3,46 @@
 import { APIError } from "better-auth";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { withTryCatch } from "@/app/action";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import type { UserCreate, UserEdit } from "@/lib/types/users";
+import type { User, UserCreate, UserEdit } from "@/lib/types/users";
 
 export async function updateUser(userData: UserEdit, id: string) {
-  try {
-    const data = await auth.api.adminUpdateUser({
+  const { success, data, error } = await withTryCatch<User>(
+    auth.api.adminUpdateUser({
       headers: await headers(),
       body: {
         userId: id,
         data: userData,
       },
-    });
-    return { data };
-  } catch (error) {
-    if (error instanceof APIError) {
-      if (error.statusCode === 405)
-        return { error: "No estas autorizado para actualizar usuarios" };
-      return { error: error.message };
-    }
-    return { error: "Algo salio mal al intentar actualizar el usuario" };
+    }),
+  );
+  if (success) {
+    revalidatePath("/dashboard/users");
+    return {
+      success: true,
+      message: `Usuario con nombre ${data.name} y rol ${data.role} actualizado exitosamente`,
+    };
+  } else if (error === "UNAUTHORIZED") {
+    return {
+      success: false,
+      message: "No estas autorizado para actualizar usuarios",
+    };
   }
+  return {
+    success: false,
+    message: "Algo salio mal al intentar actualizar el usuario",
+  };
 }
 
 export async function createUser(userData: UserCreate) {
   const { studentId, rut, ...newUserData } = userData;
 
   const password = userData.rut.replaceAll(".", "");
-  try {
-    const data = await auth.api.createUser({
+
+  const { success, data, error } = await withTryCatch<{ user: User }>(
+    auth.api.createUser({
       headers: await headers(),
       body: {
         ...newUserData,
@@ -41,26 +51,41 @@ export async function createUser(userData: UserCreate) {
           rut,
         },
       },
-    });
+    }),
+  );
+  if (success) {
     if (studentId) {
-      await db.student.create({
-        data: {
-          id: parseInt(studentId, 10),
-          isRegularStudent: false,
-          userId: data.user.id,
-        },
-      });
+      const { success, error } = await withTryCatch(
+        db.student.create({
+          data: {
+            id: parseInt(studentId, 10),
+            isRegularStudent: false,
+            userId: data.user.id,
+          },
+        }),
+      );
+      if (!success) {
+        return {
+          success: false,
+          message: error,
+        };
+      }
     }
     revalidatePath("/dashboard/users");
-    return { data: data.user };
-  } catch (error) {
-    if (error instanceof APIError) {
-      if (error.status === "UNAUTHORIZED")
-        return { error: "No estas autorizado para crear usuarios" };
-      return { error: error.status };
-    }
-    return { error: "Algo salio mal al intentar crear el usuario" };
+    return {
+      success: true,
+      message: `Usuario con nombre ${data.user.name} y rol ${data.user.role} creado exitosamente`,
+    };
+  } else if (error === "UNAUTHORIZED") {
+    return {
+      success: false,
+      message: "No estas autorizado para crear usuarios",
+    };
   }
+  return {
+    success: false,
+    message: "Algo salio mal al intentar crear el usuario",
+  };
 }
 
 export async function ChangePassword({
@@ -71,20 +96,52 @@ export async function ChangePassword({
   newPass: string;
 }) {
   try {
-    await auth.api.changePassword({
+    const data = await auth.api.changePassword({
       headers: await headers(),
       body: {
         currentPassword: currentPass,
         newPassword: newPass,
       },
     });
-    return { success: true };
+    return {
+      success: true,
+      message: `Contraseña cambiada exitosamente para el usuario ${data.user.name}`,
+    };
   } catch (error) {
     if (error instanceof APIError) {
       if (error.status === "BAD_REQUEST")
-        return { error: "La contraseña actual no es correcta" };
-      return { error: error.status };
+        return {
+          success: false,
+          message: "La contraseña actual no es correcta",
+        };
+      return { success: false, message: error.status };
     }
-    return { error: "Error interno del servidor " };
+    return { success: false, message: "Error interno del servidor " };
+  }
+}
+
+export async function deleteUser({ userId }: { userId: string }) {
+  try {
+    await auth.api.removeUser({
+      headers: await headers(),
+      body: {
+        userId,
+      },
+    });
+    revalidatePath("/dashboard/users");
+    return {
+      success: true,
+      message: `Usuario con id ${userId} eliminado exitosamente`,
+    };
+  } catch (error) {
+    if (error instanceof APIError) {
+      if (error.status === "UNAUTHORIZED")
+        return {
+          success: false,
+          message: "No estas autorizado para eliminar usuarios",
+        };
+      return { success: false, message: error.status };
+    }
+    return { success: false, message: "Error interno del servidor" };
   }
 }
