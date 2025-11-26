@@ -15,13 +15,15 @@ interface DashboardCardProps {
 
 export function DashboardCard({ title, description, url }: DashboardCardProps) {
   return (
-    <Link href={url}>
-      <Card className="w-full h-30 hover:bg-accent">
+    <Card className=" h-30 hover:bg-accent hover:text-accent-foreground min-w-2xs max-w-xl">
+      <Link href={url} className="place-self-stretch">
         <CardHeader>
           <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
+          <CardDescription className="on-hover:text-accent-foreground/10">
+            {description}
+          </CardDescription>
         </CardHeader>
-      </Card>
-    </Link>
+      </Link>
+    </Card>
   );
 }

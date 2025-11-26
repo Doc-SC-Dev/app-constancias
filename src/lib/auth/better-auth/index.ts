@@ -10,6 +10,7 @@ import {
   student,
   superadmin,
 } from "@/lib/authorization/permissions";
+import { sendForgotPasswordEmail } from "@/lib/email/resend";
 import { db } from "../../db";
 
 export const auth = betterAuth({
@@ -18,6 +19,9 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user: { email, name }, url }) => {
+      await sendForgotPasswordEmail(email, name, url);
+    },
   },
   user: {
     additionalFields: {

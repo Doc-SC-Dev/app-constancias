@@ -1,1 +1,4 @@
-{"prisma.pinToPrisma6": true}
+{
+  "prisma.pinToPrisma6": true,
+  "editor.tabSize": 2
+}

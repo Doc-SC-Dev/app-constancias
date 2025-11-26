@@ -21,11 +21,14 @@ import { type User, type UserEdit, userEditSchema } from "@/lib/types/users";
 import { updateUser } from "../actions";
 
 type DialogContentProps = {
-  user: User;
+  data: User;
   closeDialog: () => void;
 };
 
-export default function EditDialog({ user, closeDialog }: DialogContentProps) {
+export default function EditDialog({
+  data: user,
+  closeDialog,
+}: DialogContentProps) {
   const { handleSubmit, control, formState, reset } = useForm<UserEdit>({
     resolver: arktypeResolver(userEditSchema),
     reValidateMode: "onChange",
@@ -75,13 +78,13 @@ export default function EditDialog({ user, closeDialog }: DialogContentProps) {
           <Field orientation="horizontal" className="justify-end">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={() => {
                 reset();
                 closeDialog();
               }}
             >
-              Canelar
+              Cancelar
             </Button>
             <Button type="submit" disabled={formState.isSubmitting}>
               {formState.isSubmitting && <Spinner />}

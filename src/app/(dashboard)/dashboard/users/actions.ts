@@ -59,7 +59,32 @@ export async function createUser(userData: UserCreate) {
         return { error: "No estas autorizado para crear usuarios" };
       return { error: error.status };
     }
-    console.error(error);
     return { error: "Algo salio mal al intentar crear el usuario" };
+  }
+}
+
+export async function ChangePassword({
+  currentPass,
+  newPass,
+}: {
+  currentPass: string;
+  newPass: string;
+}) {
+  try {
+    await auth.api.changePassword({
+      headers: await headers(),
+      body: {
+        currentPassword: currentPass,
+        newPassword: newPass,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    if (error instanceof APIError) {
+      if (error.status === "BAD_REQUEST")
+        return { error: "La contraseña actual no es correcta" };
+      return { error: error.status };
+    }
+    return { error: "Error interno del servidor " };
   }
 }
