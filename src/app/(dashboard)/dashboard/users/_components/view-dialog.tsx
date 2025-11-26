@@ -8,10 +8,11 @@ import {
 import type { User } from "@/lib/types/users";
 
 type DialogContentProps = {
-  data: User;
+  user: User;
+  certName?: string;
 };
 
-export default function ViewDialog({ data: user }: DialogContentProps) {
+export default function ViewDialog({ user, certName }: DialogContentProps) {
   return (
     <DialogContent className="w-4xl">
       <DialogHeader className="px-8">
@@ -26,6 +27,9 @@ export default function ViewDialog({ data: user }: DialogContentProps) {
               {user.email}
             </span>
             <Badge variant="secondary">{user.role}</Badge>
+            {certName && (
+              <div className="text-sm text-muted-foreground">{certName}</div>
+            )}
           </div>
         </div>
       </DialogHeader>
