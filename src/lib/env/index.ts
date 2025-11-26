@@ -5,5 +5,5 @@ export const env = arkenv({
   BETTER_AUTH_SECRET: "string > 1",
   BETTER_AUTH_URL: "string.url",
   BETTER_AUTH_TRUST_HOST: "boolean",
-  NODE_ENV: "'development' | 'production' | 'test'"
+  NODE_ENV: "'development' | 'production' | 'test'",
 });
