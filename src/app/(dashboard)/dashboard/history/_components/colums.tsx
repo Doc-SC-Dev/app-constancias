@@ -39,12 +39,8 @@ export const columns: ColumnDef<HistoryEntry>[] = [
         month: "2-digit",
         year: "numeric",
       });
-      const formattedTime = date.toLocaleTimeString("es-CL", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-      return `${formattedDate} ${formattedTime}`;
+      
+      return `${formattedDate}`;
     },
   },
   {
