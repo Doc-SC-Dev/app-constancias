@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { withTryCatch } from "@/app/action";
 import { auth } from "@/lib/auth";
+import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import type { User, UserCreate, UserEdit } from "@/lib/types/users";
 
@@ -37,54 +38,66 @@ export async function updateUser(userData: UserEdit, id: string) {
 }
 
 export async function createUser(userData: UserCreate) {
-  const { studentId, rut, ...newUserData } = userData;
+  const { studentId, rut, academicGrade, ...newUserData } = userData;
 
   const password = userData.rut.replaceAll(".", "");
-
-  const { success, data, error } = await withTryCatch<{ user: User }>(
-    auth.api.createUser({
-      headers: await headers(),
-      body: {
-        ...newUserData,
-        password,
-        data: {
-          rut,
+  const { success, data, error } = await withTryCatch<User>(
+    db.$transaction<User>(async (tx) => {
+      // try to create user
+      const session = await auth.api.createUser({
+        headers: await headers(),
+        body: {
+          ...newUserData,
+          password,
+          data: {
+            rut,
+            academicGrade: academicGrade ?? "",
+          },
         },
-      },
-    }),
-  );
-  if (success) {
-    if (studentId) {
-      const { success, error } = await withTryCatch(
-        db.student.create({
+      });
+      if (!session) throw new Error("El usuario ya existe");
+      // try to create professor (if user role === professor)
+      if (session.user.role === Roles.PROFESSOR) {
+        const professor = await tx.professor.create({
+          data: {
+            user: {
+              connect: {
+                id: session.user.id,
+              },
+            },
+          },
+        });
+        if (!professor) throw new Error("Profesor ya existe");
+      }
+      // try to create student (if user role === student)
+      if (session.user.role === Roles.STUDENT && studentId) {
+        const student = await tx.student.create({
           data: {
             id: parseInt(studentId, 10),
             isRegularStudent: false,
-            userId: data.user.id,
+            user: {
+              connect: {
+                id: session.user.id,
+              },
+            },
           },
-        }),
-      );
-      if (!success) {
-        return {
-          success: false,
-          message: error,
-        };
+        });
+        if (!student) throw new Error("Estudiante ya existe");
       }
-    }
+      return session.user;
+    }),
+  );
+
+  if (success) {
     revalidatePath("/dashboard/users");
     return {
       success: true,
-      message: `Usuario con nombre ${data.user.name} y rol ${data.user.role} creado exitosamente`,
-    };
-  } else if (error === "UNAUTHORIZED") {
-    return {
-      success: false,
-      message: "No estas autorizado para crear usuarios",
+      message: `Usuario con nombre ${data.name} y rol ${data.role} creado exitosamente`,
     };
   }
   return {
     success: false,
-    message: "Algo salio mal al intentar crear el usuario",
+    message: error,
   };
 }
 

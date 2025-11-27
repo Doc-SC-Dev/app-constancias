@@ -41,7 +41,10 @@ export default async function UsersPage() {
       data={data.users as UserWithRut[]}
       placeholder="Filtrar por Nombre, Role, Email y Rut"
     >
-      <ActionDialogManager createDialog={NewUserDialog} />
+      <ActionDialogManager
+        createDialog={NewUserDialog}
+        triggerLabel="Crear usuario"
+      />
     </DataTable>
   );
 }

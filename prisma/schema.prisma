@@ -4,37 +4,37 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+datasource db {
+  provider = "postgresql"
+}
+
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 model User {
-  id            String    @id
+  id            String         @id
   rut           String
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean        @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
-
-  role       String?
-  banned     Boolean?   @default(false)
-  banReason  String?
-  banExpires DateTime?
-  professors Professor?
-  student    Student?
-  guests     Guest[]
-  requests   Request[]
-  logs       Log[]
+  role          String?
+  banned        Boolean?       @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  professors    Professor?
+  student       Student?
+  participants  Participant[]
+  requests      Request[]
+  logs          Log[]
+  academicGrade AcademicGrade?
+  otherRequests OtherRequest[]
 
   @@unique([rut, email])
   @@map("user")
@@ -55,6 +55,7 @@ model Session {
 
   @@unique([token])
   @@map("session")
+  @@index([userId])
 }
 
 model Account {
@@ -75,6 +76,7 @@ model Account {
 
   @@unique([accountId, providerId])
   @@map("account")
+  @@index([userId])
 }
 
 model Verification {
@@ -86,36 +88,46 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+  @@index([identifier])
 }
 
 model Professor {
-  id         String     @id
+  id         String     @id @default(uuid())
   updatedAt  DateTime   @updatedAt
   createdAt  DateTime   @default(now())
   userId     String     @unique
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   activities Activity[]
+
+  @@map("professor")
+}
+
+enum AcademicGrade {
+  DOCTOR
+  DOCTORA
+  MAGISTER
 }
 
 model Student {
   id                 Int                 @id
   userId             String
   isRegularStudent   Boolean
-  updatedAt          DateTime            @updatedAt
+  updatedAt          DateTime            @default(now()) @updatedAt
   createdAt          DateTime            @default(now())
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  otherRequests      OtherRequest[]
   qualificationExams QualificationExam[]
 
   @@unique([userId])
+  @@map("student")
 }
 
 model OtherRequest {
-  id        String @id @default(uuid())
-  studentId Int
-  name      String
+  id     String @id @default(uuid())
+  userId String
+  name   String
+  user   User   @relation(fields: [userId], references: [id])
 
-  student Student @relation(fields: [studentId], references: [id])
+  @@map("other_request")
 }
 
 model QualificationExam {
@@ -124,24 +136,23 @@ model QualificationExam {
   title     String
   grade     Int
   date      DateTime
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
   createdAt DateTime @default(now())
 
   student Student @relation(fields: [studentId], references: [id])
+
+  @@map("qualification_exam")
 }
 
 enum ActivityType {
-  CHARLA
+  DOCENCIA
   EXAMEN_CALIFICACION
-  CLASES
-  AUTORIA
-  CO_TUTOR
-  COLABORADOR
-  TUTOR_TESIS
+  TRABAJO_INVESTIGACION
+  TRABAJO_DE_TITULO
 }
 
 model Activity {
-  id            String       @id @default(uuid())
+  id            String        @id @default(uuid())
   teacherId     String
   name          String
   startAt       DateTime
@@ -149,42 +160,69 @@ model Activity {
   hours         Int
   nAssistant    Int?
   nParticipants Int
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  type          String
-  professor     Professor    @relation(fields: [teacherId], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
+  professor     Professor     @relation(fields: [teacherId], references: [id])
   activityType  ActivityType
-  guests        Guest[]
+  participants  Participant[]
+
+  @@map("activity")
 }
 
-model Guest {
-  activityId        String
-  userId            String   @id
-  participationType String
-  hours             Int
-  date              DateTime
-  createdAt         DateTime @default(now())
-  activity          Activity @relation(fields: [activityId], references: [id])
-  user              User     @relation(fields: [userId], references: [id])
+enum ParticipantType {
+  CO_AUTOR
+  AUTOR
+  PROFESOR_ENCARGADO
+  COLABORADOR
+  ESTUDIANTE
+}
+
+model Participant {
+  id         String          @id @default(uuid())
+  activityId String
+  userId     String
+  type       ParticipantType
+  hours      Int
+  startAt    DateTime
+  endAt      DateTime
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @default(now()) @updatedAt
+  activity   Activity        @relation(fields: [activityId], references: [id])
+  user       User            @relation(fields: [userId], references: [id])
+
+  @@map("participant")
 }
 
 model Certificate {
-  id       String    @id @default(uuid())
-  pdfLink  String
-  name     String    @unique
-  requests Request[]
+  id        String    @id @default(uuid())
+  pdfLink   String
+  name      String    @unique
+  requests  Request[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+
+  @@map("certificate")
+}
+
+enum RequestState {
+  PENDING
+  REJECTED
+  APPROVED
+  CANCELED
+  READY
 }
 
 model Request {
-  id            String   @id @default(uuid())
+  id            String       @id @default(uuid())
   userId        String
   certificateId String
-  state         String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  state         RequestState
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now()) @updatedAt
+  user          User         @relation(fields: [userId], references: [id])
+  certificate   Certificate  @relation(fields: [certificateId], references: [id])
 
-  user        User        @relation(fields: [userId], references: [id])
-  certificate Certificate @relation(fields: [certificateId], references: [id])
+  @@map("request")
 }
 
 enum Action {
@@ -192,21 +230,27 @@ enum Action {
   UPDATE
   READ
   DELETE
+  LIST
 }
 
 enum Resource {
   USER
   REQUEST
   ACTIVITY
+  CERTIFICATE
+  PROFESSOR
+  STUDENT
+  PARTICIPANT
 }
 
 model Log {
-  id       String   @id @default(uuid())
-  userId   String
-  action   Action
-  resource Resource
-  result   String
-  date     DateTime
+  id        String   @id @default(uuid())
+  userId    String
+  action    Action
+  resource  Resource
+  result    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
-  user User @relation(fields: [userId], references: [id])
+  @@map("log")
 }

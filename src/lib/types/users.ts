@@ -1,5 +1,6 @@
 import { type } from "arktype";
 import type { UserWithRole } from "better-auth/plugins";
+import { AcademicGrade } from "@/generated/prisma/enums";
 import type { auth } from "../auth";
 
 export type User = UserWithRole;
@@ -19,12 +20,31 @@ export const userEditSchema = type({
 
 export type UserEdit = typeof userEditSchema.infer;
 
+const academicGrade = type.enumerated(...Object.values(AcademicGrade));
+
 export const userCreateSchema = type({
   name: "string > 1",
   rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
   email: "string.email",
   role: roles,
   "studentId?": "string.numeric",
+  "academicGrade?": academicGrade,
+}).narrow((val, ctx) => {
+  if (val.role === "student" && !val.studentId) {
+    return ctx.reject({
+      code: "predicate",
+      message: "La matricula es requerida",
+      path: ["studentId"],
+    });
+  }
+  if (val.role !== "student" && !val.academicGrade) {
+    return ctx.reject({
+      code: "predicate",
+      message: "El grado académico es requerido",
+      path: ["academicGrade"],
+    });
+  }
+  return true;
 });
 
 export type UserCreate = typeof userCreateSchema.infer;

@@ -10,8 +10,8 @@ import {
   student,
   superadmin,
 } from "@/lib/authorization/permissions";
+import { db } from "@/lib/db";
 import { sendForgotPasswordEmail } from "@/lib/email/resend";
-import { db } from "../../db";
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
@@ -32,6 +32,11 @@ export const auth = betterAuth({
         returned: true,
         unique: true,
       },
+      academicGrade: {
+        type: "string",
+        input: true,
+        returned: true,
+      },
     },
   },
   plugins: [
@@ -42,4 +47,5 @@ export const auth = betterAuth({
       adminRoles: ["administrator", "superadmin"],
     }),
   ],
+  trustedOrigins: ["http://localhost:3000"],
 });

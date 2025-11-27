@@ -1,9 +1,9 @@
 "use server";
-import { APIError, success } from "better-auth";
+import { APIError } from "better-auth";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import { Resend } from "resend";
-import { PrismaClientKnownRequestError } from "@/generated/prisma/runtime/library";
+import { PrismaClientKnownRequestError } from "@/generated/prisma/runtime/client";
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import type { ForgotPassword } from "@/lib/types/login";

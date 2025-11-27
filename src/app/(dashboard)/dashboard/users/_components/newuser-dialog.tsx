@@ -17,6 +17,7 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { AcademicGrade } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
@@ -35,9 +36,10 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
       defaultValues: {
         name: "",
         email: "",
-        role: "guest",
+        role: Roles.GUEST,
         rut: "",
         studentId: undefined,
+        academicGrade: undefined,
       },
       shouldUnregister: true,
     });
@@ -46,12 +48,12 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
     const { success, message } = await createUser(user);
     if (!success) {
       toast.error("No se pudo crear el usuario", {
-        description: <p className="text-foreground">{message}</p>,
+        description: message,
       });
     }
     if (success) {
       toast.success("Se creo el usuario correctamente", {
-        description: <p className="text-background">{message}</p>,
+        description: message,
       });
       reset();
       if (closeDialog) closeDialog();
@@ -113,10 +115,22 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
               description="Ingresar el numero de matricual del nuevo estudiante"
             />
           )}
+          <FormSelect
+            label="Grado académico"
+            control={control}
+            name="academicGrade"
+            description="Seleccione el grado académico del nuevo usuario"
+          >
+            {Object.values(AcademicGrade).map((grade) => (
+              <SelectItem value={grade} key={grade}>
+                {grade.toLowerCase()}
+              </SelectItem>
+            ))}
+          </FormSelect>
         </FieldGroup>
         <DialogFooter className="mt-6">
           <DialogClose asChild onClick={() => reset()}>
-            <Button variant="outline">Canelar</Button>
+            <Button variant="outline">Cancelar</Button>
           </DialogClose>
           <Button
             type="submit"

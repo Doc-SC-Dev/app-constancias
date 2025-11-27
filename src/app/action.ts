@@ -1,6 +1,6 @@
 "use server";
 import { APIError } from "better-auth";
-import { PrismaClientKnownRequestError } from "@/generated/prisma/runtime/library";
+import { PrismaClientKnownRequestError } from "@/generated/prisma/runtime/client";
 
 type TryCatchReturnType<T> =
   | {
@@ -26,6 +26,9 @@ export async function withTryCatch<T>(
     }
     if (error instanceof PrismaClientKnownRequestError) {
       // TODO: Add more specific error messages for prisma
+      if (error.code === "P2002") {
+        return { success: false, error: "DUPLICADO" };
+      }
       return { success: false, error: error.message };
     }
     return {
