@@ -32,7 +32,7 @@ export const menus: Record<dashboards, Menu> = {
     description: "Dashboard de Administración de usuarios con rol estudiantes",
   },
   history: {
-    name: "Historial",
+    name: "Constancias",
     icon: "history",
     url: "/dashboard/history",
     description:
