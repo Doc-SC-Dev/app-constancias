@@ -20,7 +20,6 @@ export function HistoryClient({ data, userRole }: HistoryClientProps) {
 
     const allowedColumns = ["certName", "createdAt", "actions"];
     return columns.filter((col) => {
-      // Check accessorKey or id
       const key = (col as any).accessorKey || col.id;
       return allowedColumns.includes(key);
     });
