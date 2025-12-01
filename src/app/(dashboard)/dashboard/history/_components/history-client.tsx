@@ -1,9 +1,11 @@
 "use client";
 
-import { DataTable } from "@/components/data-table";
-import type { HistoryEntry } from "@/lib/types/history";
-import { columns } from "./colums";
 import { useMemo } from "react";
+import { DataTable } from "@/components/data-table";
+import ActionDialogManager from "@/components/form/action-dialog-manager";
+import type { HistoryEntry } from "@/lib/types/history";
+import CreateRequestDialog from "../../_components/create-request-dialog";
+import { columns } from "./colums";
 
 interface HistoryClientProps {
   data: HistoryEntry[];
@@ -35,7 +37,10 @@ export function HistoryClient({ data, userRole }: HistoryClientProps) {
           : "Filtrar por Nombre de Constancia"
       }
     >
-      <></>
+      <ActionDialogManager
+        createDialog={CreateRequestDialog}
+        triggerLabel="Crear constancia"
+      />
     </DataTable>
   );
 }
