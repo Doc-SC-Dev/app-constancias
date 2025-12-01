@@ -45,6 +45,7 @@ export const auth = betterAuth({
       ac: ac,
       roles: { professor, guest, superadmin, student, administrator },
       adminRoles: ["administrator", "superadmin"],
+      defaultRole: "guest",
     }),
   ],
   trustedOrigins: ["http://localhost:3000"],

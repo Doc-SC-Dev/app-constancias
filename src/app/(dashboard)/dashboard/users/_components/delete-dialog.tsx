@@ -12,11 +12,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import type { UserWithRut } from "@/lib/types/users";
+import type { User } from "@/lib/types/users";
 import { deleteUser } from "../actions";
 
 type DialogContentProps = {
-  data: UserWithRut;
+  data: User;
   closeDialog: () => void;
 };
 
@@ -32,7 +32,7 @@ export default function DeleteDialog({
     if (!success) {
       toast.error(message);
     } else {
-      toast.success(`Se elimino existosamente el usuario ${user.name}`);
+      toast.success(`Se eliminó exitosamente el usuario ${user.name}`);
     }
     closeDialog();
   }
@@ -40,9 +40,9 @@ export default function DeleteDialog({
   return (
     <DialogContent className="w-4xl">
       <DialogHeader>
-        <DialogTitle>¿Estas seguro?</DialogTitle>
+        <DialogTitle>¿Estás seguro?</DialogTitle>
         <DialogDescription>
-          Estas apunto de eliminar un usuario
+          Estás a punto de eliminar un usuario
         </DialogDescription>
       </DialogHeader>
       <div className="text-muted-foreground text-sm/normal">

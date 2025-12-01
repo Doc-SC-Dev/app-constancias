@@ -9,7 +9,7 @@ import {
   SidebarMenu,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { UserWithRut } from "@/lib/types/users";
+import type { User } from "@/lib/types/users";
 import { AppAvatar } from "./app-avatar";
 import { AppSidebarMenuItem } from "./app-sidebar-menu-item";
 
@@ -17,7 +17,7 @@ type SideBarProps = {
   hasUser: boolean;
   hasActivities: boolean;
   hasRequest: boolean;
-  user: UserWithRut;
+  user: User;
 };
 
 export function AppSideBar({

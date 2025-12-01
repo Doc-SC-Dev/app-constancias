@@ -1,7 +1,6 @@
 "use server";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { APIError } from "better-auth";
-
+import { PrismaClientKnownRequestError } from "@/generated/prisma/runtime/client";
 
 type TryCatchReturnType<T> =
   | {

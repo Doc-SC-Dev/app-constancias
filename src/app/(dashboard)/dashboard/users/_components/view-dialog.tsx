@@ -5,31 +5,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { UserWithRut } from "@/lib/types/users";
+import type { User } from "@/lib/types/users";
 
 type DialogContentProps = {
-  data: UserWithRut;
-  certName?: string;
+  data: User;
 };
 
-export default function ViewDialog({data: user, certName }: DialogContentProps) {
+export default function ViewDialog({ data: user }: DialogContentProps) {
   return (
     <DialogContent className="w-4xl">
       <DialogHeader className="px-8">
         <div className="flex items-center gap-1.5">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user.image ?? undefined} />
+            <AvatarImage src={user.image ?? ""} />
             <AvatarFallback>{user.name.slice(0, 2)}</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col gap-0">
+          <div className="flex flex-col gap-2">
             <DialogTitle>{user.name}</DialogTitle>
             <span className="text-sm/normal text-muted-foreground">
               {user.email}
             </span>
             <Badge variant="secondary">{user.role}</Badge>
-            {certName && (
-              <div className="text-sm text-muted-foreground">{certName}</div>
-            )}
           </div>
         </div>
       </DialogHeader>

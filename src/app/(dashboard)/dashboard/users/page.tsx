@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { auth } from "@/lib/auth";
-import type { UserWithRut } from "@/lib/types/users";
+import type { User } from "@/lib/types/users";
 import { columns } from "./_components/colums";
 import NewUserDialog from "./_components/newuser-dialog";
 import { UsersEmpty } from "./_components/users-empty";
@@ -32,13 +32,14 @@ export default async function UsersPage() {
       filterValue: session.user.id,
     },
   });
+  console.log(data);
   if (!data.total || !data.users) {
     return <UsersEmpty />;
   }
   return (
     <DataTable
       columns={columns}
-      data={data.users as UserWithRut[]}
+      data={data.users as User[]}
       placeholder="Filtrar por Nombre, Role, Email y Rut"
     >
       <ActionDialogManager

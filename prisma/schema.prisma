@@ -9,7 +9,7 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -24,8 +24,8 @@ model User {
   updatedAt     DateTime       @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
-  role          String?
-  banned        Boolean?       @default(false)
+  role          String
+  banned        Boolean        @default(false)
   banReason     String?
   banExpires    DateTime?
   professors    Professor?

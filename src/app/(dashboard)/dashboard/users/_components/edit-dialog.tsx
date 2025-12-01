@@ -17,15 +17,11 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { type Role, Roles } from "@/lib/authorization/permissions";
-import {
-  type UserEdit,
-  type UserWithRut,
-  userEditSchema,
-} from "@/lib/types/users";
+import { type User, type UserEdit, userEditSchema } from "@/lib/types/users";
 import { updateUser } from "../actions";
 
 type DialogContentProps = {
-  data: UserWithRut;
+  data: User;
   closeDialog: () => void;
 };
 

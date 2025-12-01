@@ -1,11 +1,11 @@
 import { type } from "arktype";
 import type { UserWithRole } from "better-auth/plugins";
-import { AcademicGrade } from "@/generated/prisma/enums";
+import { AcademicGrade } from "@/generated/prisma";
 import type { auth } from "../auth";
 
-export type User = UserWithRole;
+export type UserSelect = UserWithRole;
 export type Session = typeof auth.$Infer.Session;
-export type UserWithRut = typeof auth.$Infer.Session.user;
+export type User = typeof auth.$Infer.Session.user;
 
 const roles = type(
   "'administrator' | 'professor' | 'student' | 'superadmin'| 'guest'",

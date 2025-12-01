@@ -1,5 +1,4 @@
 "use client";
-import { Plus } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
@@ -37,6 +36,7 @@ export function DashboardCard({ title, description, url }: DashboardCardProps) {
         return <></>;
     }
   };
+
   return (
     <Card className=" max-h-sm min-w-2xs max-w-xl">
       <CardHeader>

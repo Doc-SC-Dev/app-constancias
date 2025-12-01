@@ -17,12 +17,11 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-
+import { AcademicGrade } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
 import { createUser } from "../actions";
-import { AcademicGrade } from "@/generated/prisma/enums";
 
 type DialogContentProps = {
   closeDialog?: () => void;
@@ -53,7 +52,7 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
       });
     }
     if (success) {
-      toast.success("Se creo el usuario correctamente", {
+      toast.success("Se creó el usuario correctamente", {
         description: message,
       });
       reset();
@@ -80,13 +79,13 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
             label="Email"
             control={control}
             name="email"
-            description="Ingresar el correo que tendra asociado la cuenta del nuevo usuario"
+            description="Ingresar el correo que tendrá asociado la cuenta del nuevo usuario"
           />
           <FormSelect
             label="Rol"
             control={control}
             name="role"
-            description="Seleccione el rol que tendra en la plataforma en nuevo usuario"
+            description="Seleccione el rol que tendrá en la plataforma el nuevo usuario"
           >
             {[...Object.values(Roles)].map((rol) => {
               if (
@@ -106,14 +105,14 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
             label="Rut"
             control={control}
             name="rut"
-            description="Las contraseña de los nuevo usuario sera su RUT sin puntos y con guión"
+            description="La contraseña del nuevo usuario será su RUT sin puntos y con guión"
           />
           {role === "student" && (
             <FormInput
-              label="Matricula"
+              label="Matrícula"
               control={control}
               name="studentId"
-              description="Ingresar el numero de matricual del nuevo estudiante"
+              description="Ingresar el número de matrícula del nuevo estudiante"
             />
           )}
           <FormSelect
