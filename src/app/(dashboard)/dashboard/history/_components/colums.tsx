@@ -6,7 +6,7 @@ import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ViewDialog from "../../users/_components/view-dialog";
+import ViewDialog from "./history-view-dialog";
 
 export const columns: ColumnDef<HistoryEntry>[] = [
   {
@@ -62,18 +62,7 @@ export const columns: ColumnDef<HistoryEntry>[] = [
             <Dialog.Overlay />
             <Dialog.Content>
               <ViewDialog
-                user={{
-                  id: entry.id,
-                  name: entry.name,
-                  email: "",
-                  image: undefined,
-                  createdAt: entry.createdAt,
-                  updatedAt: entry.updatedAt,
-                  emailVerified: false,
-                  rut: entry.rut,
-                  banned: false,
-                  role: entry.role as string,
-                }}
+                data={entry}
                 certName={entry.certName}
               />
             </Dialog.Content>

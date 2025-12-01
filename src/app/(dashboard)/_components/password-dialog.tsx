@@ -34,10 +34,10 @@ export default function NewPasswordDialog({
   });
   const onSubmit = async (passData: NewPassword) => {
     const { newPass, currentPass } = passData;
-    const { success, error } = await ChangePassword({ newPass, currentPass });
-    if (error) {
+    const { success, message } = await ChangePassword({ newPass, currentPass });
+    if (message) {
       toast.error("Ocurrio un error intentando cambiar tu constraseña", {
-        description: error,
+        description: message,
       });
       return;
     }

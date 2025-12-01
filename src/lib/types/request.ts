@@ -6,4 +6,4 @@ export const createRequestSchema = type({
 
 export type CreateRequest = typeof createRequestSchema.infer;
 
-export type { Request } from "@/generated/prisma";
+export type { Request } from "@/generated/prisma/client";
