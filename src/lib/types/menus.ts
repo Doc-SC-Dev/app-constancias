@@ -1,4 +1,5 @@
 import type { dynamicIconImports } from "lucide-react/dynamic";
+import type { Permissions } from "./permissions";
 
 enum dashboards {
   HOME = "home",
@@ -12,7 +13,7 @@ export type Menu = {
   icon: keyof typeof dynamicIconImports;
   url: string;
   description: string;
-  permissions?: Record<string, string[]>;
+  permissions: Permissions;
 };
 
 export const menus: Record<dashboards, Menu> = {
@@ -21,6 +22,7 @@ export const menus: Record<dashboards, Menu> = {
     icon: "home",
     name: "Inicio",
     description: "Página de inicio",
+    permissions: {},
   },
   users: {
     name: "Usuarios",
@@ -34,7 +36,7 @@ export const menus: Record<dashboards, Menu> = {
     icon: "users",
     url: "/dashboard/students",
     description: "Dashboard de administración de usuarios con rol estudiantes",
-    permissions: { student: ["list"] },
+    permissions: { user: ["list"] },
   },
   history: {
     name: "Constancias",
@@ -42,7 +44,7 @@ export const menus: Record<dashboards, Menu> = {
     url: "/dashboard/history",
     description:
       "Dashboard de visualización de peticiones históricas de constancias",
-    permissions: { history: ["list"] },
+    permissions: { request: ["list"] },
   },
   activities: {
     name: "Actividades",
