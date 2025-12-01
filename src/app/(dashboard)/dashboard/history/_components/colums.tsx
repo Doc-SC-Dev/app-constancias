@@ -6,7 +6,7 @@ import { Eye } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { HistoryEntry } from "@/lib/types/history";
-import ViewDialog from "../../users/_components/view-dialog";
+import ViewDialog from "./history-view-dialog";
 
 export const columns: ColumnDef<HistoryEntry>[] = [
   {
@@ -61,21 +61,7 @@ export const columns: ColumnDef<HistoryEntry>[] = [
           <Dialog.Portal>
             <Dialog.Overlay />
             <Dialog.Content>
-              <ViewDialog
-                data={{
-                  id: entry.id,
-                  name: entry.name,
-                  email: "email@domain.com",
-                  image: undefined,
-                  createdAt: entry.createdAt,
-                  updatedAt: entry.updatedAt,
-                  emailVerified: false,
-                  rut: entry.rut,
-                  banned: false,
-                  role: entry.role as string,
-                  academicGrade: "",
-                }}
-              />
+              <ViewDialog data={entry} certName={entry.certName} />
             </Dialog.Content>
           </Dialog.Portal>
         </Dialog.Root>
