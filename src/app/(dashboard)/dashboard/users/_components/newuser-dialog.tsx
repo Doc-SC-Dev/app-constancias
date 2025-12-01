@@ -17,12 +17,11 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-
+import { AcademicGrade } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
 import { createUser } from "../actions";
-import { AcademicGrade } from "@/generated/prisma/enums";
 
 type DialogContentProps = {
   closeDialog?: () => void;

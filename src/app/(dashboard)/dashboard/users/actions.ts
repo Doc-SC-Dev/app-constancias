@@ -7,7 +7,7 @@ import { withTryCatch } from "@/app/action";
 import { auth } from "@/lib/auth";
 import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
-import type { User, UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
+import type { UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
 
 export async function updateUser(userData: UserEdit, id: string) {
   const { success, data, error } = await withTryCatch<UserSelect>(
