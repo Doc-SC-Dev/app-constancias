@@ -6,4 +6,6 @@ export const env = arkenv({
   BETTER_AUTH_URL: "string.url",
   BETTER_AUTH_TRUST_HOST: "boolean",
   NODE_ENV: "'development' | 'production' | 'test'",
+  RESEND_API_KEY: "string",
+  FROM_EMAIL: "string.email",
 });

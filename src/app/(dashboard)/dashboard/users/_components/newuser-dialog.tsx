@@ -17,6 +17,7 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { AcademicGrade } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
@@ -35,29 +36,24 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
       defaultValues: {
         name: "",
         email: "",
-        role: "guest",
+        role: Roles.GUEST,
         rut: "",
         studentId: undefined,
+        academicGrade: undefined,
       },
       shouldUnregister: true,
     });
   const role = watch("role");
   const onSubmit = async (user: UserCreate) => {
-    console.log(user);
-    const { data, error } = await createUser(user);
-    if (error) {
+    const { success, message } = await createUser(user);
+    if (!success) {
       toast.error("No se pudo crear el usuario", {
-        description: <p className="text-foreground">{error}</p>,
+        description: message,
       });
     }
-    if (data) {
-      toast.success("Se creo el usuario correctamente", {
-        description: (
-          <p className="text-background">
-            `Se creo un nuevo usuario con nombre ${data.name} y rol ${data.role}
-            `
-          </p>
-        ),
+    if (success) {
+      toast.success("Se creó el usuario correctamente", {
+        description: message,
       });
       reset();
       if (closeDialog) closeDialog();
@@ -83,13 +79,13 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
             label="Email"
             control={control}
             name="email"
-            description="Ingresar el correo que tendra asociado la cuenta del nuevo usuario"
+            description="Ingresar el correo que tendrá asociado la cuenta del nuevo usuario"
           />
           <FormSelect
             label="Rol"
             control={control}
             name="role"
-            description="Seleccione el rol que tendra en la plataforma en nuevo usuario"
+            description="Seleccione el rol que tendrá en la plataforma el nuevo usuario"
           >
             {[...Object.values(Roles)].map((rol) => {
               if (
@@ -109,20 +105,32 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
             label="Rut"
             control={control}
             name="rut"
-            description="Las contraseña de los nuevo usuario sera su RUT sin puntos y con guión"
+            description="La contraseña del nuevo usuario será su RUT sin puntos y con guión"
           />
           {role === "student" && (
             <FormInput
-              label="Matricula"
+              label="Matrícula"
               control={control}
               name="studentId"
-              description="Ingresar el numero de matricual del nuevo estudiante"
+              description="Ingresar el número de matrícula del nuevo estudiante"
             />
           )}
+          <FormSelect
+            label="Grado académico"
+            control={control}
+            name="academicGrade"
+            description="Seleccione el grado académico del nuevo usuario"
+          >
+            {Object.values(AcademicGrade).map((grade) => (
+              <SelectItem value={grade} key={grade}>
+                {grade.toLowerCase()}
+              </SelectItem>
+            ))}
+          </FormSelect>
         </FieldGroup>
         <DialogFooter className="mt-6">
           <DialogClose asChild onClick={() => reset()}>
-            <Button variant="outline">Canelar</Button>
+            <Button variant="outline">Cancelar</Button>
           </DialogClose>
           <Button
             type="submit"

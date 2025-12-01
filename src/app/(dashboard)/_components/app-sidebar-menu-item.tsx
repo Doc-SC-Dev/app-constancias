@@ -16,7 +16,9 @@ export function AppSidebarMenuItem({ title, url, icon: Icon }: Props) {
     <SidebarMenuItem key={url}>
       <SidebarMenuButton
         size="default"
-        isActive={url === "/" ? pathName === url : pathName.includes(url)}
+        isActive={
+          url === "/dashboard" ? pathName === url : pathName.includes(url)
+        }
         className="rounded-none px-2"
         tooltip={title}
         onClick={() => router.push(url)}

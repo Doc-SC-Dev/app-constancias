@@ -1,30 +1,22 @@
 "use client";
 import { LogOut } from "lucide-react";
-import { useForm } from "react-hook-form";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Spinner } from "@/components/ui/spinner";
-import { logoutAction } from "../action";
+import LogoutDialog from "./logout-dialog";
+import NewPasswordDialog from "./password-dialog";
 
 export function AppAvatar() {
-  const { handleSubmit, formState } = useForm();
+  const [action, setAction] = useState<"logout" | "password">("logout");
+  const [open, setOpen] = useState<boolean>(false);
   return (
-    <AlertDialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Avatar>
@@ -33,36 +25,33 @@ export function AppAvatar() {
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" sideOffset={8} collisionPadding={8}>
-          <DropdownMenuItem onClick={() => {}}>
-            Cambiar constraseña
-          </DropdownMenuItem>
-          <AlertDialogTrigger asChild>
-            <DropdownMenuItem variant="destructive">
+          <DialogTrigger asChild>
+            <DropdownMenuItem
+              onClick={() => {
+                setAction("password");
+              }}
+            >
+              Cambiar constraseña
+            </DropdownMenuItem>
+          </DialogTrigger>
+          <DialogTrigger asChild>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => {
+                setAction("logout");
+              }}
+            >
               <LogOut />
               Cerrar sesión
             </DropdownMenuItem>
-          </AlertDialogTrigger>
+          </DialogTrigger>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialogContent className="w-sm">
-        <AlertDialogTitle>¿Estas seguro?</AlertDialogTitle>
-        <AlertDialogDescription>
-          Por seguridad, todos tus datos temporales se limpiarán y deberás
-          volver a iniciar sesión para continuar.
-        </AlertDialogDescription>
-        <AlertDialogFooter className="flex gap-4">
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-destructive hover:bg-destructive/75"
-            onClick={handleSubmit(logoutAction)}
-            disabled={formState.isSubmitting}
-          >
-            {formState.isSubmitting && <Spinner />}
-            Cerrar sesión
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      {action === "logout" && <LogoutDialog />}
+      {action === "password" && (
+        <NewPasswordDialog closeDialog={() => setOpen(false)} />
+      )}
+    </Dialog>
   );
 }

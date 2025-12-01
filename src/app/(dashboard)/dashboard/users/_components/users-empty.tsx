@@ -22,7 +22,7 @@ export function UsersEmpty() {
           </EmptyMedia>
           <EmptyTitle>No hay usuarios</EmptyTitle>
           <EmptyDescription>
-            No has creado usuario todavia. Empieza creando un nuevo usuario
+            No has creado usuario todavía. Empieza creando un nuevo usuario
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>

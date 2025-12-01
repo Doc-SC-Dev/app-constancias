@@ -57,13 +57,12 @@ export default async function RootLayout({
         hasActivities={hasActivities.success}
         hasRequest={hasRequest.success}
         hasUser={hasUser.success}
+        user={session.user}
       />
-      <div className="flex flex-col w-full h-screen">
+      <SidebarInset>
         <AppNavBar user={session.user} />
-        <SidebarInset className="flex-1 m-0">
-          <main className="overflow-auto p-8">{children}</main>
-        </SidebarInset>
-      </div>
+        <main className="p-8 h-full w-full">{children}</main>
+      </SidebarInset>
     </SidebarProvider>
   );
 }
