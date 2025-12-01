@@ -61,7 +61,7 @@ export default function ForgotPasswordCard({ goToTab }: Props) {
             Recuperar Contraseña
           </CardTitle>
           <CardDescription className="text-center">
-            Ingresa tu correo electronico
+            Ingresa tu correo electrónico
           </CardDescription>
         </CardHeader>
         <CardContent>

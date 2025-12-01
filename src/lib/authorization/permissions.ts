@@ -5,7 +5,7 @@ import {
   userAc,
 } from "better-auth/plugins/admin/access";
 
-const statement = {
+export const statement = {
   ...defaultStatements,
   activity: ["create", "read", "update", "delete", "list"],
   request: ["create", "read", "update", "delete", "list"],

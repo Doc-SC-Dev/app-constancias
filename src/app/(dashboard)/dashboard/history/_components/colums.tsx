@@ -1,11 +1,11 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
-import type { HistoryEntry } from "@/lib/types/history";
-import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Eye } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import type { HistoryEntry } from "@/lib/types/history";
 import ViewDialog from "../../users/_components/view-dialog";
 
 export const columns: ColumnDef<HistoryEntry>[] = [
@@ -39,7 +39,7 @@ export const columns: ColumnDef<HistoryEntry>[] = [
         month: "2-digit",
         year: "numeric",
       });
-      
+
       return `${formattedDate}`;
     },
   },
@@ -62,10 +62,10 @@ export const columns: ColumnDef<HistoryEntry>[] = [
             <Dialog.Overlay />
             <Dialog.Content>
               <ViewDialog
-                user={{
+                data={{
                   id: entry.id,
                   name: entry.name,
-                  email: "",
+                  email: "email@domain.com",
                   image: undefined,
                   createdAt: entry.createdAt,
                   updatedAt: entry.updatedAt,
@@ -73,8 +73,8 @@ export const columns: ColumnDef<HistoryEntry>[] = [
                   rut: entry.rut,
                   banned: false,
                   role: entry.role as string,
+                  academicGrade: "",
                 }}
-                certName={entry.certName}
               />
             </Dialog.Content>
           </Dialog.Portal>

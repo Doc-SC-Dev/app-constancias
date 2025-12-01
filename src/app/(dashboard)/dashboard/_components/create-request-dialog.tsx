@@ -42,12 +42,16 @@ export default function CreateRequestDialog() {
     resolver: arktypeResolver(createRequestSchema),
     reValidateMode: "onChange",
     defaultValues: {
-      certificateId: "",
+      certificateName: "",
     },
   });
   const onSubmit = async (data: CreateRequest) => {
-    const { success, message } = await createRequest(data);
+    const { success, message, data: pdf } = await createRequest(data);
     if (success) {
+      const link = document.createElement("a");
+      link.href = `data:application/pdf;base64,${pdf}`;
+      link.download = `${data.certificateName}.pdf`;
+      link.click();
       toast.success(message);
       form.reset();
     } else {
@@ -66,7 +70,7 @@ export default function CreateRequestDialog() {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         {certificates && (
           <Controller
-            name="certificateId"
+            name="certificateName"
             control={form.control}
             render={({ field, fieldState }) => (
               <Field orientation="responsive" data-invalid={fieldState.invalid}>
@@ -95,10 +99,7 @@ export default function CreateRequestDialog() {
                   </SelectTrigger>
                   <SelectContent position="item-aligned">
                     {certificates.map((certificate) => (
-                      <SelectItem
-                        key={certificate.id}
-                        value={certificate.id as string}
-                      >
+                      <SelectItem key={certificate.id} value={certificate.name}>
                         {certificate.name}
                       </SelectItem>
                     ))}

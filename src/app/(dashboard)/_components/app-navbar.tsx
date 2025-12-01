@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { UserWithRut } from "@/lib/types/users";
+import type { User } from "@/lib/types/users";
 import { AppAvatar } from "./app-avatar";
 import { AppSideBarTrigger } from "./app-sidebar-trigger";
 
 type NavBarProps = {
-  user: UserWithRut;
+  user: User;
 };
 
 export function AppNavBar({ user }: NavBarProps) {

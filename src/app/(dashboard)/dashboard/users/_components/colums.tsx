@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { admin } from "@/lib/auth/better-auth/client";
-import type { UserWithRut } from "@/lib/types/users";
+import type { User } from "@/lib/types/users";
 import DeleteDialog from "./delete-dialog";
 import EditDialog from "./edit-dialog";
 import ViewDialog from "./view-dialog";
@@ -15,7 +15,7 @@ import ViewDialog from "./view-dialog";
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 
-export const columns: ColumnDef<UserWithRut>[] = [
+export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "banned",
     header(_) {
@@ -50,7 +50,7 @@ export const columns: ColumnDef<UserWithRut>[] = [
             disabled={isLoading}
           />
           <Label htmlFor={`switch-${row.id}`}>
-            {checked ? "Activo" : "Desactivo"}
+            {checked ? "Activo" : "Inactivo"}
           </Label>
         </div>
       );
@@ -62,7 +62,7 @@ export const columns: ColumnDef<UserWithRut>[] = [
   },
   {
     accessorKey: "role",
-    header: "Role",
+    header: "Rol",
     cell({ row }) {
       return (
         <Badge
@@ -84,7 +84,7 @@ export const columns: ColumnDef<UserWithRut>[] = [
       // Todo: usar para realizar acciones sobrel el usuario
       const user = row.original;
       return (
-        <ActionDialogManager<UserWithRut>
+        <ActionDialogManager<User>
           data={user}
           viewDialog={ViewDialog}
           editDialog={EditDialog}

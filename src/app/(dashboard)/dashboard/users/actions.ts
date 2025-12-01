@@ -7,10 +7,10 @@ import { withTryCatch } from "@/app/action";
 import { auth } from "@/lib/auth";
 import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
-import type { User, UserCreate, UserEdit } from "@/lib/types/users";
+import type { User, UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
 
 export async function updateUser(userData: UserEdit, id: string) {
-  const { success, data, error } = await withTryCatch<User>(
+  const { success, data, error } = await withTryCatch<UserSelect>(
     auth.api.adminUpdateUser({
       headers: await headers(),
       body: {
@@ -41,8 +41,8 @@ export async function createUser(userData: UserCreate) {
   const { studentId, rut, academicGrade, ...newUserData } = userData;
 
   const password = userData.rut.replaceAll(".", "");
-  const { success, data, error } = await withTryCatch<User>(
-    db.$transaction<User>(async (tx) => {
+  const { success, data, error } = await withTryCatch<UserSelect>(
+    db.$transaction<UserSelect>(async (tx) => {
       // try to create user
       const session = await auth.api.createUser({
         headers: await headers(),
