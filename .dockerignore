@@ -49,3 +49,5 @@ src/generated/prisma
 # Documentation
 README.md
 WARP.md
+
+public/assets/templates/*.odg
