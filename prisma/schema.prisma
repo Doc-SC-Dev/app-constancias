@@ -13,6 +13,11 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
+enum Genre {
+  MALE
+  FEMALE
+}
+
 model User {
   id            String         @id
   rut           String
@@ -34,6 +39,7 @@ model User {
   requests      Request[]
   logs          Log[]
   academicGrade AcademicGrade?
+  genre         Genre
   otherRequests OtherRequest[]
 
   @@unique([rut, email])
@@ -92,12 +98,13 @@ model Verification {
 }
 
 model Professor {
-  id         String     @id @default(uuid())
-  updatedAt  DateTime   @updatedAt
-  createdAt  DateTime   @default(now())
-  userId     String     @unique
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activities Activity[]
+  id                 String              @id @default(uuid())
+  updatedAt          DateTime            @updatedAt
+  createdAt          DateTime            @default(now())
+  userId             String              @unique
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities         Activity[]
+  qualificationExams QualificationExam[]
 
   @@map("professor")
 }
@@ -111,7 +118,8 @@ enum AcademicGrade {
 model Student {
   id                 Int                 @id
   userId             String
-  isRegularStudent   Boolean
+  isRegularStudent   Boolean             @default(false)
+  admisionDate       DateTime            @default(now())
   updatedAt          DateTime            @default(now()) @updatedAt
   createdAt          DateTime            @default(now())
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -131,15 +139,18 @@ model OtherRequest {
 }
 
 model QualificationExam {
-  id        String   @id @default(uuid())
-  studentId Int
-  title     String
-  grade     Int
-  date      DateTime
-  updatedAt DateTime @default(now()) @updatedAt
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  studentId   Int
+  professorId String
+  title       String
+  grade       Int
+  date        DateTime
+  updatedAt   DateTime @default(now()) @updatedAt
+  createdAt   DateTime @default(now())
 
-  student Student @relation(fields: [studentId], references: [id])
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  professor Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
+  requests  Request[]
 
   @@map("qualification_exam")
 }
@@ -149,32 +160,37 @@ enum ActivityType {
   EXAMEN_CALIFICACION
   TRABAJO_INVESTIGACION
   TRABAJO_DE_TITULO
+  PROYECTO_DE_INVESTIGACION
+  PASANTIA
 }
 
 model Activity {
   id            String        @id @default(uuid())
-  teacherId     String
   name          String
   startAt       DateTime
   endAt         DateTime
-  hours         Int
   nAssistant    Int?
   nParticipants Int
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @default(now()) @updatedAt
-  professor     Professor     @relation(fields: [teacherId], references: [id])
   activityType  ActivityType
   participants  Participant[]
+  professor     Professor?    @relation(fields: [professorId], references: [id])
+  professorId   String?
+  requests      Request[]
 
   @@map("activity")
 }
 
 enum ParticipantType {
   CO_AUTOR
+  AYUDANTE
+  TESISTA
   AUTOR
   PROFESOR_ENCARGADO
   COLABORADOR
   ESTUDIANTE
+  PASANTE
 }
 
 model Participant {
@@ -213,14 +229,18 @@ enum RequestState {
 }
 
 model Request {
-  id            String       @id @default(uuid())
-  userId        String
-  certificateId String
-  state         RequestState
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @default(now()) @updatedAt
-  user          User         @relation(fields: [userId], references: [id])
-  certificate   Certificate  @relation(fields: [certificateId], references: [id])
+  id                  String             @id @default(uuid())
+  userId              String
+  certificateId       String
+  state               RequestState
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @default(now()) @updatedAt
+  user                User               @relation(fields: [userId], references: [id])
+  certificate         Certificate        @relation(fields: [certificateId], references: [id])
+  activityId          String?
+  qualificationExamId String?
+  activity            Activity?          @relation(fields: [activityId], references: [id])
+  qualificationExam   QualificationExam? @relation(fields: [qualificationExamId], references: [id])
 
   @@map("request")
 }
