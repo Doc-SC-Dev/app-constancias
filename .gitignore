@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-*.odg
 /src/generated/prisma
+public/assets/templates/template.odg
