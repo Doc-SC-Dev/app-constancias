@@ -37,6 +37,12 @@ export const auth = betterAuth({
         input: true,
         returned: true,
       },
+      genre: {
+        default: "FEMALE",
+        type: "string",
+        input: true,
+        returned: true,
+      },
     },
   },
   plugins: [
