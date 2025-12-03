@@ -21,21 +21,21 @@ export const menus: Record<dashboards, Menu> = {
     url: "/dashboard",
     icon: "home",
     name: "Inicio",
-    description: "Página de inicio",
+    description: "Página de inicio.",
     permissions: {},
   },
   users: {
     name: "Usuarios",
     icon: "user",
     url: "/dashboard/users",
-    description: "Dashboard de administración de usuarios",
+    description: "Dashboard de administración de usuarios.",
     permissions: { user: ["list"] },
   },
   students: {
     name: "Estudiantes",
     icon: "users",
     url: "/dashboard/students",
-    description: "Dashboard de administración de usuarios con rol estudiantes",
+    description: "Dashboard de administración de usuarios con rol estudiantes.",
     permissions: { user: ["list"] },
   },
   history: {
@@ -43,14 +43,15 @@ export const menus: Record<dashboards, Menu> = {
     icon: "history",
     url: "/dashboard/history",
     description:
-      "Dashboard de visualización de peticiones históricas de constancias",
+      "Dashboard de visualización de peticiones históricas de constancias.",
     permissions: { request: ["list"] },
   },
   activities: {
     name: "Actividades",
     icon: "activity",
     url: "/dashboard/activities",
-    description: "Dashboard de administración de actividades",
+    description:
+      "Dashboard de administración de actividades tales como proyectos de investigación, tesis o catedras.",
     permissions: { activity: ["list"] },
   },
 };
