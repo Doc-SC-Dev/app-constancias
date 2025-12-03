@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { User } from "@/lib/types/users";
+import logoImg from "../../../../public/assets/images/logo-horizontal-blanco.png";
 import { AppAvatar } from "./app-avatar";
 import { AppSideBarTrigger } from "./app-sidebar-trigger";
 
@@ -13,15 +14,15 @@ type NavBarProps = {
 export function AppNavBar({ user }: NavBarProps) {
   const isMobile = useIsMobile();
   return (
-    <nav className="flex justify-between items-center p-4 bg-primary max-h-21 w-full sticky">
-      <div className="flex gap-4 items-center">
+    <header className="flex justify-between items-center p-4 bg-primary max-h-21 w-full sticky">
+      <div className="flex gap-4 items-center w-1/2">
         <Image
-          src="/assets/images/logo-horizontal-blanco.png"
+          src={logoImg}
           alt="Logo doctorado en ciencias medicas"
           loading="eager"
-          className="h-16 w-auto"
-          height={64}
-          width={128}
+          priority
+          height={60}
+          className="w-auto"
         />
         <AppSideBarTrigger />
       </div>
@@ -38,6 +39,6 @@ export function AppNavBar({ user }: NavBarProps) {
           <AppAvatar />
         </div>
       )}
-    </nav>
+    </header>
   );
 }

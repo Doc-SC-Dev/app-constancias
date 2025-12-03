@@ -22,6 +22,7 @@ type ActionDialogProps<T> = {
     Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
   >;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost";
+  className?: string;
 };
 
 export default function ActionDialogManager<T>({
@@ -33,6 +34,7 @@ export default function ActionDialogManager<T>({
   createDialog: CreateDialog,
   icon: Icon = Plus,
   variant = "default",
+  className = "",
 }: ActionDialogProps<T>) {
   const [showDialog, setShowDialog] = useState<boolean>(false);
   const [action, setAction] = useState<Action>(Actions.VIEW);
@@ -71,7 +73,11 @@ export default function ActionDialogManager<T>({
           }
         />
       ) : (
-        <Button variant={variant} onClick={() => setShowDialog(true)}>
+        <Button
+          variant={variant}
+          onClick={() => setShowDialog(true)}
+          className={className}
+        >
           {triggerLabel}
           <Icon />
         </Button>

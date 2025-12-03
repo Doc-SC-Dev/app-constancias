@@ -38,25 +38,28 @@ export function DashboardCard({ title, description, url }: DashboardCardProps) {
   };
 
   return (
-    <Card className=" max-h-sm min-w-2xs max-w-xl">
+    <Card className="h-lg  max-w-lg w-mid gap-4">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between text-2xl">
           {title}
           <Button variant="link" asChild>
-            <Link href={url}>Ir</Link>
+            <Link href={url} className="text-md">
+              Ir
+            </Link>
           </Button>
         </CardTitle>
-        <CardDescription className="on-hover:text-accent-foreground/10">
+        <CardDescription className="on-hover:text-accent-foreground/10 text-md">
           {description}
         </CardDescription>
-        <CardFooter className="flex items-center justify-center">
-          <ActionDialogManager
-            createDialog={selectDialog}
-            triggerLabel={`Crear ${title}`}
-            variant="ghost"
-          />
-        </CardFooter>
       </CardHeader>
+      <CardFooter className="flex items-end justify-center">
+        <ActionDialogManager
+          createDialog={selectDialog}
+          triggerLabel={`Crear ${title}`}
+          variant="ghost"
+          className="text-sm"
+        />
+      </CardFooter>
     </Card>
   );
 }

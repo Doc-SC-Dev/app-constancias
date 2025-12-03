@@ -37,8 +37,11 @@ export default async function HomePage() {
   });
 
   return (
-    <div className="h-full flex flex-col justify-center items-center">
-      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+    <div className="h-full w-full flex flex-col gap-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Accesos Rápido</h1>
+      </div>
+      <div className="w-full max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         <HydrationBoundary state={dehydrate(queryClient)}>
           {cardData.map((card) => {
             if (!permissions[card.name]) return null;

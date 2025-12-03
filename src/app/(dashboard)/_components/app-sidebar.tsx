@@ -4,7 +4,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
 } from "@/components/ui/sidebar";
@@ -76,12 +75,9 @@ export function AppSideBar({
           </div>
         )}
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup className="h-full px-0">
-          <SidebarGroupLabel className="text-foreground text-sm h-15 px-6">
-            Secciones
-          </SidebarGroupLabel>
-          <SidebarMenu className="h-full">
+      <SidebarContent className="h-full py-2">
+        <SidebarGroup className="px-0">
+          <SidebarMenu className="h-full gap-0">
             {items.map((item) =>
               item.permission ? (
                 <AppSidebarMenuItem
