@@ -82,16 +82,12 @@ export const createRequest = async (data: CreateRequest) => {
 
 const getAlumnoRegularText = async (user: User) => {
   const { success, error, data } = await withTryCatch<Student | null>(
-    db.student.findUnique({
-      where: {
-        userId: user.id,
-      },
-    }),
+    db.student.findUnique({ where: { userId: user.id } }),
   );
   if (error) throw new Error(error);
   if (!success || !data) throw new Error("No se encontro el estudiante");
   return `
-  <div style="width: 450px;">
+  <div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
   <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong><i>, Director del Programa de 
 Doctorado en Ciencias Médicas, de la Universidad de La Frontera, deja 
 constancia que el <strong>Sr. ${user.name}</strong>, Matrícula Nº <strong>${data.id}</strong>, 
@@ -117,16 +113,16 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
     "template.pdf",
   );
 
-  const trebuchetPath = path.join(
+  const robotoPath = path.join(
     process.cwd(),
     "public",
     "assets",
     "fonts",
-    "trebuchetms.ttf",
+    "Roboto.ttf",
   );
 
   const templateBytes = readFileSync(templatePath);
-  const trebuchetBytes = readFileSync(trebuchetPath);
+  const robotoBytes = readFileSync(robotoPath);
 
   const pdfDoc = await PDFDocument.load(templateBytes);
   pdfDoc.registerFontkit(fontkit);
@@ -144,9 +140,13 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
 
   const text = await getCertificateText(user, certificate);
   await page.addStyleTag({
-    content: `@font-face { font-family: 'Trebuchet MS'; src: url('${trebuchetPath}'); }
+    content: `
+    @font-face {
+      font-family: 'Roboto';
+      src: url('${robotoPath}');
+    }
       div {
-        font-family: 'Trebuchet MS' !important;
+        font-family: 'Roboto' !important;
         font-size: 12pt !important;
       }
       `,
@@ -165,7 +165,7 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
   const parcheDoc = await PDFDocument.load(parcheBuffer);
   const [parchePage] = await pdfDoc.copyPages(parcheDoc, [0]);
   const embeddedPage = await pdfDoc.embedPage(parchePage);
-  const trebuchetFont = await pdfDoc.embedFont(trebuchetBytes);
+  const robotoFont = await pdfDoc.embedFont(robotoBytes);
 
   const form = pdfDoc.getForm();
   const date = new Date();
@@ -173,7 +173,7 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
   const footerField = form.getTextField("footer_field");
 
   footerField.setFontSize(12);
-  footerField.updateAppearances(trebuchetFont);
+  footerField.updateAppearances(robotoFont);
   footerField.setText(
     `TEMUCO, CHILE - ${month.at(0)?.toUpperCase() + month.slice(1)} de ${date.getFullYear()}.`,
   );
