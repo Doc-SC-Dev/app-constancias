@@ -32,7 +32,6 @@ export default async function UsersPage() {
       filterValue: session.user.id,
     },
   });
-  console.log(data);
   if (!data.total || !data.users) {
     return <UsersEmpty />;
   }
