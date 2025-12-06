@@ -16,7 +16,7 @@ export const getHistoryPaginated = async ({
 }): Promise<PaginationResponse<HistoryEntry>> => {
   const start = pageParam * PAGE_SIZE;
   const [count, data] = await db.$transaction([
-    db.request.count(),
+    db.request.count({ where: isAdmin ? undefined : { userId: user.id } }),
     db.request.findMany({
       where: isAdmin ? undefined : { userId: user.id },
       take: PAGE_SIZE,
