@@ -1,10 +1,7 @@
 "use client";
 
-import * as Dialog from "@radix-ui/react-dialog";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Eye } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import ActionDialogManager from "@/components/form/action-dialog-manager";
 import type { HistoryEntry } from "@/lib/types/history";
 import ViewDialog from "./history-view-dialog";
 
@@ -12,26 +9,48 @@ export const columns: ColumnDef<HistoryEntry>[] = [
   {
     accessorKey: "certName",
     header: "Constancia",
+    cell: ({ row }) => {
+      const certName = row.original.certName;
+      return <span className="flex flex-1 ">{certName}</span>;
+    },
   },
 
   {
     accessorKey: "name",
     header: "Nombre",
+    cell: ({ row }) => {
+      const name = row.original.name;
+      return <span className="flex flex-1 items-center ">{name}</span>;
+    },
   },
 
   {
     accessorKey: "rut",
-    header: "RUT",
+    header: () => <span className="flex flex-1 justify-center">Rut</span>,
+    cell: ({ row }) => {
+      const rut = row.original.rut;
+      return (
+        <span className="flex flex-1 items-center justify-center">{rut}</span>
+      );
+    },
   },
 
   {
     accessorKey: "role",
-    header: "Rol",
+    header: () => <span className="flex flex-1 justify-center">Rol</span>,
+    cell: ({ row }) => {
+      const role = row.original.role;
+      return (
+        <span className="flex flex-1 items-center justify-center">{role}</span>
+      );
+    },
   },
 
   {
     accessorKey: "createdAt",
-    header: "Fecha Creación",
+    header: () => (
+      <span className="flex flex-1 justify-center">Fecha Creación</span>
+    ),
     cell: ({ row }) => {
       const date = row.original.createdAt;
       const formattedDate = date.toLocaleDateString("es-CL", {
@@ -40,31 +59,26 @@ export const columns: ColumnDef<HistoryEntry>[] = [
         year: "numeric",
       });
 
-      return `${formattedDate}`;
+      return (
+        <span className="flex flex-1 items-center justify-center">
+          {formattedDate}
+        </span>
+      );
     },
   },
   {
     id: "actions",
-    header: "Acción",
+    header: () => <span className="flex flex-1 justify-center">Acción</span>,
     enableGlobalFilter: false,
     cell: ({ row }) => {
       const entry = row.original;
-      const [open, setOpen] = useState(false);
       return (
-        <Dialog.Root open={open} onOpenChange={setOpen}>
-          <Dialog.Trigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              <span>Ver</span>
-            </Button>
-          </Dialog.Trigger>
-          <Dialog.Portal>
-            <Dialog.Overlay />
-            <Dialog.Content>
-              <ViewDialog data={entry} certName={entry.certName} />
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
+        <div className="flex flex-1 items-center justify-center">
+          <ActionDialogManager<HistoryEntry>
+            data={entry}
+            viewDialog={ViewDialog}
+          />
+        </div>
       );
     },
   },

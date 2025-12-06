@@ -1,10 +1,15 @@
-import { HistoryClient } from "./_components/history-client";
-import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import type { HistoryEntry } from "@/lib/types/history";
-import { HistoryEmpty } from "./_components/history-empty";
+import type { PaginationResponse } from "@/lib/types/pagination";
+import { HistoryClient } from "./_components/history-client";
+import { getHistoryPaginated } from "./actions";
 
 export default async function HistoryPage() {
   const nextHeader = await headers();
@@ -32,40 +37,28 @@ export default async function HistoryPage() {
   const userRole = session.user.role || "guest";
   const isAdmin = userRole === "administrator" || userRole === "superadmin";
 
-  const requests = await db.request.findMany({
-    where: isAdmin ? undefined : { userId: session.user.id },
-    include: {
-      user: true,
-      certificate: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchInfiniteQuery({
+    queryKey: ["list-history"],
+    queryFn: ({ pageParam }) =>
+      getHistoryPaginated({
+        pageParam,
+        user: session.user,
+        isAdmin,
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (
+      _lastPage: PaginationResponse<HistoryEntry>,
+      groups: PaginationResponse<HistoryEntry>[],
+    ) => groups.length,
   });
 
-  const historyData: HistoryEntry[] = requests.map((request) => ({
-    id: request.id,
-    name: request.user.name,
-    rut: request.user.rut,
-    role:
-      (request.user.role as
-        | "administrator"
-        | "professor"
-        | "student"
-        | "superadmin"
-        | "guest") || "guest",
-    certName: request.certificate.name,
-    createdAt: request.createdAt,
-    updatedAt: request.updatedAt,
-  }));
-
-  if (!historyData.length) {
-    return <HistoryEmpty />;
-  }
-
   return (
-    <div className="container mx-auto">
-      <HistoryClient data={historyData} userRole={userRole} />
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <div className="container h-full mx-auto">
+        <HistoryClient isAdmin={isAdmin} user={session.user} />
+      </div>
+    </HydrationBoundary>
   );
 }

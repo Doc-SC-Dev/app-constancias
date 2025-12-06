@@ -6,7 +6,7 @@ export const createRequestSchema = type({
 
 export type CreateRequest = typeof createRequestSchema.infer;
 
-export type { Request } from "@/generated/prisma/client";
+export type { Request } from "@/generated/prisma";
 
 export enum Certificates {
   ALUMNO_REGULAR = "Constancia de alumno regular",

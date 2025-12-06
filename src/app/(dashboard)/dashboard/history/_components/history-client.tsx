@@ -3,18 +3,17 @@
 import { useMemo } from "react";
 import { DataTable } from "@/components/data-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
-import type { HistoryEntry } from "@/lib/types/history";
+import type { User } from "@/lib/types/users";
 import CreateRequestDialog from "../../_components/create-request-dialog";
+import { getHistoryPaginated } from "../actions";
 import { columns } from "./colums";
 
 interface HistoryClientProps {
-  data: HistoryEntry[];
-  userRole: string;
+  isAdmin: boolean;
+  user: User;
 }
 
-export function HistoryClient({ data, userRole }: HistoryClientProps) {
-  const isAdmin = userRole === "administrator" || userRole === "superadmin";
-
+export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
   const filteredColumns = useMemo(() => {
     if (isAdmin) {
       return columns;
@@ -29,8 +28,11 @@ export function HistoryClient({ data, userRole }: HistoryClientProps) {
 
   return (
     <DataTable
+      queryKey="list-history"
+      queryFn={({ pageParam }) =>
+        getHistoryPaginated({ pageParam, user, isAdmin })
+      }
       columns={filteredColumns}
-      data={data}
       placeholder={
         isAdmin
           ? "Filtrar por Nombre, Rol, RUT y Constancia"
