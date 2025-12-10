@@ -4,10 +4,11 @@ import { APIError } from "better-auth";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { withTryCatch } from "@/app/action";
-import { auth } from "@/lib/auth";
+import { auth, isAuthenticated } from "@/lib/auth";
 import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
-import type { UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
+import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
+import type { User, UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
 
 export async function updateUser(userData: UserEdit, id: string) {
   const { success, data, error } = await withTryCatch<UserSelect>(
@@ -157,4 +158,39 @@ export async function deleteUser({ userId }: { userId: string }) {
     }
     return { success: false, message: "Error interno del servidor" };
   }
+}
+
+export async function listUsers({
+  pageParam,
+}: {
+  pageParam: number;
+}): Promise<PaginationResponse<User>> {
+  const session = await isAuthenticated();
+
+  const { users, total } = await auth.api.listUsers({
+    headers: await headers(),
+    query: {
+      filterField: "id",
+      filterOperator: "ne",
+      filterValue: session.user.id,
+      limit: PAGE_SIZE,
+      offset: pageParam * PAGE_SIZE,
+    },
+  });
+  return { data: users as User[], nextPage: pageParam + 1, totalRows: total };
+}
+
+export async function listUsersAdmin(): Promise<User[]> {
+  const session = await isAuthenticated();
+  const users = await db.user.findMany({
+    where: {
+      id: {
+        not: session.user.id,
+      },
+      role: {
+        notIn: ["administrator", "superadmin"],
+      },
+    },
+  });
+  return users as User[];
 }

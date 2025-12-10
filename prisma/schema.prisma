@@ -199,8 +199,8 @@ model Participant {
   userId     String
   type       ParticipantType
   hours      Int
-  startAt    DateTime
-  endAt      DateTime
+  startAt    DateTime?
+  endAt      DateTime?
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @default(now()) @updatedAt
   activity   Activity        @relation(fields: [activityId], references: [id])

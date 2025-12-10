@@ -12,15 +12,10 @@ import DeleteDialog from "./delete-dialog";
 import EditDialog from "./edit-dialog";
 import ViewDialog from "./view-dialog";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-
-export const columns: ColumnDef<UserWithActivities>[] = [
+export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "banned",
-    header(_) {
-      return <p className="text-center">Estado</p>;
-    },
+    header: () => <p className="flex flex-1 justify-center">Estado</p>,
     enableGlobalFilter: false,
     cell({ row }) {
       const user = row.original;
@@ -42,7 +37,7 @@ export const columns: ColumnDef<UserWithActivities>[] = [
         setIsLoading(false);
       };
       return (
-        <div className="flex items-center justify-center space-x-2">
+        <div className="flex flex-1 items-center justify-center space-x-2">
           <Switch
             id={`switch-${row.id}`}
             checked={checked}
@@ -59,37 +54,69 @@ export const columns: ColumnDef<UserWithActivities>[] = [
   {
     accessorKey: "name",
     header: "Nombre",
+    cell({ row }) {
+      return (
+        <div className="flex flex-1 items-center ">
+          <p>{row.getValue("name")}</p>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "role",
-    header: "Rol",
+    header: () => <p className="flex flex-1 justify-center">Rol</p>,
     cell({ row }) {
       return (
-        <Badge
-          variant={row.getValue("role") === "admin" ? "destructive" : "outline"}
-        >{`${(row.getValue("role") as string).toUpperCase().replace("_", "-")}`}</Badge>
+        <span className="flex flex-1 items-center justify-center">
+          <Badge
+            variant={
+              row.getValue("role") === "admin" ? "destructive" : "outline"
+            }
+          >
+            {`${(row.getValue("role") as string).toLowerCase().replace("_", "-")}`}
+          </Badge>
+        </span>
       );
     },
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: () => <p className="flex flex-1">Email</p>,
+    cell({ row }) {
+      return (
+        <div className="flex flex-1 items-center">
+          <p>{row.getValue("email")}</p>
+        </div>
+      );
+    },
   },
-  { accessorKey: "rut", header: "Rut" },
+  {
+    accessorKey: "rut",
+    header: () => <p className="flex flex-1 justify-center">Rut</p>,
+    cell({ row }) {
+      return (
+        <div className="flex flex-1 items-center justify-center">
+          <p>{row.getValue("rut")}</p>
+        </div>
+      );
+    },
+  },
   {
     id: "actions",
-    header: "Acción",
+    header: () => <p className="flex flex-1 justify-center">Acción</p>,
     enableGlobalFilter: false,
     cell: ({ row }) => {
-      // Todo: usar para realizar acciones sobrel el usuario
       const user = row.original;
+
       return (
-        <ActionDialogManager<UserWithActivities>
-          data={user}
-          viewDialog={ViewDialog}
-          editDialog={EditDialog}
-          deleteDialog={DeleteDialog}
-        />
+        <span className="flex flex-1 items-center justify-center">
+          <ActionDialogManager<User>
+            data={user}
+            viewDialog={ViewDialog}
+            editDialog={EditDialog}
+            deleteDialog={DeleteDialog}
+          />
+        </span>
       );
     },
   },

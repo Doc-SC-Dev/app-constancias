@@ -1,77 +1,59 @@
-import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import ActivityClient from "./_components/client";
-import { ActivityEmpty } from "./_components/empty";
-import { ParticipantActivity } from "@/lib/types/paricipant-activity";
-import { ActivityType, ParticipantType } from "@/generated/prisma";
+import { DataTable } from "@/components/data-table";
+// import ActionDialogManager from "@/components/form/action-dialog-manager";
+import { auth, isAuthenticated } from "@/lib/auth";
+import { db } from "@/lib/db";
+import type { Activity } from "@/lib/types/activity";
+import type { PaginationResponse } from "@/lib/types/pagination";
+import { ActivityEmpty } from "./_component/activity-empty";
+import { columns } from "./_component/columns";
+// import CreateActivityDialog from "./_component/create-activity-dialog";
+import { getActivitiesPaginated } from "./actions";
 
 export default async function ActivityPage() {
-  const nextHeader = await headers();
-  const session = await auth.api.getSession({
-    headers: nextHeader,
-  });
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  const { success } = await auth.api.userHasPermission({
-    headers: nextHeader,
+  const session = await isAuthenticated();
+  const permission = await auth.api.userHasPermission({
     body: {
-      permissions: {
-        activity: ["list"],
-      },
+      userId: session.user.id,
+      permissions: { user: ["list"] },
     },
   });
-
-  if (!success) {
-    return redirect("/dashboard");
+  if (!permission.success) {
+    redirect("/dashboard");
   }
 
-  const userRole = session.user.role || "guest";
-  const isAdmin = userRole === "administrator" || userRole === "superadmin";
+  const queryClient = new QueryClient();
 
-  const participants = await db.participant.findMany({
-    where: isAdmin ? undefined : { userId: session.user.id },
-    include: {
-      activity: true,
-      user: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+  await queryClient.prefetchInfiniteQuery({
+    queryKey: ["list-activity"],
+    queryFn: ({ pageParam }) => getActivitiesPaginated({ pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: PaginationResponse<Activity>) =>
+      lastPage.nextPage,
   });
-
-  if (!participants || participants.length === 0) {
+  const data = await db.activity.findMany();
+  if (!data.length || !data) {
     return <ActivityEmpty />;
   }
-
-  const formattedData: ParticipantActivity[] = participants.map((p) => {
-    const start = new Date(p.activity.startAt);
-    const end = new Date(p.activity.endAt);
-    const diffMs = end.getTime() - start.getTime();
-    const diffHrs = Math.floor(diffMs / 3600000);
-    const diffMins = Math.round((diffMs % 3600000) / 60000);
-    const durationString = `${diffHrs}h ${diffMins}m`;
-
-    return {
-      id: p.id,
-      hours: durationString, 
-      type: p.type as ParticipantType,
-      activityName: p.activity.name,
-      activityType: p.activity.activityType as ActivityType,
-      userName: p.user.name,
-      createdAt: p.createdAt,
-      updatedAt: p.updatedAt,
-      activity: p.activity,
-    };
-  });
-
   return (
-    <div className="container mx-auto">
-      <ActivityClient data={formattedData} />
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <DataTable
+        columns={columns}
+        queryFn={getActivitiesPaginated}
+        queryKey="list-activity"
+        placeholder="Filtrar datos en columnas"
+      >
+        {""}
+        {/* <ActionDialogManager
+          createDialog={CreateActivityDialog}
+          triggerLabel="Crear actividad"
+        /> */}
+      </DataTable>
+    </HydrationBoundary>
   );
 }

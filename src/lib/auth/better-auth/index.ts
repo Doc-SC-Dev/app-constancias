@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
+import { withTryCatch } from "@/app/action";
 import {
   ac,
   administrator,
@@ -39,6 +40,7 @@ export const auth = betterAuth({
       },
       genre: {
         default: "FEMALE",
+        required: true,
         type: "string",
         input: true,
         returned: true,

@@ -1,15 +1,25 @@
 "use client";
 
 import { rankItem } from "@tanstack/match-sorter-utils";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import {
   type ColumnDef,
   type FilterFn,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  type Row,
   useReactTable,
 } from "@tanstack/react-table";
-import { type ReactNode, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,25 +30,73 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { PaginationResponse } from "@/lib/types/pagination";
+import { Spinner } from "./ui/spinner";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+interface DataTableProps<TData> {
+  columns: ColumnDef<TData>[];
   children: ReactNode;
   placeholder: string;
-  title?: string;
+  queryKey: string;
+  queryFn: ({
+    pageParam,
+  }: {
+    pageParam: number;
+  }) => Promise<PaginationResponse<TData>>;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData>({
   columns,
-  data,
   children,
   placeholder,
-  title,
-}: DataTableProps<TData, TValue>) {
+  queryKey,
+  queryFn,
+}: DataTableProps<TData>) {
+  const tableContainerRef = useRef<HTMLDivElement>(null);
   const [globalFilter, setGlobalFilter] = useState<"">("");
 
-  const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+  const { data, fetchNextPage, isFetching } = useInfiniteQuery({
+    queryKey: [queryKey],
+    queryFn: async ({ pageParam }) => await queryFn({ pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (
+      _lastPage: PaginationResponse<TData>,
+      allPages: PaginationResponse<TData>[],
+    ) => allPages.length,
+    refetchOnWindowFocus: false,
+    placeholderData: keepPreviousData,
+  });
+
+  const flatData = useMemo(
+    () => data?.pages.flatMap((page) => page.data) || [],
+    [data],
+  );
+
+  const totalDBRowCount = data?.pages.at(0)?.totalRows || 0;
+  const totalFetched = flatData.length;
+
+  const fetchMoreOnBottomReached = useCallback(
+    (containerRefElement?: HTMLDivElement | null) => {
+      if (containerRefElement) {
+        const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
+        //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
+        if (
+          scrollHeight - scrollTop - clientHeight < 500 &&
+          !isFetching &&
+          totalFetched < totalDBRowCount
+        ) {
+          fetchNextPage();
+        }
+      }
+    },
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
+  );
+  useEffect(() => {
+    fetchMoreOnBottomReached(tableContainerRef.current);
+  }, [fetchMoreOnBottomReached]);
+
+  const memoColumns = useMemo(() => columns, [columns]);
+  const fuzzyFilter: FilterFn<TData> = (row, columnId, value, addMeta) => {
     // Rank the item
     const itemRank = rankItem(row.getValue(columnId), value);
 
@@ -49,8 +107,8 @@ export function DataTable<TData, TValue>({
     return itemRank.passed;
   };
   const table = useReactTable({
-    data,
-    columns,
+    data: flatData,
+    columns: memoColumns,
     filterFns: {
       fuzzy: fuzzyFilter,
     },
@@ -63,8 +121,23 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const { rows } = table.getRowModel();
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    estimateSize: () => 33, //estimate row height for accurate scrollbar dragging
+    getScrollElement: () => tableContainerRef.current,
+    //measure dynamic row height, except in firefox because it measures table border height incorrectly
+    measureElement:
+      typeof window !== "undefined" &&
+      navigator.userAgent.indexOf("Firefox") === -1
+        ? (element) => element?.getBoundingClientRect().height
+        : undefined,
+    overscan: 5,
+  });
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="container flex flex-col mx-auto h-full gap-4">
       <div className="flex items-center align-middle justify-between">
         <div className="grid w-full max-w-sm items-center gap-3">
           <Label htmlFor="fuzzy-input">Filtrar</Label>
@@ -78,15 +151,29 @@ export function DataTable<TData, TValue>({
         </div>
         {children}
       </div>
-      {title && <h3 className="font-bold text-lg">{title}</h3>}
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
+      <div
+        className="container h-[600px] overflow-auto relative  rounded-md border"
+        ref={tableContainerRef}
+        onScroll={(e) => fetchMoreOnBottomReached(e.currentTarget)}
+      >
+        <Table className="grid">
+          <TableHeader
+            style={{
+              display: "grid",
+              position: "sticky",
+              top: 0,
+              zIndex: 1,
+              width: "100%",
+            }}
+          >
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="flex w-full gap-4">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className="flex flex-1 items-center"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -99,23 +186,41 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+          <TableBody
+            className={`grid relative w-full`}
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().length ? (
+              rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const row = rows[virtualRow.index] as Row<TData>;
+                return (
+                  <TableRow
+                    data-index={virtualRow.index}
+                    ref={(node) => rowVirtualizer.measureElement(node)}
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="flex absolute w-full gap-4"
+                    style={{
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className="flex w-full"
+                        style={{}}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
@@ -128,6 +233,11 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+        {isFetching && (
+          <span className="flex flex-1 justify-center items-center gap-4">
+            <Spinner /> Cargando...
+          </span>
+        )}
       </div>
     </div>
   );
