@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { type Activity, activitySchema } from "@/lib/types/activity";
+import type { Activity, ActivityCreateInput } from "@/lib/types/activity";
+import type { PaginationResponse } from "@/lib/types/pagination";
+import { PAGE_SIZE } from "@/lib/types/pagination";
 
 export async function updateActivity(data: Partial<Activity>, id: string) {
   try {
@@ -36,10 +38,6 @@ export async function deleteActivity({ activityId }: { activityId: string }) {
     return { success: false, message: "Error al eliminar la actividad" };
   }
 }
-import { db } from "@/lib/db";
-import type { Activity, ActivityCreateInput } from "@/lib/types/activity";
-import type { PaginationResponse } from "@/lib/types/pagination";
-import { PAGE_SIZE } from "@/lib/types/pagination";
 
 export const getActivitiesPaginated = async ({
   pageParam,
