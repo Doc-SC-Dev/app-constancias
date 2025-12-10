@@ -22,17 +22,7 @@ export function ActivityEmpty() {
             No participas en ninguna actividad aún.
           </EmptyDescription>
         </EmptyHeader>
-        {/* 
-          If we had a "Join Activity" or "Create Activity" action, it would go here.
-          For now, leaving it empty or we could add a button if there's a relevant action.
-          History has "Solicitar constancia". Maybe "Ver actividades disponibles"?
-        */}
-        {/* <EmptyContent>
-          <Button>
-            <Plus />
-            Unirse a actividad
-          </Button>
-        </EmptyContent> */}
+
       </Empty>
     </div>
   );

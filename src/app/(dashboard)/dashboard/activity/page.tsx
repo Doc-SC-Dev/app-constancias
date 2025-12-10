@@ -58,7 +58,7 @@ export default async function ActivityPage() {
 
     return {
       id: p.id,
-      hours: durationString, // Overriding number type with string for display
+      hours: durationString, 
       type: p.type as ParticipantType,
       activityName: p.activity.name,
       activityType: p.activity.activityType as ActivityType,

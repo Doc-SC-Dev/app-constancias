@@ -36,10 +36,10 @@ export default function EditDialog({
     reValidateMode: "onChange",
     defaultValues: {
       name: activity.name,
-      activityType: activity.activityType as ActivityType, // Cast if needed
+      activityType: activity.activityType as ActivityType, 
       nParticipants: activity.nParticipants,
-      startAt: new Date(activity.startAt), // Ensure Date object
-      endAt: new Date(activity.endAt), // Ensure Date object
+      startAt: new Date(activity.startAt), 
+      endAt: new Date(activity.endAt), 
     },
   });
 

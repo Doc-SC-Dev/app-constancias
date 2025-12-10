@@ -1,7 +1,6 @@
 import { type } from "arktype";
 import { activitySchema } from "./activity";
 
-// Enums from Prisma schema
 export const activityType = type(
   "'DOCENCIA' | 'EXAMEN_CALIFICACION' | 'TRABAJO_INVESTIGACION' | 'TRABAJO_DE_TITULO' | 'PROYECTO_DE_INVESTIGACION' | 'PASANTIA'"
 );
