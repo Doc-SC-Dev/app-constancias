@@ -5,15 +5,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { User } from "@/lib/types/users";
+import type { UserWithActivities } from "@/lib/types/users";
+import UserActivitiesTable from "./user-activities-table";
 
 type DialogContentProps = {
-  data: User;
+  data: UserWithActivities;
 };
 
 export default function ViewDialog({ data: user }: DialogContentProps) {
   return (
-    <DialogContent className="w-4xl">
+    <DialogContent className="sm:max-w-4xl w-full">
       <DialogHeader className="px-8">
         <div className="flex items-center gap-1.5">
           <Avatar className="h-10 w-10">
@@ -29,6 +30,9 @@ export default function ViewDialog({ data: user }: DialogContentProps) {
           </div>
         </div>
       </DialogHeader>
+      <div className="px-8 pb-8">
+        <UserActivitiesTable participants={user.participants} />
+      </div>
     </DialogContent>
   );
 }

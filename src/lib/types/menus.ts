@@ -49,7 +49,7 @@ export const menus: Record<dashboards, Menu> = {
   activities: {
     name: "Actividades",
     icon: "activity",
-    url: "/dashboard/activities",
+    url: "/dashboard/activity",
     description:
       "Dashboard de administración de actividades tales como proyectos de investigación, tesis o catedras.",
     permissions: { activity: ["list"] },
