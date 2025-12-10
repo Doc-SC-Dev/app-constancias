@@ -26,6 +26,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   children: ReactNode;
   placeholder: string;
+  title?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -33,6 +34,7 @@ export function DataTable<TData, TValue>({
   data,
   children,
   placeholder,
+  title,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState<"">("");
 
@@ -76,6 +78,7 @@ export function DataTable<TData, TValue>({
         </div>
         {children}
       </div>
+      {title && <h3 className="font-bold text-lg">{title}</h3>}
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>

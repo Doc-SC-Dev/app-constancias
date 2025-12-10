@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { auth } from "@/lib/auth";
-import type { User } from "@/lib/types/users";
+import { db } from "@/lib/db";
+import type { UserWithActivities } from "@/lib/types/users";
 import { columns } from "./_components/colums";
 import NewUserDialog from "./_components/newuser-dialog";
 import { UsersEmpty } from "./_components/users-empty";
@@ -24,21 +25,28 @@ export default async function UsersPage() {
   if (!permission.success) {
     redirect("/dashboard");
   }
-  const data = await auth.api.listUsers({
-    headers: await headers(),
-    query: {
-      filterField: "id",
-      filterOperator: "ne",
-      filterValue: session.user.id,
+  const users = await db.user.findMany({
+    where: {
+      id: {
+        not: session.user.id,
+      },
+    },
+    include: {
+      participants: {
+        include: {
+          activity: true,
+        },
+      },
     },
   });
-  if (!data.total || !data.users) {
+
+  if (users.length === 0) {
     return <UsersEmpty />;
   }
   return (
     <DataTable
       columns={columns}
-      data={data.users as User[]}
+      data={users as unknown as UserWithActivities[]}
       placeholder="Filtrar por Nombre, Role, Email y Rut"
     >
       <ActionDialogManager
