@@ -19,7 +19,7 @@ type FormControlProps<
   TTransformedValues = TFieldValues,
 > = {
   name: TName;
-  label: ReactNode;
+  label?: ReactNode;
   description?: ReactNode;
   control: ControllerProps<TFieldValues, TName, TTransformedValues>["control"];
 };
@@ -72,7 +72,9 @@ export function FormBase<
       render={({ field, fieldState }) => {
         const labelElement = (
           <>
-            <FieldLabel htmlFor={`field-${field.name}`}>{label}</FieldLabel>
+            {label && (
+              <FieldLabel htmlFor={`field-${field.name}`}>{label}</FieldLabel>
+            )}
             {description && <FieldDescription>{description}</FieldDescription>}
           </>
         );
@@ -100,7 +102,7 @@ export function FormBase<
               </>
             ) : (
               <>
-                <FieldContent>{labelElement}</FieldContent>
+                {label && <FieldContent>{labelElement}</FieldContent>}
                 {control}
                 {errorElem}
               </>

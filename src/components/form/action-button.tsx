@@ -56,7 +56,7 @@ export default function ActionButton({
     return (
       <Button
         variant="ghost"
-        size="icon"
+        size="default"
         onClick={action.onClick}
         className={
           action.type === "delete"
@@ -66,7 +66,7 @@ export default function ActionButton({
         title={action.label}
       >
         {action.icon}
-        <span className="sr-only">{action.label}</span>
+        <span>{action.label}</span>
       </Button>
     );
   }
