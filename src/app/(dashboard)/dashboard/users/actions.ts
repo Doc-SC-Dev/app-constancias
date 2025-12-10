@@ -4,7 +4,7 @@ import { APIError } from "better-auth";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { withTryCatch } from "@/app/action";
-import { auth } from "@/lib/auth";
+import { auth, isAuthenticated } from "@/lib/auth";
 import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
@@ -165,12 +165,8 @@ export async function listUsers({
 }: {
   pageParam: number;
 }): Promise<PaginationResponse<User>> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  if (!session) {
-    throw new Error("No hay usuario autenticado");
-  }
+  const session = await isAuthenticated();
+
   const { users, total } = await auth.api.listUsers({
     headers: await headers(),
     query: {
@@ -182,4 +178,19 @@ export async function listUsers({
     },
   });
   return { data: users as User[], nextPage: pageParam + 1, totalRows: total };
+}
+
+export async function listUsersAdmin(): Promise<User[]> {
+  const session = await isAuthenticated();
+  const users = await db.user.findMany({
+    where: {
+      id: {
+        not: session.user.id,
+      },
+      role: {
+        notIn: ["administrator", "superadmin"],
+      },
+    },
+  });
+  return users as User[];
 }

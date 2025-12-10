@@ -1,6 +1,12 @@
 "use server";
 import { APIError } from "better-auth";
 import { PrismaClientKnownRequestError } from "@/generated/prisma/runtime/client";
+import {
+  DisconectedError,
+  DuplicatedError,
+  UnhandledError,
+  UnhandledPrismaError,
+} from "@/lib/errors";
 
 type TryCatchReturnType<T> =
   | {
@@ -27,13 +33,25 @@ export async function withTryCatch<T>(
     if (error instanceof PrismaClientKnownRequestError) {
       // TODO: Add more specific error messages for prisma
       if (error.code === "P2002") {
-        return { success: false, error: "DUPLICADO" };
+        return {
+          success: false,
+          error: `Ya existe en recurso ${error.meta?.target}`,
+        };
       }
-      return { success: false, error: error.message };
+      if (error.code === "P1001") {
+        return {
+          success: false,
+          error: "Sin conexión a internet",
+        };
+      }
+      return {
+        success: false,
+        error: error.message,
+      };
     }
     return {
       success: false,
-      error: "Algo salio mal",
+      error: error as string,
     };
   }
 }
