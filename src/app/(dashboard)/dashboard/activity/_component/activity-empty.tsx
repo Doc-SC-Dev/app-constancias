@@ -1,5 +1,5 @@
 import { FolderMinus, Plus } from "lucide-react";
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -13,6 +13,8 @@ import {
 import CreateActivityDialog from "./create-activity-dialog";
 
 export function ActivityEmpty() {
+  const [open, setOpen] = useState(false);
+  const closeDialog = () => setOpen(false);
   return (
     <div className="h-full flex items-center">
       <Empty>
@@ -27,14 +29,14 @@ export function ActivityEmpty() {
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
-            <Dialog>
+            <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus />
                   Crear actividad
                 </Button>
               </DialogTrigger>
-              <CreateActivityDialog />
+              <CreateActivityDialog closeDialog={closeDialog} />
             </Dialog>
           </div>
         </EmptyContent>
