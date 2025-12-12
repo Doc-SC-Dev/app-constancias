@@ -5,11 +5,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { UserWithActivities } from "@/lib/types/users";
+import type { User } from "@/lib/types/users";
 import UserActivitiesTable from "./user-activities-table";
 
 type DialogContentProps = {
-  data: UserWithActivities;
+  data: User;
 };
 
 export default function ViewDialog({ data: user }: DialogContentProps) {
