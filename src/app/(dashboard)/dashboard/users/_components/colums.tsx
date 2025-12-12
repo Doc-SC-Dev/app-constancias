@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { admin } from "@/lib/auth/better-auth/client";
-import type { User } from "@/lib/types/users";
+import type { UserWithActivities } from "@/lib/types/users";
 import DeleteDialog from "./delete-dialog";
 import EditDialog from "./edit-dialog";
 import ViewDialog from "./view-dialog";

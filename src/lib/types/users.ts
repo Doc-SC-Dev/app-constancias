@@ -7,8 +7,19 @@ export type UserSelect = UserWithRole;
 export type Session = typeof auth.$Infer.Session;
 export type User = typeof auth.$Infer.Session.user;
 
+export type UserWithActivities = User & {
+  participants: {
+    activity: {
+      name: string;
+      activityType: string;
+    };
+    hours: number;
+    type: string;
+  }[];
+};
+
 const roles = type(
-  "'administrator' | 'professor' | 'student' | 'superadmin'| 'guest'",
+  "'administrator' | 'professor' | 'student' | 'superadmin'| 'guest'"
 );
 
 export const userEditSchema = type({
