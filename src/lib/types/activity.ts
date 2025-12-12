@@ -1,4 +1,5 @@
 import { type } from "arktype";
+import type { Activity } from "@/generated/prisma";
 import { ActivityType } from "@/generated/prisma";
 
 export const activityTypeSchema = type.enumerated(
@@ -26,18 +27,17 @@ export const activityEditSchema = type({
 
 export type ActivityEdit = typeof activityEditSchema.infer;
 
-export type { Activity } from "@/generated/prisma";
-export { ActivityType, ParticipantType } from "@/generated/prisma";
-
+export type ActivityWithUser = Activity & {
+  professor: string;
+};
 const participantSchema = type({
-  id: "string.uuid",
+  id: "string > 0",
   type: "'CO_AUTOR' | 'AYUDANTE' | 'TESISTA' | 'AUTOR' | 'PROFESOR_ENCARGADO' | 'COLABORADOR' | 'ESTUDIANTE' | 'PASANTE'",
   hours: "number >= 1",
 }).array();
 
 export const activityCreateSchema = type({
   name: "string > 1",
-  description: "string > 1",
   startAt: "Date",
   endAt: "Date",
   type: activityTypeSchema,
@@ -53,3 +53,9 @@ export const activityCreateSchema = type({
 });
 
 export type ActivityCreateInput = typeof activityCreateSchema.infer;
+
+export {
+  type Activity,
+  ActivityType,
+  ParticipantType,
+} from "@/generated/prisma";

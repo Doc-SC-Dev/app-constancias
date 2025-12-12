@@ -5,14 +5,14 @@ import {
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
-// import ActionDialogManager from "@/components/form/action-dialog-manager";
+import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
-import type { Activity } from "@/lib/types/activity";
+import type { ActivityWithUser } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { ActivityEmpty } from "./_component/activity-empty";
 import { columns } from "./_component/columns";
-// import CreateActivityDialog from "./_component/create-activity-dialog";
+import CreateActivityDialog from "./_component/create-activity-dialog";
 import { getActivitiesPaginated } from "./actions";
 
 export default async function ActivityPage() {
@@ -20,7 +20,7 @@ export default async function ActivityPage() {
   const permission = await auth.api.userHasPermission({
     body: {
       userId: session.user.id,
-      permissions: { user: ["list"] },
+      permissions: { activity: ["list"] },
     },
   });
   if (!permission.success) {
@@ -33,7 +33,7 @@ export default async function ActivityPage() {
     queryKey: ["list-activity"],
     queryFn: ({ pageParam }) => getActivitiesPaginated({ pageParam }),
     initialPageParam: 0,
-    getNextPageParam: (lastPage: PaginationResponse<Activity>) =>
+    getNextPageParam: (lastPage: PaginationResponse<ActivityWithUser>) =>
       lastPage.nextPage,
   });
   const data = await db.activity.findMany();
@@ -48,11 +48,10 @@ export default async function ActivityPage() {
         queryKey="list-activity"
         placeholder="Filtrar datos en columnas"
       >
-        {""}
-        {/* <ActionDialogManager
+        <ActionDialogManager
           createDialog={CreateActivityDialog}
           triggerLabel="Crear actividad"
-        /> */}
+        />
       </DataTable>
     </HydrationBoundary>
   );
