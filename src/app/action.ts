@@ -1,12 +1,6 @@
 "use server";
 import { APIError } from "better-auth";
 import { PrismaClientKnownRequestError } from "@/generated/prisma/runtime/client";
-import {
-  DisconectedError,
-  DuplicatedError,
-  UnhandledError,
-  UnhandledPrismaError,
-} from "@/lib/errors";
 
 type TryCatchReturnType<T> =
   | {
@@ -44,14 +38,23 @@ export async function withTryCatch<T>(
           error: "Sin conexión a internet",
         };
       }
+      if (error.code === "P2022") {
+        console.log(error.meta);
+        return {
+          success: false,
+          error: `Recurso no encontrado ${error.meta?.target}`,
+        };
+      }
+
       return {
         success: false,
         error: error.message,
       };
     }
+    console.error(error);
     return {
       success: false,
-      error: error as string,
+      error: "Algo salio mal",
     };
   }
 }
