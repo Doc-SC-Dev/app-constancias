@@ -34,7 +34,7 @@ export const menus: Record<dashboards, Menu> = {
   students: {
     name: "Estudiantes",
     icon: "users",
-    url: "/dashboard/students",
+    url: "/dashboard/student",
     description: "Dashboard de administración de usuarios con rol estudiantes.",
     permissions: { user: ["list"] },
   },
