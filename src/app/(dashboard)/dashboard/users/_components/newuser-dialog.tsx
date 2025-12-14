@@ -14,10 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FieldGroup } from "@/components/ui/field";
+import { FieldGroup, FieldSeparator } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { AcademicGrade } from "@/generated/prisma";
+import { AcademicGrade, Genre } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
@@ -40,6 +40,8 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
         rut: "",
         studentId: undefined,
         academicGrade: undefined,
+        admissionDate: undefined,
+        gender: Genre.FEMALE,
       },
       shouldUnregister: true,
     });
@@ -81,6 +83,27 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
             name="email"
             description="Ingresar el correo que tendrá asociado la cuenta del nuevo usuario"
           />
+          <FormInput
+            label="Rut"
+            control={control}
+            name="rut"
+            description="La contraseña del nuevo usuario será su RUT sin puntos y con guión"
+          />
+
+          <FormSelect
+            label="Grado académico"
+            control={control}
+            name="academicGrade"
+            description="Seleccione el grado académico del nuevo usuario"
+          >
+            {Object.values(AcademicGrade).map((grade) => (
+              <SelectItem value={grade} key={grade}>
+                {grade.toLowerCase()}
+              </SelectItem>
+            ))}
+          </FormSelect>
+        </FieldGroup>
+        <FieldGroup>
           <FormSelect
             label="Rol"
             control={control}
@@ -101,32 +124,17 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
               );
             })}
           </FormSelect>
-          <FormInput
-            label="Rut"
-            control={control}
-            name="rut"
-            description="La contraseña del nuevo usuario será su RUT sin puntos y con guión"
-          />
           {role === "student" && (
-            <FormInput
-              label="Matrícula"
-              control={control}
-              name="studentId"
-              description="Ingresar el número de matrícula del nuevo estudiante"
-            />
+            <>
+              <FieldSeparator />
+              <FormInput
+                label="Matrícula"
+                control={control}
+                name="studentId"
+                description="Ingresar el número de matrícula del nuevo estudiante"
+              />
+            </>
           )}
-          <FormSelect
-            label="Grado académico"
-            control={control}
-            name="academicGrade"
-            description="Seleccione el grado académico del nuevo usuario"
-          >
-            {Object.values(AcademicGrade).map((grade) => (
-              <SelectItem value={grade} key={grade}>
-                {grade.toLowerCase()}
-              </SelectItem>
-            ))}
-          </FormSelect>
         </FieldGroup>
         <DialogFooter className="mt-6">
           <DialogClose asChild onClick={() => reset()}>
