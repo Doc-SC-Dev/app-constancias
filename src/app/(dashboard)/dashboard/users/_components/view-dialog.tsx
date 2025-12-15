@@ -5,11 +5,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { UserWithActivities } from "@/lib/types/users";
+import type { User} from "@/lib/types/users";
 import UserActivitiesTable from "./user-activities-table";
 
 type DialogContentProps = {
-  data: UserWithActivities;
+  data: User;
 };
 
 export default function ViewDialog({ data: user }: DialogContentProps) {
@@ -31,7 +31,7 @@ export default function ViewDialog({ data: user }: DialogContentProps) {
         </div>
       </DialogHeader>
       <div className="px-8 pb-8">
-        <UserActivitiesTable participants={user.participants} />
+        <UserActivitiesTable userId={user.id} />
       </div>
     </DialogContent>
   );

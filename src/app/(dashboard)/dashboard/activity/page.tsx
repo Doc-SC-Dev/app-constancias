@@ -10,8 +10,8 @@ import { auth, isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type { Activity } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
-import { ActivityEmpty } from "./_component/activity-empty";
-import { columns } from "./_component/columns";
+import { ActivityEmpty } from "./_components/activity-empty";
+import { columns } from "./_components/activity-columns";
 // import CreateActivityDialog from "./_component/create-activity-dialog";
 import { getActivitiesPaginated } from "./actions";
 

@@ -1,10 +1,9 @@
 "use client";
 
 import { type ColumnDef } from "@tanstack/react-table";
-import { type UserWithActivities } from "@/lib/types/users";
+import { Participant } from "@/lib/types/paricipant-activity";
 
 // Extract the participant type from UserWithActivities
-type Participant = UserWithActivities["participants"][number];
 
 export const columns: ColumnDef<Participant>[] = [
   {

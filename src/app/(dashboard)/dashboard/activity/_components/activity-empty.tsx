@@ -10,7 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import CreateActivityDialog from "./create-activity-dialog";
+//import CreateActivityDialog from "./create-activity-dialog";
 
 export function ActivityEmpty() {
   return (
@@ -34,7 +34,7 @@ export function ActivityEmpty() {
                   Crear actividad
                 </Button>
               </DialogTrigger>
-              <CreateActivityDialog />
+              {/* <CreateActivityDialog /> */}
             </Dialog>
           </div>
         </EmptyContent>
