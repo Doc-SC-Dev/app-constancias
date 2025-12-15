@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { User} from "@/lib/types/users";
+import type { User } from "@/lib/types/users";
 import UserActivitiesTable from "./user-activities-table";
 
 type DialogContentProps = {

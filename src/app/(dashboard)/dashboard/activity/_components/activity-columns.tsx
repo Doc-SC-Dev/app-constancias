@@ -2,12 +2,12 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
-import type { Activity } from "@/lib/types/activity";
+import type { Activity, ActivityWithUser } from "@/lib/types/activity";
 import DeleteDialog from "./delete-dialog";
 import EditDialog from "./edit-dialog";
 import ViewDialog from "./activity-view-dialog";
 
-export const columns: ColumnDef<Activity>[] = [
+export const columns: ColumnDef<ActivityWithUser>[] = [
   {
     accessorKey: "name",
     header: "Nombre",
@@ -44,7 +44,7 @@ export const columns: ColumnDef<Activity>[] = [
     },
   },
   {
-    accessorKey: "professorId",
+    accessorKey: "professor",
     header: "Encargado",
   },
   {

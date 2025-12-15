@@ -103,7 +103,6 @@ model Professor {
   createdAt          DateTime            @default(now())
   userId             String              @unique
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activities         Activity[]
   qualificationExams QualificationExam[]
 
   @@map("professor")
@@ -175,8 +174,6 @@ model Activity {
   updatedAt     DateTime      @default(now()) @updatedAt
   activityType  ActivityType
   participants  Participant[]
-  professor     Professor?    @relation(fields: [professorId], references: [id])
-  professorId   String?
   requests      Request[]
 
   @@map("activity")
