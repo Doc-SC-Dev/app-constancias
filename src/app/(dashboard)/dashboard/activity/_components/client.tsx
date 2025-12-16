@@ -1,8 +1,7 @@
 "use client";
 
 import { DataTable } from "@/components/data-table";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
-import { type ParticipantActivity } from "@/lib/types/paricipant-activity";
+import type { ParticipantActivity } from "@/lib/types/paricipant-activity";
 import { columns } from "./columns";
 
 interface ActivityClientProps {

@@ -1,66 +1,69 @@
 "use client";
 
-import { type ColumnDef } from "@tanstack/react-table";
-import { ParticipantActivity } from "@/lib/types/paricipant-activity";
-import { Badge } from "@/components/ui/badge";
+import type { ColumnDef } from "@tanstack/react-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
-import { type Activity } from "@/lib/types/activity";
-import DeleteDialog from "./delete-dialog";
-import EditDialog from "./edit-dialog";
-import ViewDialog from "./activity-view-dialog";
+import type {
+  Activity,
+  ActivityType,
+  ActivityWithUser,
+} from "@/lib/types/activity";
 
-export const columns: ColumnDef<ParticipantActivity>[] = [
+export const columns: ColumnDef<ActivityWithUser>[] = [
   {
-    accessorKey: "activityName",
-    header: "Actividad",
+    accessorKey: "name",
+    header: "Nombre",
+    enableGlobalFilter: false,
   },
   {
     accessorKey: "activityType",
-    header: "Tipo de Actividad",
-    cell: ({ row }) => {
-      const type = row.getValue("activityType") as string;
+    header: "Tipo",
+    cell({ row }) {
+      const type = row.getValue("activityType") as ActivityType;
+      return <span>{type.replace(/_/g, " ").toLowerCase()}</span>;
+    },
+  },
+  {
+    accessorKey: "startAt",
+    header: () => (
+      <span className="flex flex-1 justify-center">Fecha de inicio</span>
+    ),
+    cell({ row }) {
       return (
-        <Badge variant="outline">
-          {type.replace(/_/g, " ")}
-        </Badge>
+        <span className="flex flex-1 justify-center">
+          {row.original.startAt.toLocaleDateString("es-CL")}
+        </span>
       );
     },
   },
   {
-    accessorKey: "hours",
-    header: "Horas",
-    cell: ({ row }) => {
-      return <div className="text-center font-medium">{row.getValue("hours")}</div>;
+    accessorKey: "endAt",
+    header: () => (
+      <span className="flex flex-1 justify-center">Fecha de finalización</span>
+    ),
+    cell({ row }) {
+      return (
+        <span className="flex flex-1 justify-center">
+          {row.original.endAt.toLocaleDateString("es-CL")}
+        </span>
+      );
     },
   },
   {
-    accessorKey: "type",
-    header: "Participación",
-    cell: ({ row }) => {
-      const type = row.getValue("type") as string;
-      return type.replace(/_/g, " ");
-    },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Fecha Registro",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
-      return date.toLocaleDateString();
-    },
+    accessorKey: "professor",
+    header: "Encargado",
   },
   {
     id: "actions",
     header: "Acción",
+    enableGlobalFilter: false,
     cell: ({ row }) => {
-      const activity = row.original.activity;
-
+      const activity = row.original;
       return (
         <ActionDialogManager<Activity>
           data={activity}
-          viewDialog={ViewDialog}
-          editDialog={EditDialog}
-          deleteDialog={DeleteDialog}
+          // viewDialog={}
+          // editDialog={}
+          // deleteDialog={}
         />
       );
     },
