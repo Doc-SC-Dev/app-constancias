@@ -49,7 +49,7 @@ interface DataTableProps<TData> {
   buttonLabel: string;
   emptyTitle: string;
   emptyDescription: string;
-  onDialog: boolean;
+  onDialog?: boolean;
 }
 
 export function DataTable<TData>({
