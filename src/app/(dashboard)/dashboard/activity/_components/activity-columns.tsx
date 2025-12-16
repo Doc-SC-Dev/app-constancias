@@ -54,7 +54,7 @@ export const columns: ColumnDef<ActivityWithUser>[] = [
     cell: ({ row }) => {
       const activity = row.original;
       return (
-        <ActionDialogManager<Activity>
+        <ActionDialogManager<ActivityWithUser>
           data={activity}
           viewDialog={ViewDialog}
           editDialog={EditDialog}

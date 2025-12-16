@@ -11,7 +11,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-//import CreateActivityDialog from "./create-activity-dialog";
+import CreateActivityDialog from "./create-activity-dialog";
 
 export function ActivityEmpty() {
   const [open, setOpen] = useState(false);
@@ -43,5 +43,5 @@ export function ActivityEmpty() {
         </EmptyContent>
       </Empty>
     </div>
-  );
+  ); 
 }
