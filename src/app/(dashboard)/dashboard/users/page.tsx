@@ -45,6 +45,10 @@ export default async function UsersPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <DataTable<User>
+        emptyTitle="No hay usuarios"
+        emptyDescription="No hay usuarios disponibles. Para iniciar debe crear un usuario"
+        buttonLabel="Crear usuario"
+        createDialog={NewUserDialog}
         columns={columns}
         queryKey="list-users"
         queryFn={listUsers}

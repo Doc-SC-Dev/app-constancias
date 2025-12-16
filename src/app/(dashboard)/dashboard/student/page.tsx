@@ -37,6 +37,9 @@ export default async function UsersPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <DataTable<Student>
+        emptyDescription="No hay estudiantes. Para iniciar debe crear un estudiante"
+        emptyTitle="No hay estudiantes"
+        buttonLabel="Crear estudiante"
         columns={columns}
         queryKey="list-students"
         queryFn={listStudents}
