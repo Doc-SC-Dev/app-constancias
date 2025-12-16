@@ -3,27 +3,19 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { auth, isAuthenticated } from "@/lib/auth";
 import type { HistoryEntry } from "@/lib/types/history";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { HistoryClient } from "./_components/history-client";
 import { getHistoryPaginated } from "./actions";
 
 export default async function HistoryPage() {
-  const nextHeader = await headers();
-  const session = await auth.api.getSession({
-    headers: nextHeader,
-  });
-
-  if (!session) {
-    redirect("/login");
-  }
+  const session = await isAuthenticated();
 
   const { success } = await auth.api.userHasPermission({
-    headers: nextHeader,
     body: {
+      userId: session.user.id,
       permissions: {
         request: ["list"],
       },
