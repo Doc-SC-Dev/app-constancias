@@ -51,6 +51,7 @@ export async function createUser(userData: UserCreate) {
           ...newUserData,
           password,
           data: {
+            genre: newUserData.gender,
             rut,
             academicGrade: academicGrade ?? "",
           },
