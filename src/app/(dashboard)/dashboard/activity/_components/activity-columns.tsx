@@ -2,10 +2,10 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
-import type { Activity, ActivityWithUser } from "@/lib/types/activity";
 import DeleteDialog from "./delete-dialog";
 import EditDialog from "./edit-dialog";
 import ViewDialog from "./activity-view-dialog";
+import type { ActivityType, ActivityWithUser } from "@/lib/types/activity";
 
 export const columns: ColumnDef<ActivityWithUser>[] = [
   {
@@ -16,6 +16,10 @@ export const columns: ColumnDef<ActivityWithUser>[] = [
   {
     accessorKey: "activityType",
     header: "Tipo",
+    cell({ row }) {
+      const type = row.getValue("activityType") as ActivityType;
+      return <span>{type.replace(/_/g, " ").toLowerCase()}</span>;
+    },
   },
   {
     accessorKey: "startAt",

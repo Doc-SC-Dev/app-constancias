@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppNavBar } from "./_components/app-navbar";
 import "../globals.css";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { auth, isAuthenticated } from "@/lib/auth";
 import { AppSideBar } from "./_components/app-sidebar";
 
 export const metadata: Metadata = {
@@ -17,14 +15,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const nextHeader = await headers();
-  const session = await auth.api.getSession({
-    headers: nextHeader,
-  });
-  if (!session) redirect("/login");
+  const session = await isAuthenticated();
   const [hasUser, hasRequest, hasActivities] = await Promise.all([
     auth.api.userHasPermission({
-      headers: nextHeader,
       body: {
         userId: session.user.id,
         permissions: {
@@ -33,7 +26,6 @@ export default async function RootLayout({
       },
     }),
     auth.api.userHasPermission({
-      headers: nextHeader,
       body: {
         userId: session.user.id,
         permissions: {
@@ -42,7 +34,6 @@ export default async function RootLayout({
       },
     }),
     auth.api.userHasPermission({
-      headers: nextHeader,
       body: {
         userId: session.user.id,
         permissions: {

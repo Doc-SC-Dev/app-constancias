@@ -1,6 +1,5 @@
-"use client";
 import { FolderMinus, Plus } from "lucide-react";
-import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -11,11 +10,19 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import CreateActivityDialog from "./create-activity-dialog";
 
-export function ActivityEmpty() {
-  const [open, setOpen] = useState(false);
-  const closeDialog = () => setOpen(false);
+type Props = {
+  title: string;
+  description: string;
+  buttonLabel: string;
+  createDialog?: React.ComponentType<{ closeDialog: () => void }>;
+};
+export function EmptyPage({
+  title,
+  description,
+  createDialog: CreateDialog,
+  buttonLabel,
+}: Props) {
   return (
     <div className="h-full flex items-center">
       <Empty>
@@ -23,21 +30,19 @@ export function ActivityEmpty() {
           <EmptyMedia variant="icon">
             <FolderMinus />
           </EmptyMedia>
-          <EmptyTitle>No hay actividades</EmptyTitle>
-          <EmptyDescription>
-            No has creado actividad todavía. Empieza creando una nueva actividad
-          </EmptyDescription>
+          <EmptyTitle>{title}</EmptyTitle>
+          <EmptyDescription>{description}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog>
               <DialogTrigger asChild>
                 <Button>
                   <Plus />
-                  Crear actividad
+                  {buttonLabel}
                 </Button>
               </DialogTrigger>
-              <CreateActivityDialog closeDialog={closeDialog} />
+              {CreateDialog && <CreateDialog closeDialog={() => {}} />}
             </Dialog>
           </div>
         </EmptyContent>

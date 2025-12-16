@@ -28,6 +28,10 @@ export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
 
   return (
     <DataTable
+      emptyDescription="No se han creado constancias. Para iniciar debe crear una constancia"
+      emptyTitle="No hay constancias"
+      buttonLabel="Crear constancia"
+      createDialog={CreateRequestDialog}
       queryKey="list-history"
       queryFn={({ pageParam }) =>
         getHistoryPaginated({ pageParam, user, isAdmin })

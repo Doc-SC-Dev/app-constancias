@@ -1,12 +1,12 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import {
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { type Activity, type ActivityWithUser } from "@/lib/types/activity";
+import type { Activity, ActivityWithUser } from "@/lib/types/activity";
 import { DataTable } from "@/components/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Participant } from "@/generated/prisma";

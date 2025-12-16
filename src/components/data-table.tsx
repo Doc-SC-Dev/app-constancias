@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { PaginationResponse } from "@/lib/types/pagination";
+import { EmptyPage } from "./empty-page";
 import { Spinner } from "./ui/spinner";
 
 interface DataTableProps<TData> {
@@ -43,6 +44,12 @@ interface DataTableProps<TData> {
   }: {
     pageParam: number;
   }) => Promise<PaginationResponse<TData>>;
+
+  createDialog?: React.ComponentType<{ closeDialog: () => void }>;
+  buttonLabel: string;
+  emptyTitle: string;
+  emptyDescription: string;
+  onDialog?: boolean;
 }
 
 export function DataTable<TData>({
@@ -51,6 +58,11 @@ export function DataTable<TData>({
   placeholder,
   queryKey,
   queryFn,
+  createDialog: CreateDialog,
+  buttonLabel,
+  emptyDescription,
+  emptyTitle,
+  onDialog = false,
 }: DataTableProps<TData>) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [globalFilter, setGlobalFilter] = useState<"">("");
@@ -136,21 +148,33 @@ export function DataTable<TData>({
     overscan: 5,
   });
 
+  if (rows.length === 0) {
+    return (
+      <EmptyPage
+        title={emptyTitle}
+        description={emptyDescription}
+        buttonLabel={buttonLabel}
+        createDialog={CreateDialog}
+      />
+    );
+  }
   return (
     <div className="container flex flex-col mx-auto h-full gap-4">
-      <div className="flex items-center align-middle justify-between">
-        <div className="grid w-full max-w-sm items-center gap-3">
-          <Label htmlFor="fuzzy-input">Filtrar</Label>
-          <Input
-            id="fuzzy-input"
-            className="max-w-sm"
-            placeholder={placeholder}
-            value={globalFilter ?? ""}
-            onChange={(e) => table.setGlobalFilter(String(e.target.value))}
-          />
+      {!onDialog && (
+        <div className="flex items-center justify-between">
+          <div className="grid w-full max-w-sm items-center gap-3">
+            <Label htmlFor="fuzzy-input">Filtrar</Label>
+            <Input
+              id="fuzzy-input"
+              className="max-w-sm"
+              placeholder={placeholder}
+              value={globalFilter ?? ""}
+              onChange={(e) => table.setGlobalFilter(String(e.target.value))}
+            />
+          </div>
+          {children}
         </div>
-        {children}
-      </div>
+      )}
       <div
         className="container h-[600px] overflow-auto relative  rounded-md border"
         ref={tableContainerRef}

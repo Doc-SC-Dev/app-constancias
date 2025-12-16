@@ -1,15 +1,21 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { admin } from "better-auth/plugins";
 import { v4 as uuid } from "uuid";
+import {
+  ac,
+  administrator,
+  guest,
+  professor,
+  student,
+  superadmin,
+} from "@/lib/authorization/permissions";
 import { db } from "../src/lib/db";
 
-const auth = betterAuth({
+export const auth = betterAuth({
   database: prismaAdapter(db, {
     provider: "postgresql",
   }),
-  emailAndPassword: {
-    enabled: true,
-  },
   user: {
     additionalFields: {
       rut: {
@@ -17,10 +23,31 @@ const auth = betterAuth({
         required: true,
         input: true,
         returned: true,
+        unique: true,
+      },
+      academicGrade: {
+        type: "string",
+        input: true,
+        returned: true,
+      },
+      genre: {
+        default: "FEMALE",
+        required: true,
+        type: "string",
+        input: true,
+        returned: true,
       },
     },
   },
-  plugins: [],
+  plugins: [
+    admin({
+      ac: ac,
+      roles: { professor, guest, superadmin, student, administrator },
+      adminRoles: ["administrator", "superadmin"],
+      defaultRole: "guest",
+    }),
+  ],
+  trustedOrigins: ["http://localhost:3000"],
 });
 
 async function main() {
@@ -46,6 +73,8 @@ async function main() {
           password: "AdminPassword123!", // Change this password in production
           name: "Administrador",
           rut: "11.111.111-1",
+          academicGrade: "DOCTOR",
+          genre: "FEMALE",
         },
       });
 
@@ -58,7 +87,6 @@ async function main() {
       await db.user.update({
         where: { id: adminUserResponse.user.id },
         data: {
-          role: "superadmin",
           emailVerified: true,
         },
       });

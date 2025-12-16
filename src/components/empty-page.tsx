@@ -10,9 +10,19 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import CreateRequestDialog from "../../_components/create-request-dialog";
 
-export function HistoryEmpty() {
+type Props = {
+  title: string;
+  description: string;
+  buttonLabel: string;
+  createDialog?: React.ComponentType<{ closeDialog: () => void }>;
+};
+export function EmptyPage({
+  title,
+  description,
+  createDialog: CreateDialog,
+  buttonLabel,
+}: Props) {
   return (
     <div className="h-full flex items-center">
       <Empty>
@@ -20,10 +30,8 @@ export function HistoryEmpty() {
           <EmptyMedia variant="icon">
             <FolderMinus />
           </EmptyMedia>
-          <EmptyTitle>No hay constancias</EmptyTitle>
-          <EmptyDescription>
-            No se han generado constancias aún.
-          </EmptyDescription>
+          <EmptyTitle>{title}</EmptyTitle>
+          <EmptyDescription>{description}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <div className="flex gap-2">
@@ -31,14 +39,14 @@ export function HistoryEmpty() {
               <DialogTrigger asChild>
                 <Button>
                   <Plus />
-                  Solicitar constancia
+                  {buttonLabel}
                 </Button>
               </DialogTrigger>
-              <CreateRequestDialog />
+              {CreateDialog && <CreateDialog closeDialog={() => {}} />}
             </Dialog>
           </div>
         </EmptyContent>
       </Empty>
     </div>
-  );
+  ); 
 }

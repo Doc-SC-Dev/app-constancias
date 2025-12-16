@@ -1,7 +1,8 @@
 import { type } from "arktype";
 import type { UserWithRole } from "better-auth/plugins";
-import { AcademicGrade } from "@/generated/prisma";
+import { AcademicGrade, Genre } from "@/generated/prisma";
 import type { auth } from "../auth";
+import { Roles } from "../authorization/permissions";
 
 export type UserSelect = UserWithRole;
 export type Session = typeof auth.$Infer.Session;
@@ -18,29 +19,39 @@ export type UserWithActivities = User & {
   }[];
 };
 
-const roles = type(
-  "'administrator' | 'professor' | 'student' | 'superadmin'| 'guest'"
-);
-
+const rolSchema = type.enumerated(...Object.values(Roles));
 export const userEditSchema = type({
   name: "string >= 1",
   rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
   email: "string.email",
-  role: roles,
+  role: rolSchema,
 });
 
 export type UserEdit = typeof userEditSchema.infer;
 
 const academicGrade = type.enumerated(...Object.values(AcademicGrade));
 
+const genderSchema = type.enumerated(...Object.values(Genre));
+
+export type Gender = typeof genderSchema.infer;
+
 export const userCreateSchema = type({
   name: "string > 1",
   rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
   email: "string.email",
-  role: roles,
+  role: rolSchema,
+  gender: genderSchema,
   "studentId?": "string.numeric",
+  "admissionDate?": "Date",
   "academicGrade?": academicGrade,
 }).narrow((val, ctx) => {
+  if (val.role === "student" && !val.admissionDate) {
+    return ctx.reject({
+      code: "predicate",
+      message: "La fecha de ingreso es requerida",
+      path: ["admissionDate"],
+    });
+  }
   if (val.role === "student" && !val.studentId) {
     return ctx.reject({
       code: "predicate",

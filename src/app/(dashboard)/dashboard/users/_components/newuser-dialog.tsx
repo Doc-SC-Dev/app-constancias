@@ -1,11 +1,13 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { useForm } from "react-hook-form";
+import { CalendarIcon } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormInput } from "@/components/form/FormInput";
 import { FormSelect } from "@/components/form/FormSelect";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   DialogClose,
   DialogContent,
@@ -14,10 +16,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FieldGroup } from "@/components/ui/field";
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { AcademicGrade } from "@/generated/prisma";
+import { AcademicGrade, Genre } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
@@ -40,6 +59,8 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
         rut: "",
         studentId: undefined,
         academicGrade: undefined,
+        admissionDate: undefined,
+        gender: Genre.FEMALE,
       },
       shouldUnregister: true,
     });
@@ -60,88 +81,147 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
     }
   };
   return (
-    <DialogContent>
+    <DialogContent className="max-w-xl w-lg">
       <DialogHeader className="mb-4">
         <DialogTitle>Crear nuevo usuario</DialogTitle>
         <DialogDescription>
           Ingresar datos para crear un nuevo usuario
         </DialogDescription>
       </DialogHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <FieldGroup className="gap-4">
-          <FormInput
-            label="Nombre"
-            control={control}
-            name="name"
-            description="Ingresar el nombre completo del nuevo usuario"
-          />
-          <FormInput
-            label="Email"
-            control={control}
-            name="email"
-            description="Ingresar el correo que tendrá asociado la cuenta del nuevo usuario"
-          />
-          <FormSelect
-            label="Rol"
-            control={control}
-            name="role"
-            description="Seleccione el rol que tendrá en la plataforma el nuevo usuario"
-          >
-            {[...Object.values(Roles)].map((rol) => {
-              if (
-                data?.user.role !== Roles.SUPERADMIN &&
-                rol === Roles.SUPERADMIN
-              ) {
-                return undefined;
-              }
-              return (
-                <SelectItem value={rol} key={rol}>
-                  {rol}
-                </SelectItem>
-              );
-            })}
-          </FormSelect>
-          <FormInput
-            label="Rut"
-            control={control}
-            name="rut"
-            description="La contraseña del nuevo usuario será su RUT sin puntos y con guión"
-          />
-          {role === "student" && (
+      <div className="overflow-y-scroll max-h-96 overflow-x-hidden">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FieldGroup className="gap-4 w-full">
             <FormInput
-              label="Matrícula"
+              label="Nombre"
               control={control}
-              name="studentId"
-              description="Ingresar el número de matrícula del nuevo estudiante"
+              name="name"
+              description="Ingresar el nombre completo del nuevo usuario"
             />
-          )}
-          <FormSelect
-            label="Grado académico"
-            control={control}
-            name="academicGrade"
-            description="Seleccione el grado académico del nuevo usuario"
-          >
-            {Object.values(AcademicGrade).map((grade) => (
-              <SelectItem value={grade} key={grade}>
-                {grade.toLowerCase()}
-              </SelectItem>
-            ))}
-          </FormSelect>
-        </FieldGroup>
-        <DialogFooter className="mt-6">
-          <DialogClose asChild onClick={() => reset()}>
-            <Button variant="outline">Cancelar</Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            variant="default"
-            disabled={formState.isSubmitting}
-          >
-            {formState.isSubmitting && <Spinner />}
-            Crear
-          </Button>
-        </DialogFooter>
-      </form>
+            <FormInput
+              label="Email"
+              control={control}
+              name="email"
+              description="Ingresar el correo que tendrá asociado la cuenta del nuevo usuario"
+            />
+            <FormInput
+              label="Rut"
+              control={control}
+              name="rut"
+              description="La contraseña del nuevo usuario será su RUT sin puntos y con guión"
+            />
+
+            <FormSelect
+              label="Grado académico"
+              control={control}
+              name="academicGrade"
+              description="Seleccione el grado académico del nuevo usuario"
+            >
+              {Object.values(AcademicGrade).map((grade) => (
+                <SelectItem value={grade} key={grade}>
+                  {grade.toLowerCase()}
+                </SelectItem>
+              ))}
+            </FormSelect>
+            <FormSelect
+              name="gender"
+              control={control}
+              label="Género"
+              description="Seleccione el género del nuevo usuario"
+            >
+              {Object.values(Genre).map((gender) => (
+                <SelectItem value={gender} key={gender}>
+                  {gender.toLowerCase()}
+                </SelectItem>
+              ))}
+            </FormSelect>
+
+            <FormSelect
+              label="Rol"
+              control={control}
+              name="role"
+              description="Seleccione el rol que tendrá en la plataforma el nuevo usuario"
+            >
+              {[...Object.values(Roles)].map((rol) => {
+                if (
+                  data?.user.role !== Roles.SUPERADMIN &&
+                  rol === Roles.SUPERADMIN
+                ) {
+                  return undefined;
+                }
+                return (
+                  <SelectItem value={rol} key={rol}>
+                    {rol}
+                  </SelectItem>
+                );
+              })}
+            </FormSelect>
+
+            {role === "student" && (
+              <>
+                <FieldSeparator />
+                <FormInput
+                  label="Matrícula"
+                  control={control}
+                  name="studentId"
+                  description="Ingresar el número de matrícula del nuevo estudiante"
+                />
+
+                <Controller
+                  name="admissionDate"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldContent>
+                        <FieldLabel>Fecha de Admisión</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            {...field}
+                            aria-invalid={fieldState.invalid}
+                            value={field.value?.toLocaleDateString("es-CL")}
+                          />
+                          <InputGroupAddon align="inline-end">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button type="button" variant="ghost">
+                                  <CalendarIcon />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent>
+                                <Calendar
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  mode="single"
+                                  captionLayout="dropdown"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </FieldContent>
+                    </Field>
+                  )}
+                />
+              </>
+            )}
+          </FieldGroup>
+          <DialogFooter className="mt-6">
+            <DialogClose asChild onClick={() => reset()}>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button
+              type="submit"
+              variant="default"
+              disabled={formState.isSubmitting}
+            >
+              {formState.isSubmitting && <Spinner />}
+              Crear
+            </Button>
+          </DialogFooter>
+        </form>
+      </div>
     </DialogContent>
   );
 }

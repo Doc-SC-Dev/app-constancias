@@ -7,10 +7,8 @@ import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { auth, isAuthenticated } from "@/lib/auth";
-import { db } from "@/lib/db";
 import type { ActivityWithUser } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
-import { ActivityEmpty } from "./_components/activity-empty";
 import { columns } from "./_components/activity-columns";
 import CreateActivityDialog from "./_components/create-activity-dialog";
 import { getActivitiesPaginated } from "./actions";
@@ -36,13 +34,13 @@ export default async function ActivityPage() {
     getNextPageParam: (lastPage: PaginationResponse<ActivityWithUser>) =>
       lastPage.nextPage,
   });
- /*  const data = await db.activity.findMany();
-  if (!data.length || !data) {
-    return <ActivityEmpty />;
-  } */
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <DataTable
+        emptyTitle="No hay actividades"
+        emptyDescription="No se creado ninguna Actividad, para iniciar debe crear una actividad"
+        buttonLabel="Crear actividad"
+        createDialog={CreateActivityDialog}
         columns={columns}
         queryFn={getActivitiesPaginated}
         queryKey="list-activity"
