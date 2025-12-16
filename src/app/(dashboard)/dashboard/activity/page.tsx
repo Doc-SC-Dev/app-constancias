@@ -9,7 +9,7 @@ import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { auth, isAuthenticated } from "@/lib/auth";
 import type { ActivityWithUser } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
-import { columns } from "./_components/columns";
+import { columns } from "./_components/activity-columns";
 import CreateActivityDialog from "./_components/create-activity-dialog";
 import { getActivitiesPaginated } from "./actions";
 

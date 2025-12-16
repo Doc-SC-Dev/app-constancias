@@ -2,7 +2,7 @@
 
 import { DataTable } from "@/components/data-table";
 import type { ParticipantActivity } from "@/lib/types/paricipant-activity";
-import { columns } from "./columns";
+import { columns } from "./activity-columns";
 
 interface ActivityClientProps {
   data: ParticipantActivity[];

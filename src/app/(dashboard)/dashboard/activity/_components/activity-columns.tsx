@@ -2,11 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
-import type {
-  Activity,
-  ActivityType,
-  ActivityWithUser,
-} from "@/lib/types/activity";
+import type { ActivityType, ActivityWithUser } from "@/lib/types/activity";
 
 export const columns: ColumnDef<ActivityWithUser>[] = [
   {
@@ -59,7 +55,7 @@ export const columns: ColumnDef<ActivityWithUser>[] = [
     cell: ({ row }) => {
       const activity = row.original;
       return (
-        <ActionDialogManager<Activity>
+        <ActionDialogManager<ActivityWithUser>
           data={activity}
           // viewDialog={}
           // editDialog={}

@@ -1,12 +1,12 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import {
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { type Activity } from "@/lib/types/activity";
+import type { Activity } from "@/lib/types/activity";
 
 type DialogContentProps = {
   data: Activity;
@@ -39,9 +39,7 @@ export default function ViewDialog({ data: activity }: DialogContentProps) {
         </div>
         <div className="grid grid-cols-4 items-center gap-4">
           <span className="text-right font-medium text-sm">Participantes:</span>
-          <span className="col-span-3 text-sm">
-            {activity.nParticipants}
-          </span>
+          <span className="col-span-3 text-sm">{activity.nParticipants}</span>
         </div>
       </div>
     </DialogContent>
