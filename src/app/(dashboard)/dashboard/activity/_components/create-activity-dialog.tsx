@@ -49,13 +49,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  type ActivityCreateInput,
-  ActivityType,
+  type ActivityCreateDTO,
   activityCreateSchema,
-  ParticipantType,
 } from "@/lib/types/activity";
 import { listUsersAdmin } from "../../users/actions";
-import { createActivity } from "../actions";
+import { createActivity, getActivityTypes } from "../actions";
 
 type CreateActivityDialogProps = {
   closeDialog: () => void;
@@ -67,8 +65,17 @@ export default function CreateActivityDialog({
   const { data: users, isLoading } = useQuery({
     queryKey: ["db-users"],
     queryFn: listUsersAdmin,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
-  const form = useForm<ActivityCreateInput>({
+
+  const { data: activityTypes, isLoading: isLoadingActivityTypes } = useQuery({
+    queryKey: ["db-activity-types"],
+    queryFn: getActivityTypes,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+  const form = useForm<ActivityCreateDTO>({
     mode: "onChange",
     reValidateMode: "onSubmit",
     resolver: arktypeResolver(activityCreateSchema),
@@ -76,17 +83,20 @@ export default function CreateActivityDialog({
       name: "",
       startAt: new Date(),
       endAt: new Date(),
-      type: ActivityType.DOCENCIA,
-      participants: [{ id: "", type: ParticipantType.AUTOR, hours: 0 }],
+      type: "",
+      participants: [{ id: "", type: "", hours: 0 }],
     },
   });
+
+  const activityType = form.watch("type");
+
   const {
     fields: participants,
     append: addParticipant,
     remove: removeParticipant,
   } = useFieldArray({ control: form.control, name: "participants" });
 
-  const onSubmit = async (data: ActivityCreateInput) => {
+  const onSubmit = async (data: ActivityCreateDTO) => {
     const { success, message } = await createActivity({ activity: data });
     if (success) {
       toast.success("Actividad creada exitosamente", {
@@ -111,13 +121,16 @@ export default function CreateActivityDialog({
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup className="gap-4">
           <FormInput label="Nombre" control={form.control} name="name" />
-          <FormSelect label="Tipo" control={form.control} name="type">
-            {Object.values(ActivityType).map((type) => (
-              <SelectItem value={type} key={type}>
-                {type.toLowerCase().replaceAll("_", " ")}
-              </SelectItem>
-            ))}
-          </FormSelect>
+          {isLoadingActivityTypes && <Spinner />}
+          {activityTypes && (
+            <FormSelect label="Tipo" control={form.control} name="type">
+              {activityTypes.map((type) => (
+                <SelectItem value={type.id} key={type.id}>
+                  {type.name.toLowerCase().replaceAll("_", " ")}
+                </SelectItem>
+              ))}
+            </FormSelect>
+          )}
           <FieldSeparator />
           <div className="flex flex-1 gap-2">
             <Controller
@@ -223,7 +236,7 @@ export default function CreateActivityDialog({
                 onClick={() =>
                   addParticipant({
                     id: "",
-                    type: ParticipantType.AUTOR,
+                    type: "",
                     hours: 0,
                   })
                 }
@@ -269,11 +282,16 @@ export default function CreateActivityDialog({
                             control={form.control}
                             name={`participants.${index}.type`}
                           >
-                            {Object.values(ParticipantType).map((type) => (
-                              <SelectItem value={type} key={type}>
-                                {type.toLowerCase().replaceAll("_", " ")}
-                              </SelectItem>
-                            ))}
+                            {activityTypes
+                              ?.find((type) => type.id === activityType)
+                              ?.participantTypes.map((participantType) => (
+                                <SelectItem
+                                  value={participantType.id}
+                                  key={participantType.id}
+                                >
+                                  {participantType.name}
+                                </SelectItem>
+                              ))}
                           </FormSelect>
                         </TableCell>
                         <TableCell>
