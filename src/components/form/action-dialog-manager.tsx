@@ -1,6 +1,5 @@
 "use client";
 
-import { Dialog } from "@radix-ui/react-dialog";
 import { type LucideProps, Plus } from "lucide-react";
 import {
   type ForwardRefExoticComponent,
@@ -9,6 +8,7 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { type Action, Actions } from "@/lib/types/action";
+import { Dialog } from "../ui/dialog";
 import ActionButton from "./action-button";
 
 type ActionDialogProps<T> = {
