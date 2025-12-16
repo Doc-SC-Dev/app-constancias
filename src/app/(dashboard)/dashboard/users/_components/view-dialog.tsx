@@ -31,7 +31,7 @@ export default function ViewDialog({ data: user }: DialogContentProps) {
         </div>
       </DialogHeader>
       <div className="px-8 pb-8">
-        <UserActivitiesTable participants={user.participants} />
+        <UserActivitiesTable userId={user.id} />
       </div>
     </DialogContent>
   );

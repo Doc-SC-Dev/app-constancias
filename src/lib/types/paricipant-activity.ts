@@ -1,5 +1,6 @@
 import { type } from "arktype";
 import { activitySchema } from "./activity";
+import { UserWithActivities } from "./users";
 
 export const activityType = type(
   "'DOCENCIA' | 'EXAMEN_CALIFICACION' | 'TRABAJO_INVESTIGACION' | 'TRABAJO_DE_TITULO' | 'PROYECTO_DE_INVESTIGACION' | 'PASANTIA'"
@@ -22,3 +23,4 @@ export const participantActivitySchema = type({
 });
 
 export type ParticipantActivity = typeof participantActivitySchema.infer;
+export type Participant = UserWithActivities["participants"][number];

@@ -1,29 +1,23 @@
 import { DataTable } from "@/components/data-table";
-import type { UserWithActivities } from "@/lib/types/users";
 import { columns } from "./user-activities-columns";
+import { listParticipantActivities } from "../actions";
 
 type UserActivitiesTableProps = {
-  participants: UserWithActivities["participants"];
+  userId: string
 };
 
 export default function UserActivitiesTable({
-  participants,
+  userId,
 }: UserActivitiesTableProps) {
-  if (!participants || participants.length === 0) {
-    return (
-      <div className="text-center text-sm text-muted-foreground py-4">
-        No hay actividades registradas.
-      </div>
-    );
-  }
 
   return (
     <div className="mt-4">
+      <h3 className="text-lg font-semibold mb-4">Actividades</h3>
       <DataTable
         columns={columns}
-        data={participants}
+        queryFn={({pageParam})=> listParticipantActivities({pageParam, userId})}
+        queryKey="list-user-activity"
         placeholder="Filtrar por actividad..."
-        title="Actividades"
       >
         <></>
       </DataTable>

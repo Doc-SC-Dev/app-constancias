@@ -2,6 +2,9 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
+import DeleteDialog from "./delete-dialog";
+import EditDialog from "./edit-dialog";
+import ViewDialog from "./activity-view-dialog";
 import type { ActivityType, ActivityWithUser } from "@/lib/types/activity";
 
 export const columns: ColumnDef<ActivityWithUser>[] = [
@@ -57,9 +60,9 @@ export const columns: ColumnDef<ActivityWithUser>[] = [
       return (
         <ActionDialogManager<ActivityWithUser>
           data={activity}
-          // viewDialog={}
-          // editDialog={}
-          // deleteDialog={}
+          viewDialog={ViewDialog}
+          editDialog={EditDialog}
+          deleteDialog={DeleteDialog}
         />
       );
     },

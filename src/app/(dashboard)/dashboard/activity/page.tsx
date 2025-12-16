@@ -34,7 +34,6 @@ export default async function ActivityPage() {
     getNextPageParam: (lastPage: PaginationResponse<ActivityWithUser>) =>
       lastPage.nextPage,
   });
-
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <DataTable

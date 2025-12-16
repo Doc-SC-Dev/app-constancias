@@ -200,7 +200,7 @@ model Participant {
   endAt      DateTime?
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @default(now()) @updatedAt
-  activity   Activity        @relation(fields: [activityId], references: [id])
+  activity   Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
   user       User            @relation(fields: [userId], references: [id])
 
   @@map("participant")

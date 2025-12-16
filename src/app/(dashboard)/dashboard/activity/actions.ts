@@ -6,23 +6,39 @@ import { db } from "@/lib/db";
 import type {
   Activity,
   ActivityCreateInput,
+  ActivityEdit,
   ActivityWithUser,
 } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { PAGE_SIZE } from "@/lib/types/pagination";
 
-export async function updateActivity(data: Partial<Activity>, id: string) {
+export async function updateActivity(data: ActivityEdit, id: string) {
   try {
-    await db.activity.update({
-      where: { id },
-      data: {
-        name: data.name,
-        activityType: data.activityType,
-        nParticipants: data.nParticipants,
-        startAt: data.startAt,
-        endAt: data.endAt,
-      },
-    });
+    await db.$transaction([
+      db.participant.deleteMany({
+        where: { activityId: id },
+      }),
+      db.activity.update({
+        where: { id },
+        data: {
+          name: data.name,
+          activityType: data.activityType,
+          nParticipants: data.participants?.length || 0,
+          startAt: data.startAt,
+          endAt: data.endAt,
+          participants: {
+            createMany: {
+              data:
+                data.participants?.map((p) => ({
+                  userId: p.id,
+                  type: p.type,
+                  hours: p.hours,
+                })) || [],
+            },
+          },
+        },
+      }),
+    ]);
     revalidatePath("/dashboard/activity");
     return { success: true, message: "Actividad actualizada correctamente" };
   } catch (error) {

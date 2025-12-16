@@ -48,5 +48,5 @@ export function EmptyPage({
         </EmptyContent>
       </Empty>
     </div>
-  );
+  ); 
 }
