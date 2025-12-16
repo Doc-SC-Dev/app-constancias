@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { auth, isAuthenticated } from "@/lib/auth";
-import type { ActivityWithUser } from "@/lib/types/activity";
+import type { ActivityDTO } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { columns } from "./_components/activity-columns";
 import CreateActivityDialog from "./_components/create-activity-dialog";
@@ -31,8 +31,10 @@ export default async function ActivityPage() {
     queryKey: ["list-activity"],
     queryFn: ({ pageParam }) => getActivitiesPaginated({ pageParam }),
     initialPageParam: 0,
-    getNextPageParam: (lastPage: PaginationResponse<ActivityWithUser>) =>
-      lastPage.nextPage,
+    getNextPageParam: (
+      _: PaginationResponse<ActivityDTO>,
+      groups: PaginationResponse<ActivityDTO>[],
+    ) => groups.length,
   });
 
   return (
