@@ -46,6 +46,9 @@ export const activityEditSchema = type({
 
 export type ActivityEdit = typeof activityEditSchema.infer;
 
+// export type ActivityWithUser = Activity & {
+//   professor: string;
+// };
 const participantSchema = type({
   id: "string > 0",
   type: "string",

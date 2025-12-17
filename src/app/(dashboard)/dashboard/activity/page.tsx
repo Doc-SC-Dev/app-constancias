@@ -36,7 +36,6 @@ export default async function ActivityPage() {
       groups: PaginationResponse<ActivityDTO>[],
     ) => groups.length,
   });
-
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <DataTable

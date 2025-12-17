@@ -9,6 +9,7 @@ import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import type { User, UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
+import { Participant } from "@/lib/types/paricipant-activity";
 
 export async function updateUser(userData: UserEdit, id: string) {
   const { success, data, error } = await withTryCatch<UserSelect>(
@@ -182,3 +183,37 @@ export async function listUsersAdmin(): Promise<User[]> {
   });
   return users as User[];
 }
+
+export const listParticipantActivities = async ({
+  pageParam,
+  userId,
+}: {
+  pageParam: number;
+  userId: string;
+
+}): Promise<PaginationResponse<Participant>> => {
+  const start = pageParam * PAGE_SIZE;
+  const [count, data] = await db.$transaction([
+    db.participant.count({ where: { userId } }),
+    db.participant.findMany({
+      where: { userId },
+      take: PAGE_SIZE,
+      skip: start,
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        hours: true,
+        type: true,
+        activity: {
+          select: {
+            name: true,
+            activityType: true,
+          }
+        }
+      },
+    }),
+  ]);
+
+  return { data, nextPage: pageParam + 1, totalRows: count };
+};

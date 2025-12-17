@@ -49,6 +49,7 @@ interface DataTableProps<TData> {
   buttonLabel: string;
   emptyTitle: string;
   emptyDescription: string;
+  onDialog?: boolean;
 }
 
 export function DataTable<TData>({
@@ -61,6 +62,7 @@ export function DataTable<TData>({
   buttonLabel,
   emptyDescription,
   emptyTitle,
+  onDialog = false,
 }: DataTableProps<TData>) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [globalFilter, setGlobalFilter] = useState<"">("");
@@ -158,19 +160,21 @@ export function DataTable<TData>({
   }
   return (
     <div className="container flex flex-col mx-auto h-full gap-4">
-      <div className="flex items-center justify-between">
-        <div className="grid w-full max-w-sm items-center gap-3">
-          <Label htmlFor="fuzzy-input">Filtrar</Label>
-          <Input
-            id="fuzzy-input"
-            className="max-w-sm"
-            placeholder={placeholder}
-            value={globalFilter ?? ""}
-            onChange={(e) => table.setGlobalFilter(String(e.target.value))}
-          />
+      {!onDialog && (
+        <div className="flex items-center justify-between">
+          <div className="grid w-full max-w-sm items-center gap-3">
+            <Label htmlFor="fuzzy-input">Filtrar</Label>
+            <Input
+              id="fuzzy-input"
+              className="max-w-sm"
+              placeholder={placeholder}
+              value={globalFilter ?? ""}
+              onChange={(e) => table.setGlobalFilter(String(e.target.value))}
+            />
+          </div>
+          {children}
         </div>
-        {children}
-      </div>
+      )}
       <div
         className="container h-[600px] overflow-auto relative  rounded-md border"
         ref={tableContainerRef}
