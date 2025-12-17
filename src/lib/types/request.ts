@@ -2,6 +2,7 @@ import { type } from "arktype";
 
 export const createRequestSchema = type({
   certificateName: "string",
+  "activityId?": "string",
 });
 
 export type CreateRequest = typeof createRequestSchema.infer;

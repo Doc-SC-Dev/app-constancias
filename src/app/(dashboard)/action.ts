@@ -5,18 +5,18 @@ import path from "node:path";
 import fontkit from "@pdf-lib/fontkit";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { RedirectType, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
-import type { Student } from "@/generated/prisma";
-import { auth } from "@/lib/auth";
+import { Genre, type Student } from "@/generated/prisma";
+import { auth, isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
 import {
   Certificates,
   type CreateRequest,
   type Request,
 } from "@/lib/types/request";
-import type { Session, User } from "@/lib/types/users";
+import type { User } from "@/lib/types/users";
 import { withTryCatch } from "../action";
 
 export const logoutAction = async () => {
@@ -28,24 +28,36 @@ export const logoutAction = async () => {
 };
 
 export const getRequestsTypes = async () => {
-  return await db.certificate.findMany({
-    select: {
-      name: true,
-      id: true,
-    },
-  });
+  const session = await isAuthenticated();
+  const [certificates, activities] = await Promise.all([
+    db.certificate.findMany({
+      select: {
+        name: true,
+        id: true,
+      },
+    }),
+    db.activity.findMany({
+      where: {
+        participants: {
+          some: {
+            userId: session.user.id,
+          },
+        },
+      },
+      select: {
+        name: true,
+        id: true,
+      },
+    }),
+  ]);
+  return { activities, certificates };
 };
 
-export const createRequest = async (data: CreateRequest) => {
-  const { data: session } = await withTryCatch<Session | null>(
-    auth.api.getSession({
-      headers: await headers(),
-    }),
-  );
-  if (!session) {
-    redirect("/login", RedirectType.replace);
-    return { success: false, message: "No estas autenticado" };
-  }
+export const createRequest = async (data: {
+  certificateName: string;
+  activity: { id: string; name: string };
+}) => {
+  const session = await isAuthenticated();
   const { user } = session;
   const {
     success,
@@ -59,6 +71,13 @@ export const createRequest = async (data: CreateRequest) => {
             id: user.id,
           },
         },
+        activity: data.activity
+          ? {
+              connect: {
+                id: data.activity.id,
+              },
+            }
+          : {},
         certificate: {
           connect: {
             name: data.certificateName,
@@ -90,12 +109,14 @@ const getAlumnoRegularText = async (user: User) => {
   <div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
   <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong><i>, Director del Programa de 
 Doctorado en Ciencias Médicas, de la Universidad de La Frontera, deja 
-constancia que el <strong>Sr. ${user.name}</strong>, Matrícula Nº <strong>${data.id}</strong>, 
-es alumno regular de nuestro programa, desde el año <strong>2023</strong> a la fecha. 
+constancia que el <strong>${user.genre === Genre.MALE ? "Sr." : "Sra."} ${user.name}</strong>, Matrícula Nº <strong>${data.id}</strong>, 
+es alumno regular de nuestro programa, desde el año <strong>${data.admisionDate.getFullYear()}</strong> a la fecha. 
 </i></div>`;
 };
 
+// TODO: Implementar mensajes de forma dinamica desde la DB
 const getCertificateText = async (user: User, certificate: CreateRequest) => {
+  // TODO: Implementar mensajes para el resto de certificados de forma estatica por ahora
   switch (certificate.certificateName) {
     case Certificates.ALUMNO_REGULAR:
       return await getAlumnoRegularText(user);
