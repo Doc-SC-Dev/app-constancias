@@ -2,8 +2,10 @@
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
-import { Controller, useForm } from "react-hook-form";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { FormSelect } from "@/components/form/FormSelect";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,39 +16,47 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FieldGroup } from "@/components/ui/field";
+import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { type CreateRequest, createRequestSchema } from "@/lib/types/request";
+import {
+  Certificates,
+  type CreateRequest,
+  createRequestSchema,
+} from "@/lib/types/request";
 import { createRequest, getRequestsTypes } from "../../action";
 
 export default function CreateRequestDialog() {
-  const { data: certificates, error } = useQuery({
+  const { data, error } = useQuery({
     queryKey: ["certificate-types"],
     queryFn: getRequestsTypes,
   });
 
   const form = useForm<CreateRequest>({
     resolver: arktypeResolver(createRequestSchema),
-    reValidateMode: "onChange",
+    mode: "onChange",
+    reValidateMode: "onSubmit",
     defaultValues: {
-      certificateName: "",
+      certificateName: Certificates.ALUMNO_REGULAR,
+      activityId: "",
     },
+    shouldUnregister: true,
   });
+  const certificate = form.watch("certificateName");
+  const activityById = useMemo(() => {
+    if (!data) return new Map();
+    return new Map(data.activities.map((activity) => [activity.id, activity]));
+  }, [data]);
+
   const onSubmit = async (data: CreateRequest) => {
-    const { success, message, data: pdf } = await createRequest(data);
+    const {
+      success,
+      message,
+      data: pdf,
+    } = await createRequest({
+      certificateName: data.certificateName,
+      activity: activityById.get(data.activityId),
+    });
     if (success) {
       const link = document.createElement("a");
       link.href = `data:application/pdf;base64,${pdf}`;
@@ -68,46 +78,35 @@ export default function CreateRequestDialog() {
       </DialogHeader>
 
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        {certificates && (
-          <Controller
-            name="certificateName"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field orientation="responsive" data-invalid={fieldState.invalid}>
-                <FieldContent>
-                  <FieldLabel htmlFor="form-rhf-select-language">
-                    Tipo de constancia
-                  </FieldLabel>
-                  <FieldDescription>
-                    Selecciona el tipo de constancia que deseas solicitar.
-                  </FieldDescription>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </FieldContent>
-                <Select
-                  name={field.name}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <SelectTrigger
-                    id="form-rhf-select-language"
-                    aria-invalid={fieldState.invalid}
-                    className="min-w-[120px]"
-                  >
-                    <SelectValue placeholder="Selecciona un tipo de constancia" />
-                  </SelectTrigger>
-                  <SelectContent position="item-aligned">
-                    {certificates.map((certificate) => (
-                      <SelectItem key={certificate.id} value={certificate.name}>
-                        {certificate.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
+        {data && (
+          <FieldGroup>
+            <FormSelect
+              control={form.control}
+              name="certificateName"
+              label="Tipo de constancia"
+              description="Selecciona el tipo de constancia que deseas solicitar."
+            >
+              {data.certificates.map((certificate) => (
+                <SelectItem key={certificate.id} value={certificate.name}>
+                  {certificate.name}
+                </SelectItem>
+              ))}
+            </FormSelect>
+            {certificate !== Certificates.ALUMNO_REGULAR && (
+              <FormSelect
+                control={form.control}
+                name="activityId"
+                label="Actividad"
+                description="Selecciona la actividad a la que deseas solicitar la constancia."
+              >
+                {data.activities.map((activity) => (
+                  <SelectItem key={activity.id} value={activity.id}>
+                    {activity.name}
+                  </SelectItem>
+                ))}
+              </FormSelect>
             )}
-          />
+          </FieldGroup>
         )}
         {error && (
           <Alert variant="destructive">

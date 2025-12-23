@@ -1,10 +1,5 @@
 import { type } from "arktype";
-import type { Activity, Participant } from "@/generated/prisma";
-import { ActivityType } from "@/generated/prisma";
-
-export const activityTypeSchema = type.enumerated(
-  ...Object.values(ActivityType),
-);
+import { ActivityModel } from "../models";
 
 export const activitySchema = type({
   id: "string",
@@ -12,37 +7,51 @@ export const activitySchema = type({
   startAt: "Date",
   endAt: "Date",
   nParticipants: "number",
-  activityType: activityTypeSchema,
+  activityType: "string",
   createdAt: "Date",
   updatedAt: "Date",
 });
+
+export const activityDTO = type({
+  id: "string",
+  activityType: "string",
+  name: "string",
+  startAt: "string",
+  endAt: "string",
+  nParticipants: "number",
+  encargado: "string",
+});
+
+export const toActivityDTO = type.instanceOf(ActivityModel).pipe(
+  (activity: ActivityModel): ActivityDTO => ({
+    activityType: activity.activityType.name,
+    id: activity.id,
+    name: activity.name,
+    startAt: activity.startAt.toISOString(),
+    endAt: activity.endAt.toISOString(),
+    nParticipants: activity.nParticipants,
+    encargado: activity.participants[0].user.name,
+  }),
+);
+
+export type ActivityDTO = typeof activityDTO.infer;
 
 export const activityEditSchema = type({
   name: "string",
   startAt: "Date",
   endAt: "Date",
   nParticipants: "1 <= number <= 30",
-  activityType: activityTypeSchema,
-  participants: type({
-    id: "string > 0",
-    type: "'CO_AUTOR' | 'AYUDANTE' | 'TESISTA' | 'AUTOR' | 'PROFESOR_ENCARGADO' | 'COLABORADOR' | 'ESTUDIANTE' | 'PASANTE'",
-    hours: "number >= 1",
-  }).array(),
+  activityType: "string",
 });
 
 export type ActivityEdit = typeof activityEditSchema.infer;
 
-export type ActivityWithUser = Activity & {
-  professor: string;
-  participants: (Participant & {
-    user: {
-      name: string;
-    };
-  })[];
-};
+// export type ActivityWithUser = Activity & {
+//   professor: string;
+// };
 const participantSchema = type({
   id: "string > 0",
-  type: "'CO_AUTOR' | 'AYUDANTE' | 'TESISTA' | 'AUTOR' | 'PROFESOR_ENCARGADO' | 'COLABORADOR' | 'ESTUDIANTE' | 'PASANTE'",
+  type: "string",
   hours: "number >= 1",
 }).array();
 
@@ -50,7 +59,7 @@ export const activityCreateSchema = type({
   name: "string > 1",
   startAt: "Date",
   endAt: "Date",
-  type: activityTypeSchema,
+  type: "string",
   participants: participantSchema,
 }).narrow((value, ctx) => {
   if (value.startAt > value.endAt)
@@ -62,11 +71,4 @@ export const activityCreateSchema = type({
   return true;
 });
 
-export type ActivityCreateInput = typeof activityCreateSchema.infer;
-
-export {
-  type Activity,
-  ActivityType,
-  ParticipantType,
-  type Participant,
-} from "@/generated/prisma";
+export type ActivityCreateDTO = typeof activityCreateSchema.infer;

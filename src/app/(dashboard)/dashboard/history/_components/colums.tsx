@@ -11,7 +11,7 @@ export const columns: ColumnDef<HistoryEntry>[] = [
     header: "Constancia",
     cell: ({ row }) => {
       const certName = row.original.certName;
-      return <span className="flex flex-1 ">{certName}</span>;
+      return <span className="flex flex-1 items-center">{certName}</span>;
     },
   },
 

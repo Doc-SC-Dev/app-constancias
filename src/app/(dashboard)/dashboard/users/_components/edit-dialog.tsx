@@ -16,7 +16,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { type Role, Roles } from "@/lib/authorization/permissions";
+import { Roles } from "@/lib/authorization/permissions";
 import { type User, type UserEdit, userEditSchema } from "@/lib/types/users";
 import { updateUser } from "../actions";
 
@@ -35,7 +35,7 @@ export default function EditDialog({
     defaultValues: {
       name: user.name,
       email: user.email,
-      role: user.role as Role,
+      role: user.role as Roles,
       rut: user.rut,
     },
   });

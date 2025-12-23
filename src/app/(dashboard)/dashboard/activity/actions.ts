@@ -2,10 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { withTryCatch } from "@/app/action";
+import { isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type {
   Activity,
+  ActivityCreateDTO,
   ActivityCreateInput,
+  ActivityDTO,
   ActivityEdit,
   ActivityWithUser,
 } from "@/lib/types/activity";
@@ -22,7 +25,11 @@ export async function updateActivity(data: ActivityEdit, id: string) {
         where: { id },
         data: {
           name: data.name,
-          activityType: data.activityType,
+          activityType: {
+            connect: {
+              id: data.activityType,
+            },
+          },
           nParticipants: data.participants?.length || 0,
           startAt: data.startAt,
           endAt: data.endAt,
@@ -64,14 +71,46 @@ export const getActivitiesPaginated = async ({
   pageParam,
 }: {
   pageParam: number;
-}): Promise<PaginationResponse<ActivityWithUser>> => {
+}): Promise<PaginationResponse<ActivityDTO>> => {
+  const session = await isAuthenticated();
+  const isAdmin = ["administrator", "superadmin"].includes(
+    session.user.role || "",
+  );
   const start = pageParam * PAGE_SIZE;
   const [count, data] = await db.$transaction([
-    db.activity.count(),
+    db.activity.count({
+      where: isAdmin
+        ? {}
+        : {
+            participants: {
+              some: {
+                userId: {
+                  equals: session.user.id,
+                },
+              },
+            },
+          },
+    }),
     db.activity.findMany({
+      where: isAdmin
+        ? {}
+        : {
+            participants: {
+              some: {
+                userId: {
+                  equals: session.user.id,
+                },
+              },
+            },
+          },
       take: PAGE_SIZE,
       skip: start,
       include: {
+        activityType: {
+          select: {
+            name: true,
+          },
+        },
         participants: {
           include: {
             user: {
@@ -88,9 +127,14 @@ export const getActivitiesPaginated = async ({
     }),
   ]);
   return {
-    data: data.map<ActivityWithUser>((activity) => ({
-      ...activity,
-      professor: activity.participants[0].user.name,
+    data: data.map<ActivityDTO>((activity) => ({
+      activityType: activity.activityType.name,
+      id: activity.id,
+      name: activity.name,
+      startAt: activity.startAt.toISOString(),
+      endAt: activity.endAt.toISOString(),
+      nParticipants: activity.nParticipants,
+      encargado: activity.participants[0].user.name,
     })),
     nextPage: pageParam + 1,
     totalRows: count,
@@ -100,20 +144,24 @@ export const getActivitiesPaginated = async ({
 export const createActivity = async ({
   activity,
 }: {
-  activity: ActivityCreateInput;
+  activity: ActivityCreateDTO;
 }) => {
   const { participants, type, ...rest } = activity;
-  const { error, success } = await withTryCatch<Activity>(
+  const { error, success } = await withTryCatch(
     db.activity.create({
       data: {
         ...rest,
         nParticipants: participants.length,
-        activityType: type,
+        activityType: {
+          connect: {
+            id: type,
+          },
+        },
         participants: {
           createMany: {
             data: participants.map((participant) => ({
               userId: participant.id,
-              type: participant.type,
+              participantTypeId: participant.type,
               hours: participant.hours,
             })),
           },
@@ -123,4 +171,21 @@ export const createActivity = async ({
   );
   if (success) revalidatePath("/dashboard/activity");
   return { message: error, success };
+};
+
+export const getActivityTypes = async () => {
+  const data = await db.activityType.findMany({
+    select: {
+      id: true,
+      name: true,
+      participantTypes: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  return data;
 };

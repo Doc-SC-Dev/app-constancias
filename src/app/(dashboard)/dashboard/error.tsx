@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { AlertCircle } from "lucide-react";
+import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
@@ -23,7 +23,8 @@ export default function UsersError({
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
-          Ocurrió un problema al cargar los datos. Por favor, intenta nuevamente.
+          Ocurrió un problema al cargar los datos. Por favor, intenta
+          nuevamente.
         </AlertDescription>
       </Alert>
       <Button onClick={() => reset()}>Reintentar</Button>

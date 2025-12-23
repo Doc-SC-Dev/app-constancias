@@ -19,12 +19,12 @@ export type UserWithActivities = User & {
   }[];
 };
 
-const rolSchema = type.enumerated(...Object.values(Roles));
+const roleSchema = type.enumerated(...Object.values(Roles));
 export const userEditSchema = type({
   name: "string >= 1",
   rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
   email: "string.email",
-  role: rolSchema,
+  role: roleSchema,
 });
 
 export type UserEdit = typeof userEditSchema.infer;
@@ -39,7 +39,7 @@ export const userCreateSchema = type({
   name: "string > 1",
   rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
   email: "string.email",
-  role: rolSchema,
+  role: roleSchema,
   gender: genderSchema,
   "studentId?": "string.numeric",
   "admissionDate?": "Date",
