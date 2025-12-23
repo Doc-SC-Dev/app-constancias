@@ -33,7 +33,6 @@ model User {
   banned        Boolean        @default(false)
   banReason     String?
   banExpires    DateTime?
-  professors    Professor?
   student       Student?
   participants  Participant[]
   requests      Request[]
@@ -97,17 +96,6 @@ model Verification {
   @@map("verification")
 }
 
-model Professor {
-  id                 String              @id @default(uuid())
-  updatedAt          DateTime            @updatedAt
-  createdAt          DateTime            @default(now())
-  userId             String              @unique
-  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  qualificationExams QualificationExam[]
-
-  @@map("professor")
-}
-
 enum AcademicGrade {
   DOCTOR
   DOCTORA
@@ -115,93 +103,115 @@ enum AcademicGrade {
 }
 
 model Student {
-  id                 Int                 @id
-  userId             String
-  isRegularStudent   Boolean             @default(false)
-  admisionDate       DateTime            @default(now())
-  updatedAt          DateTime            @default(now()) @updatedAt
-  createdAt          DateTime            @default(now())
-  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  qualificationExams QualificationExam[]
+  id                      Int                      @id
+  userId                  String
+  isRegularStudent        Boolean                  @default(false)
+  admisionDate            DateTime                 @default(now())
+  updatedAt               DateTime                 @default(now()) @updatedAt
+  createdAt               DateTime                 @default(now())
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualificationExamGrades QualificationExamGrade[]
 
   @@unique([userId])
   @@map("student")
+}
+
+model QualificationExamGrade {
+  studentId  Int
+  activityId String
+  grade      Float
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, activityId])
+  @@map("qualification_exam_grade")
 }
 
 model OtherRequest {
   id     String @id @default(uuid())
   userId String
   name   String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("other_request")
 }
 
-model QualificationExam {
-  id          String   @id @default(uuid())
-  studentId   Int
-  professorId String
-  title       String
-  grade       Int
-  date        DateTime
-  updatedAt   DateTime @default(now()) @updatedAt
-  createdAt   DateTime @default(now())
+// enum ActivityType {
+//   DOCENCIA
+//   EXAMEN_CALIFICACION
+//   TRABAJO_INVESTIGACION
+//   TRABAJO_DE_TITULO
+//   PROYECTO_DE_INVESTIGACION
+//   PASANTIA
+// }
 
-  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  professor Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
-  requests  Request[]
+model ActivityType {
+  id               String            @id @default(uuid())
+  name             String            @unique
+  participantTypes ParticipantType[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @default(now()) @updatedAt
+  activities       Activity[]
 
-  @@map("qualification_exam")
-}
-
-enum ActivityType {
-  DOCENCIA
-  EXAMEN_CALIFICACION
-  TRABAJO_INVESTIGACION
-  TRABAJO_DE_TITULO
-  PROYECTO_DE_INVESTIGACION
-  PASANTIA
+  @@map("activity_type")
 }
 
 model Activity {
-  id            String        @id @default(uuid())
-  name          String
-  startAt       DateTime
-  endAt         DateTime
-  nAssistant    Int?
-  nParticipants Int
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @default(now()) @updatedAt
-  activityType  ActivityType
-  participants  Participant[]
-  requests      Request[]
+  id                      String                   @id @default(uuid())
+  activityTypeId          String
+  name                    String
+  startAt                 DateTime
+  endAt                   DateTime
+  nAssistant              Int?
+  nParticipants           Int
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @default(now()) @updatedAt
+  activityType            ActivityType             @relation(fields: [activityTypeId], references: [id])
+  participants            Participant[]
+  requests                Request[]
+  qualificationExamGrades QualificationExamGrade[]
 
   @@map("activity")
 }
 
-enum ParticipantType {
-  CO_AUTOR
-  AYUDANTE
-  TESISTA
-  AUTOR
-  PROFESOR_ENCARGADO
-  COLABORADOR
-  ESTUDIANTE
-  PASANTE
+// enum ParticipantType {
+//   CO_AUTOR
+//   AYUDANTE
+//   TESISTA
+//   AUTOR
+//   PROFESOR_ENCARGADO
+//   COLABORADOR
+//   ESTUDIANTE
+//   PASANTE
+// }
+
+model ParticipantType {
+  id             String        @id @default(uuid())
+  name           String
+  activityType   ActivityType? @relation(fields: [activityTypeId], references: [id])
+  activityTypeId String?
+  participants   Participant[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+
+  @@map("participant_type")
 }
 
 model Participant {
-  id         String          @id @default(uuid())
-  activityId String
-  userId     String
-  type       ParticipantType
-  hours      Int
-  startAt    DateTime?
-  endAt      DateTime?
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @default(now()) @updatedAt
-  activity   Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  user       User            @relation(fields: [userId], references: [id])
+  id                String          @id @default(uuid())
+  activityId        String
+  userId            String
+  type              ParticipantType @relation(fields: [participantTypeId], references: [id])
+  hours             Int
+  startAt           DateTime?
+  endAt             DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
+  activity          Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id])
+  participantTypeId String
 
   @@map("participant")
 }
@@ -226,18 +236,16 @@ enum RequestState {
 }
 
 model Request {
-  id                  String             @id @default(uuid())
-  userId              String
-  certificateId       String
-  state               RequestState
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @default(now()) @updatedAt
-  user                User               @relation(fields: [userId], references: [id])
-  certificate         Certificate        @relation(fields: [certificateId], references: [id])
-  activityId          String?
-  qualificationExamId String?
-  activity            Activity?          @relation(fields: [activityId], references: [id])
-  qualificationExam   QualificationExam? @relation(fields: [qualificationExamId], references: [id])
+  id            String       @id @default(uuid())
+  userId        String
+  certificateId String
+  state         RequestState
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now()) @updatedAt
+  user          User         @relation(fields: [userId], references: [id])
+  certificate   Certificate  @relation(fields: [certificateId], references: [id])
+  activityId    String?
+  activity      Activity?    @relation(fields: [activityId], references: [id])
 
   @@map("request")
 }

@@ -2,12 +2,12 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
+import type { ActivityDTO } from "@/lib/types/activity";
+import ViewDialog from "./activity-view-dialog";
 import DeleteDialog from "./delete-dialog";
 import EditDialog from "./edit-dialog";
-import ViewDialog from "./activity-view-dialog";
-import type { ActivityType, ActivityWithUser } from "@/lib/types/activity";
 
-export const columns: ColumnDef<ActivityWithUser>[] = [
+export const columns: ColumnDef<ActivityDTO>[] = [
   {
     accessorKey: "name",
     header: "Nombre",
@@ -17,7 +17,7 @@ export const columns: ColumnDef<ActivityWithUser>[] = [
     accessorKey: "activityType",
     header: "Tipo",
     cell({ row }) {
-      const type = row.getValue("activityType") as ActivityType;
+      const type = row.getValue("activityType") as string;
       return <span>{type.replace(/_/g, " ").toLowerCase()}</span>;
     },
   },
@@ -27,9 +27,10 @@ export const columns: ColumnDef<ActivityWithUser>[] = [
       <span className="flex flex-1 justify-center">Fecha de inicio</span>
     ),
     cell({ row }) {
+      const date = new Date(row.original.startAt);
       return (
         <span className="flex flex-1 justify-center">
-          {row.original.startAt.toLocaleDateString("es-CL")}
+          {date.toLocaleDateString("es-CL")}
         </span>
       );
     },
@@ -40,16 +41,25 @@ export const columns: ColumnDef<ActivityWithUser>[] = [
       <span className="flex flex-1 justify-center">Fecha de finalización</span>
     ),
     cell({ row }) {
+      const date = new Date(row.original.endAt);
       return (
         <span className="flex flex-1 justify-center">
-          {row.original.endAt.toLocaleDateString("es-CL")}
+          {date.toLocaleDateString("es-CL")}
         </span>
       );
     },
   },
   {
-    accessorKey: "professor",
-    header: "Encargado",
+    accessorKey: "nParticipants",
+    header: () => (
+      <span className="flex flex-1 justify-center">
+        Cantidad de participantes
+      </span>
+    ),
+    cell({ row }) {
+      const participants = row.getValue("nParticipants") as number;
+      return <span className="flex flex-1 justify-center">{participants}</span>;
+    },
   },
   {
     id: "actions",
@@ -58,7 +68,7 @@ export const columns: ColumnDef<ActivityWithUser>[] = [
     cell: ({ row }) => {
       const activity = row.original;
       return (
-        <ActionDialogManager<ActivityWithUser>
+        <ActionDialogManager<ActivityDTO>
           data={activity}
           viewDialog={ViewDialog}
           editDialog={EditDialog}

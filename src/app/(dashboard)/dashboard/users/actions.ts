@@ -59,19 +59,6 @@ export async function createUser(userData: UserCreate) {
         },
       });
       if (!session) throw new Error("El usuario ya existe");
-      // try to create professor (if user role === professor)
-      if (session.user.role === Roles.PROFESSOR) {
-        const professor = await tx.professor.create({
-          data: {
-            user: {
-              connect: {
-                id: session.user.id,
-              },
-            },
-          },
-        });
-        if (!professor) throw new Error("Profesor ya existe");
-      }
       // try to create student (if user role === student)
       if (session.user.role === Roles.STUDENT && studentId) {
         const student = await tx.student.create({

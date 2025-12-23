@@ -92,31 +92,102 @@ async function main() {
       });
     }
 
-    await db.certificate.createMany({
-      data: [
-        {
-          name: "Constancia de participación",
-          pdfLink: "",
-          id: uuid(),
-        },
-        {
-          name: "Constancia de alumno regular",
-          pdfLink: "",
-          id: uuid(),
-        },
-        {
-          name: "Constancia de examen de calificación",
-          pdfLink: "",
-          id: uuid(),
-        },
-        {
-          name: "Constancia de colaboración",
-          pdfLink: "",
-          id: uuid(),
-        },
-      ],
+    // Create certificates
+    console.log("Checking certificates...");
+    const countCertificates = await db.certificate.count();
+    if (!countCertificates) {
+      console.log("Creating certificates...");
+      await db.certificate.createMany({
+        data: [
+          {
+            name: "Constancia de participación",
+            pdfLink: "",
+            id: uuid(),
+          },
+          {
+            name: "Constancia de alumno regular",
+            pdfLink: "",
+            id: uuid(),
+          },
+          {
+            name: "Constancia de examen de calificación",
+            pdfLink: "",
+            id: uuid(),
+          },
+          {
+            name: "Constancia de colaboración",
+            pdfLink: "",
+            id: uuid(),
+          },
+        ],
+      });
+      console.log("Certificates created successfully");
+    }
+    // create Activity types of table is emtpty
+    console.log("Checking activity types...");
+    const countActivityType = await db.activityType.count();
+    if (!countActivityType) {
+      console.log("Creating activity types...");
+      await db.activityType.createMany({
+        data: [
+          { name: "Docencia" },
+          { name: "Examen de calificación" },
+          { name: "Trabajo de investigación" },
+          { name: "Trabajo de título" },
+          { name: "Proyecto de investigación" },
+          { name: "Pasantía" },
+        ],
+      });
+      console.log("Activity types created successfully");
+    }
+
+    const docencia = await db.activityType.findUnique({
+      where: {
+        name: "Docencia",
+      },
     });
 
+    const trabajoInvestigacion = await db.activityType.findUnique({
+      where: {
+        name: "Trabajo de investigación",
+      },
+    });
+
+    const examenCalificacion = await db.activityType.findUnique({
+      where: {
+        name: "Examen de calificación",
+      },
+    });
+
+    const trabajoTitulo = await db.activityType.findUnique({
+      where: {
+        name: "Trabajo de título",
+      },
+    });
+    //creating Participant types
+    console.log("Checking participant types...");
+    const countParticipantType = await db.participantType.count();
+    if (!countParticipantType) {
+      console.log("Creating participant types...");
+      await db.participantType.createMany({
+        data: [
+          { name: "Co-autor", activityTypeId: trabajoInvestigacion?.id },
+          { name: "Ayudante", activityTypeId: docencia?.id },
+          { name: "Estudiante", activityTypeId: trabajoTitulo?.id },
+          {
+            name: "Profesor encargado",
+            activityTypeId: examenCalificacion?.id,
+          },
+          { name: "Autor", activityTypeId: trabajoInvestigacion?.id },
+          { name: "Profesor encargado", activityTypeId: docencia?.id },
+          { name: "Colaborador", activityTypeId: docencia?.id },
+          { name: "Estudiante", activityTypeId: examenCalificacion?.id },
+          { name: "Pasante", activityTypeId: trabajoInvestigacion?.id },
+          { name: "Profesor Adjunto", activityTypeId: docencia?.id },
+        ],
+      });
+      console.log("Participant types created successfully");
+    }
     console.log("\n🎉 Database seed completed!");
   } catch (error) {
     console.error("❌ Error during seed:", error);
