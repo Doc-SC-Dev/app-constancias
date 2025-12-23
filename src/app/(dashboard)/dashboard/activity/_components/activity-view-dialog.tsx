@@ -10,6 +10,7 @@ import type { Activity, ActivityWithUser } from "@/lib/types/activity";
 import { DataTable } from "@/components/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Participant } from "@/generated/prisma";
+import CreateActivityDialog from "./create-activity-dialog";
 
 type DialogContentProps = {
   data: Activity | ActivityWithUser;
@@ -94,7 +95,11 @@ export default function ViewDialog({ data: activity }: DialogContentProps) {
           </span>
           <div className="flex-1 overflow-hidden">
             <DataTable
+              emptyTitle="No hay participantes"
+              emptyDescription="No hay participantes disponibles"
+              buttonLabel="Agregar participante"
               columns={columns}
+              onDialog
               queryKey={`activity-${activity.id}-participants`}
               queryFn={queryFn}
               placeholder="Buscar participantes..."

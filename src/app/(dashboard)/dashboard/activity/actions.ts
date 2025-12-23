@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { withTryCatch } from "@/app/action";
+import { isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type {
   Activity,
@@ -65,10 +66,28 @@ export const getActivitiesPaginated = async ({
 }: {
   pageParam: number;
 }): Promise<PaginationResponse<ActivityWithUser>> => {
+  const session = await isAuthenticated();
+
   const start = pageParam * PAGE_SIZE;
+
   const [count, data] = await db.$transaction([
-    db.activity.count(),
+    db.activity.count({
+      where: {
+        participants: {
+          some: {
+            userId: session.user.id,
+          },
+        },
+      },
+    }),
     db.activity.findMany({
+      where: {
+        participants: {
+          some: {
+            userId: session.user.id,
+          },
+        },
+      },
       take: PAGE_SIZE,
       skip: start,
       include: {
@@ -87,10 +106,11 @@ export const getActivitiesPaginated = async ({
       },
     }),
   ]);
+
   return {
     data: data.map<ActivityWithUser>((activity) => ({
       ...activity,
-      professor: activity.participants[0].user.name,
+      professor: activity.participants[0]?.user.name || "Sin asignar", 
     })),
     nextPage: pageParam + 1,
     totalRows: count,
