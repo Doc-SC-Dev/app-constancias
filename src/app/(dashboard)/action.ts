@@ -82,10 +82,10 @@ export const createRequest = async (data: {
         },
         activity: data.activity
           ? {
-              connect: {
-                id: data.activity.id,
-              },
-            }
+            connect: {
+              id: data.activity.id,
+            },
+          }
           : {},
         certificate: {
           connect: {
@@ -104,6 +104,53 @@ export const createRequest = async (data: {
   return {
     success: true,
     message: `Solicitud creada exitosamente con id ${request.id}`,
+    data: pdf,
+  };
+};
+
+export const downloadCertificate = async (requestId: string) => {
+ await isAuthenticated();
+
+  const request = await db.request.findUnique({
+    where: {
+      id: requestId,
+    },
+    include: {
+      user: true,
+      certificate: true,
+      activity: {
+        include: {
+          participants: {
+            include: {
+              user: {
+                include: {
+                  student: true,
+                },
+              },
+              type: true,
+            },
+          },
+          activityType: true,
+        },
+      },
+    },
+  });
+
+  if (!request) {
+    return {
+      success: false,
+      message: "Solicitud no encontrada",
+    };
+  }
+
+  const createRequestData: CreateRequest = {
+    certificateName: request.certificate.name,
+    activityId: request.activityId ?? undefined,
+  };
+  const pdf = await createPdf(request.user as User, createRequestData);
+
+  return {
+    success: true,
     data: pdf,
   };
 };

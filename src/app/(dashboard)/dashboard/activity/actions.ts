@@ -3,15 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { withTryCatch } from "@/app/action";
 import { isAuthenticated } from "@/lib/auth";
-import { isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type {
-  Activity,
   ActivityCreateDTO,
-  ActivityCreateInput,
   ActivityDTO,
-  ActivityEdit,
-  ActivityWithUser,
+  ActivityEdit
 } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { PAGE_SIZE } from "@/lib/types/pagination";
@@ -73,8 +69,6 @@ export const getActivitiesPaginated = async ({
 }: {
   pageParam: number;
 }): Promise<PaginationResponse<ActivityDTO>> => {
-  const session = await isAuthenticated();
-
   const session = await isAuthenticated();
   const isAdmin = ["administrator", "superadmin"].includes(
     session.user.role || "",

@@ -38,21 +38,24 @@ export default async function UsersPage() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <DataTable<User>
-        emptyTitle="No hay usuarios"
-        emptyDescription="No hay usuarios disponibles. Para iniciar debe crear un usuario"
-        buttonLabel="Crear usuario"
-        createDialog={NewUserDialog}
-        columns={columns}
-        queryKey="list-users"
-        queryFn={listUsers}
-        placeholder="Filtrar por Nombre, Role, Email y Rut"
-      >
-        <ActionDialogManager
+      <div className="container h-full mx-auto flex flex-col gap-4">
+        <h2 className="text-2xl font-bold">Usuarios</h2>
+        <DataTable<User>
+          emptyTitle="No hay usuarios"
+          emptyDescription="No hay usuarios disponibles. Para iniciar debe crear un usuario"
+          buttonLabel="Crear usuario"
           createDialog={NewUserDialog}
-          triggerLabel="Crear usuario"
-        />
-      </DataTable>
+          columns={columns}
+          queryKey="list-users"
+          queryFn={listUsers}
+          placeholder="Filtrar por Nombre, Role, Email y Rut"
+        >
+          <ActionDialogManager
+            createDialog={NewUserDialog}
+            triggerLabel="Crear usuario"
+          />
+        </DataTable>
+      </div>
     </HydrationBoundary>
   );
 }

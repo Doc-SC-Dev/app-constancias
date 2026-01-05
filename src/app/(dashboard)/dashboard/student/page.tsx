@@ -36,17 +36,20 @@ export default async function UsersPage() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <DataTable<Student>
-        emptyDescription="No hay estudiantes. Para iniciar debe crear un estudiante"
-        emptyTitle="No hay estudiantes"
-        buttonLabel="Crear estudiante"
-        columns={columns}
-        queryKey="list-students"
-        queryFn={listStudents}
-        placeholder="Filtrar por matricula, nombre o email"
-      >
-        {""}
-      </DataTable>
+      <div className="container h-full mx-auto flex flex-col gap-4">
+        <h2 className="text-2xl font-bold">Estudiantes</h2>
+        <DataTable<Student>
+          emptyDescription="No hay estudiantes. Para iniciar debe crear un estudiante"
+          emptyTitle="No hay estudiantes"
+          buttonLabel="Crear estudiante"
+          columns={columns}
+          queryKey="list-students"
+          queryFn={listStudents}
+          placeholder="Filtrar por matricula, nombre o email"
+        >
+          {""}
+        </DataTable>
+      </div>
     </HydrationBoundary>
   );
 }

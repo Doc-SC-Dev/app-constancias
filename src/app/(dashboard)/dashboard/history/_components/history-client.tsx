@@ -27,26 +27,29 @@ export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
   }, [isAdmin]);
 
   return (
-    <DataTable
-      emptyDescription="No se han creado constancias. Para iniciar debe crear una constancia"
-      emptyTitle="No hay constancias"
-      buttonLabel="Crear constancia"
-      createDialog={CreateRequestDialog}
-      queryKey="list-history"
-      queryFn={({ pageParam }) =>
-        getHistoryPaginated({ pageParam, user, isAdmin })
-      }
-      columns={filteredColumns}
-      placeholder={
-        isAdmin
-          ? "Filtrar por Nombre, Rol, RUT y Constancia"
-          : "Filtrar por Nombre de Constancia"
-      }
-    >
-      <ActionDialogManager
+    <div className="flex flex-col gap-4 h-full">
+      <h2 className="text-2xl font-bold">Constancias</h2>
+      <DataTable
+        emptyDescription="No se han creado constancias. Para iniciar debe crear una constancia"
+        emptyTitle="No hay constancias"
+        buttonLabel="Crear constancia"
         createDialog={CreateRequestDialog}
-        triggerLabel="Crear constancia"
-      />
-    </DataTable>
+        queryKey="list-history"
+        queryFn={({ pageParam }) =>
+          getHistoryPaginated({ pageParam, user, isAdmin })
+        }
+        columns={filteredColumns}
+        placeholder={
+          isAdmin
+            ? "Filtrar por Nombre, Rol, RUT y Constancia"
+            : "Filtrar por Nombre de Constancia"
+        }
+      >
+        <ActionDialogManager
+          createDialog={CreateRequestDialog}
+          triggerLabel="Crear constancia"
+        />
+      </DataTable>
+    </div>
   );
 }
