@@ -81,8 +81,7 @@ export default function CreateActivityDialog({
     resolver: arktypeResolver(activityCreateSchema),
     defaultValues: {
       name: "",
-      startAt: new Date(),
-      endAt: new Date(),
+      date: { to: undefined, from: new Date() },
       type: "",
       participants: [{ id: "", type: "", hours: 0 }],
     },
@@ -111,8 +110,8 @@ export default function CreateActivityDialog({
     }
   };
   return (
-    <DialogContent className="min-w-md">
-      <DialogHeader>
+    <DialogContent className="sm:max-w-md md:max-w-xl lg:max-w-2xl">
+      <DialogHeader className="w-full">
         <DialogTitle>Crear Actividad</DialogTitle>
         <DialogDescription>
           Ingresar datos para crear una nueva actividad
@@ -132,47 +131,62 @@ export default function CreateActivityDialog({
             </FormSelect>
           )}
           <FieldSeparator />
-          <div className="flex flex-1 gap-2">
-            <Controller
-              name="startAt"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldContent>
-                    <FieldLabel>Fecha de inicio</FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        {...field}
-                        aria-invalid={fieldState.invalid}
-                        value={field.value.toLocaleDateString("es-CL")}
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button type="button" variant="ghost">
-                              <CalendarIcon />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent>
-                            <Calendar
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              mode="single"
-                              captionLayout="dropdown"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </FieldContent>
-                </Field>
-              )}
-            />
+          {/* <div className="flex flex-1 gap-2"> */}
+          <Controller
+            name="date"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldContent>
+                  <FieldLabel>Fecha</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      value={
+                        field.value.to
+                          ? `${field.value.from.toLocaleDateString("es-CL")} - ${field.value.to.toLocaleDateString("es-CL")}`
+                          : field.value.from.toLocaleDateString("es-CL")
+                      }
+                    />
+                    <InputGroupAddon align="inline-end">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button type="button" variant="ghost">
+                            <CalendarIcon />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent>
+                          <Calendar
+                            selected={field.value}
+                            onSelect={(value) => {
+                              const to = value?.to
+                                ? value.to.toLocaleDateString("es-CL") ===
+                                  value.from?.toLocaleDateString("es-CL")
+                                  ? undefined
+                                  : value.to
+                                : undefined;
+                              field.onChange({
+                                from: value?.from ? value?.from : new Date(),
+                                to,
+                              });
+                            }}
+                            mode="range"
+                            captionLayout="dropdown"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </InputGroupAddon>
+                  </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </FieldContent>
+              </Field>
+            )}
+          />
 
-            <Controller
+          {/* <Controller
               name="endAt"
               control={form.control}
               render={({ field, fieldState }) => (
@@ -209,8 +223,8 @@ export default function CreateActivityDialog({
                   </FieldContent>
                 </Field>
               )}
-            />
-          </div>
+            /> */}
+          {/* </div> */}
 
           <FieldSeparator />
 

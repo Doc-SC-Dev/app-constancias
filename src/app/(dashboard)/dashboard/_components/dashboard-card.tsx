@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { menus } from "@/lib/types/menus";
+import CreateActivityDialog from "../activity/_components/create-activity-dialog";
 import NewUserDialog from "../users/_components/newuser-dialog";
 import CreateRequestDialog from "./create-request-dialog";
 
@@ -29,7 +30,7 @@ export function DashboardCard({ title, description, url }: DashboardCardProps) {
       case menus.history.name:
         return <CreateRequestDialog />;
       case menus.activities.name:
-        return <></>;
+        return <CreateActivityDialog closeDialog={() => {}} />;
       case menus.users.name:
         return <NewUserDialog />;
       default:
