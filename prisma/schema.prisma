@@ -163,7 +163,7 @@ model Activity {
   activityTypeId          String
   name                    String
   startAt                 DateTime
-  endAt                   DateTime
+  endAt                   DateTime?
   nAssistant              Int?
   nParticipants           Int
   createdAt               DateTime                 @default(now())

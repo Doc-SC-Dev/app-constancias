@@ -8,8 +8,8 @@ import { auth, isAuthenticated } from "@/lib/auth";
 import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
+import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
 import type { User, UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
-import { Participant } from "@/lib/types/paricipant-activity";
 
 export async function updateUser(userData: UserEdit, id: string) {
   const { success, data, error } = await withTryCatch<UserSelect>(
@@ -184,14 +184,13 @@ export async function listUsersAdmin(): Promise<User[]> {
   return users as User[];
 }
 
-export const listParticipantActivities = async ({
+export const listUserActivities = async ({
   pageParam,
   userId,
 }: {
   pageParam: number;
   userId: string;
-
-}): Promise<PaginationResponse<Participant>> => {
+}): Promise<PaginationResponse<UserActivityDTO>> => {
   const start = pageParam * PAGE_SIZE;
   const [count, data] = await db.$transaction([
     db.participant.count({ where: { userId } }),
@@ -204,16 +203,34 @@ export const listParticipantActivities = async ({
       },
       select: {
         hours: true,
-        type: true,
-        activity: {
+        type: {
           select: {
             name: true,
-            activityType: true,
-          }
-        }
+            id: true,
+          },
+        },
+        activity: {
+          select: {
+            id: true,
+            name: true,
+            activityType: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     }),
   ]);
-
-  return { data, nextPage: pageParam + 1, totalRows: count };
+  const participants = data.map<UserActivityDTO>((participant) => ({
+    activityId: participant.activity.id,
+    hours: participant.hours,
+    activityName: participant.activity.name,
+    activityType: participant.activity.activityType.name,
+    typeId: participant.type.id,
+    typeName: participant.type.name,
+  }));
+  return { data: participants, nextPage: pageParam + 1, totalRows: count };
 };

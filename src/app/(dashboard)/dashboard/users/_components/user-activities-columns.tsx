@@ -1,22 +1,22 @@
 "use client";
 
-import { type ColumnDef } from "@tanstack/react-table";
-import { Participant } from "@/lib/types/paricipant-activity";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
 
 // Extract the participant type from UserWithActivities
 
-export const columns: ColumnDef<Participant>[] = [
+export const columns: ColumnDef<UserActivityDTO>[] = [
   {
-    accessorFn: (row) => row.activity.name,
+    accessorFn: (row) => row.activityName,
     id: "activityName",
     header: "Nombre",
   },
   {
-    accessorFn: (row) => row.activity.activityType,
+    accessorFn: (row) => row.activityType,
     id: "activityType",
     header: "Tipo Actividad",
     cell: ({ getValue }) => {
-      const val = getValue() as string;
+      const val = getValue<string>();
       return val.replace(/_/g, " ");
     },
   },
@@ -25,10 +25,10 @@ export const columns: ColumnDef<Participant>[] = [
     header: "Horas",
   },
   {
-    accessorKey: "type",
+    accessorKey: "typeName",
     header: "Participación",
     cell: ({ getValue }) => {
-      const val = getValue() as string;
+      const val = getValue<string>();
       return val.replace(/_/g, " ");
     },
   },

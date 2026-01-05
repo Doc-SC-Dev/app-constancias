@@ -21,7 +21,10 @@ export class ActivityModel {
       hours: number;
       userId: string;
       activityId: string;
-      participantTypeId: string;
+      participantType: {
+        name: string;
+        id: string;
+      };
       user: {
         name: string;
       };

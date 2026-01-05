@@ -5,15 +5,13 @@ import { withTryCatch } from "@/app/action";
 import { isAuthenticated } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type {
-  Activity,
   ActivityCreateDTO,
-  ActivityCreateInput,
   ActivityDTO,
   ActivityEdit,
-  ActivityWithUser,
 } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { PAGE_SIZE } from "@/lib/types/pagination";
+import type { ActivityParticipantDTO } from "@/lib/types/paricipant-activity";
 
 export async function updateActivity(data: ActivityEdit, id: string) {
   try {
@@ -38,7 +36,7 @@ export async function updateActivity(data: ActivityEdit, id: string) {
               data:
                 data.participants?.map((p) => ({
                   userId: p.id,
-                  type: p.type,
+                  participantTypeId: p.type,
                   hours: p.hours,
                 })) || [],
             },
@@ -46,7 +44,7 @@ export async function updateActivity(data: ActivityEdit, id: string) {
         },
       }),
     ]);
-    revalidatePath("/dashboard/activity");
+    revalidatePath(`/dashboard/activity/${id}`);
     return { success: true, message: "Actividad actualizada correctamente" };
   } catch (error) {
     console.error(error);
@@ -56,8 +54,13 @@ export async function updateActivity(data: ActivityEdit, id: string) {
 
 export async function deleteActivity({ activityId }: { activityId: string }) {
   try {
-    await db.activity.delete({
-      where: { id: activityId },
+    await db.$transaction(async (ctx) => {
+      await ctx.participant.deleteMany({
+        where: { activityId },
+      });
+      await ctx.activity.delete({
+        where: { id: activityId },
+      });
     });
     revalidatePath("/dashboard/activity");
     return { success: true, message: "Actividad eliminada correctamente" };
@@ -113,6 +116,12 @@ export const getActivitiesPaginated = async ({
         },
         participants: {
           include: {
+            type: {
+              select: {
+                name: true,
+                id: true,
+              },
+            },
             user: {
               select: {
                 name: true,
@@ -132,7 +141,7 @@ export const getActivitiesPaginated = async ({
       id: activity.id,
       name: activity.name,
       startAt: activity.startAt.toISOString(),
-      endAt: activity.endAt.toISOString(),
+      endAt: activity.endAt ? activity.endAt.toISOString() : undefined,
       nParticipants: activity.nParticipants,
       encargado: activity.participants[0].user.name,
     })),
@@ -146,11 +155,13 @@ export const createActivity = async ({
 }: {
   activity: ActivityCreateDTO;
 }) => {
-  const { participants, type, ...rest } = activity;
+  const { participants, type, date, ...rest } = activity;
   const { error, success } = await withTryCatch(
     db.activity.create({
       data: {
         ...rest,
+        startAt: date.from,
+        endAt: date.to,
         nParticipants: participants.length,
         activityType: {
           connect: {
@@ -188,4 +199,94 @@ export const getActivityTypes = async () => {
   });
 
   return data;
+};
+
+export const getActivityParticipants = async ({
+  activityId,
+}: {
+  activityId: string;
+}): Promise<ActivityParticipantDTO[]> => {
+  const data = await db.participant.findMany({
+    where: {
+      activityId,
+    },
+    select: {
+      id: true,
+      hours: true,
+      type: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      user: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+    },
+  });
+
+  return data.map<ActivityParticipantDTO>((participant) => ({
+    id: participant.id,
+    hours: participant.hours,
+    typeId: participant.type.id,
+    typeName: participant.type.name,
+    userId: participant.user.id,
+    userName: participant.user.name,
+  }));
+};
+
+export const getActivityById = async (activityId: string) => {
+  const data = await db.activity.findUnique({
+    where: {
+      id: activityId,
+    },
+    select: {
+      id: true,
+      name: true,
+      startAt: true,
+      endAt: true,
+      activityType: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      participants: {
+        select: {
+          id: true,
+          hours: true,
+
+          type: {
+            select: {
+              name: true,
+              id: true,
+            },
+          },
+          user: {
+            select: {
+              name: true,
+              id: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  if (!data) throw new Error("No existe la actividad con id ");
+  const { participants, activityType, ...rest } = data;
+  return {
+    ...rest,
+    participants: participants.map((p) => ({
+      name: p.user.name,
+      userId: p.user.id,
+      typeId: p.type.id,
+      type: p.type.name,
+      hours: p.hours,
+    })),
+    type: activityType.name,
+    typeId: activityType.id,
+  };
 };

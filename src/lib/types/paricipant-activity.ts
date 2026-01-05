@@ -1,13 +1,13 @@
 import { type } from "arktype";
 import { activitySchema } from "./activity";
-import { UserWithActivities } from "./users";
+import type { UserWithActivities } from "./users";
 
 export const activityType = type(
-  "'DOCENCIA' | 'EXAMEN_CALIFICACION' | 'TRABAJO_INVESTIGACION' | 'TRABAJO_DE_TITULO' | 'PROYECTO_DE_INVESTIGACION' | 'PASANTIA'"
+  "'DOCENCIA' | 'EXAMEN_CALIFICACION' | 'TRABAJO_INVESTIGACION' | 'TRABAJO_DE_TITULO' | 'PROYECTO_DE_INVESTIGACION' | 'PASANTIA'",
 );
 
 export const participantType = type(
-  "'CO_AUTOR' | 'AYUDANTE' | 'TESISTA' | 'AUTOR' | 'PROFESOR_ENCARGADO' | 'COLABORADOR' | 'ESTUDIANTE' | 'PASANTE'"
+  "'CO_AUTOR' | 'AYUDANTE' | 'TESISTA' | 'AUTOR' | 'PROFESOR_ENCARGADO' | 'COLABORADOR' | 'ESTUDIANTE' | 'PASANTE'",
 );
 
 export const participantActivitySchema = type({
@@ -24,3 +24,21 @@ export const participantActivitySchema = type({
 
 export type ParticipantActivity = typeof participantActivitySchema.infer;
 export type Participant = UserWithActivities["participants"][number];
+
+export type ActivityParticipantDTO = {
+  id: string;
+  hours: number;
+  typeId: string;
+  typeName: string;
+  userId: string;
+  userName: string;
+};
+
+export type UserActivityDTO = {
+  activityId: string;
+  hours: number;
+  activityName: string;
+  activityType: string;
+  typeId: string;
+  typeName: string;
+};

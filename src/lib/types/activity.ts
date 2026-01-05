@@ -17,7 +17,7 @@ export const activityDTO = type({
   activityType: "string",
   name: "string",
   startAt: "string",
-  endAt: "string",
+  endAt: "string | undefined",
   nParticipants: "number",
   encargado: "string",
 });
@@ -36,39 +36,65 @@ export const toActivityDTO = type.instanceOf(ActivityModel).pipe(
 
 export type ActivityDTO = typeof activityDTO.infer;
 
-export const activityEditSchema = type({
-  name: "string",
-  startAt: "Date",
-  endAt: "Date",
-  nParticipants: "1 <= number <= 30",
-  activityType: "string",
-});
-
-export type ActivityEdit = typeof activityEditSchema.infer;
-
-// export type ActivityWithUser = Activity & {
-//   professor: string;
-// };
 const participantSchema = type({
   id: "string > 0",
   type: "string",
   hours: "number >= 1",
 }).array();
 
+export const activityEditSchema = type({
+  name: "string",
+  startAt: "Date",
+  endAt: "Date | undefined",
+  nParticipants: "1 <= number <= 30",
+  activityType: "string",
+  participants: participantSchema,
+});
+
+export type ActivityParticipant = typeof participantSchema.infer;
+export type ActivityEdit = typeof activityEditSchema.infer;
+
+// export type ActivityWithUser = Activity & {
+//   professor: string;
+// };
+
 export const activityCreateSchema = type({
   name: "string > 1",
-  startAt: "Date",
-  endAt: "Date",
+  date: type({ to: "Date | undefined ", from: "Date" }),
   type: "string",
   participants: participantSchema,
 }).narrow((value, ctx) => {
-  if (value.startAt > value.endAt)
+  if (!value.date.to) return true;
+  if (value.date.to > value.date.from)
     return ctx.reject({
       message: "La fecha de fin debe ser mayor a la fecha de inicio",
       code: "predicate",
-      path: ["endAt"],
+      path: ["date"],
     });
   return true;
 });
 
 export type ActivityCreateDTO = typeof activityCreateSchema.infer;
+
+export type Activity = {
+  participants: {
+    name: string;
+    userId: string;
+    typeId: string;
+    type: string;
+    hours: number;
+  }[];
+  id: string;
+  type: string;
+  typeId: string;
+  name: string;
+  startAt: Date;
+  endAt: Date | null;
+};
+
+export const activityUpdateSchema = type({
+  date: type({ to: "Date | undefined ", from: "Date" }),
+  participants: participantSchema,
+});
+
+export type ActivityUpdateType = typeof activityUpdateSchema.infer;
