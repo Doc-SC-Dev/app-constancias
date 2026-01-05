@@ -13,8 +13,8 @@ import {
 
 type Props = {
   title: string;
-  description: string;
-  buttonLabel: string;
+  description?: string;
+  buttonLabel?: string;
   createDialog?: React.ComponentType<{ closeDialog: () => void }>;
 };
 export function EmptyPage({
@@ -31,22 +31,24 @@ export function EmptyPage({
             <FolderMinus />
           </EmptyMedia>
           <EmptyTitle>{title}</EmptyTitle>
-          <EmptyDescription>{description}</EmptyDescription>
+          {description && <EmptyDescription>{description}</EmptyDescription>}
         </EmptyHeader>
-        <EmptyContent>
-          <div className="flex gap-2">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus />
-                  {buttonLabel}
-                </Button>
-              </DialogTrigger>
-              {CreateDialog && <CreateDialog closeDialog={() => {}} />}
-            </Dialog>
-          </div>
-        </EmptyContent>
+        {CreateDialog && (
+          <EmptyContent>
+            <div className="flex gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus />
+                    {buttonLabel}
+                  </Button>
+                </DialogTrigger>
+                <CreateDialog closeDialog={() => {}} />
+              </Dialog>
+            </div>
+          </EmptyContent>
+        )}
       </Empty>
     </div>
-  ); 
+  );
 }

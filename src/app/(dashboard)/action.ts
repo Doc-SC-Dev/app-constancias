@@ -8,18 +8,10 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
-import { act } from "react";
-import {
-  AcademicGrade,
-  Genre,
-  type Participant,
-  type ParticipantType,
-  type Student,
-} from "@/generated/prisma";
+import { AcademicGrade, Genre, type Student } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
-import type { ActivityDTO } from "@/lib/types/activity";
 import {
   Certificates,
   type CreateRequest,
@@ -118,7 +110,7 @@ const getAlumnoRegularText = async (user: User) => {
   <div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
   <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong><i>, Director del Programa de 
 Doctorado en Ciencias Médicas, de la Universidad de La Frontera, deja 
-constancia que el <strong>${user.genre === Genre.MALE ? "Sr." : "Sra."} ${user.name}</strong>, Matrícula Nº <strong>${data.id}</strong>, 
+constancia que <strong>${user.genre === Genre.MALE ? "el Sr." : "la Sra."} ${user.name}</strong>, Matrícula Nº <strong>${data.id}</strong>, 
 es alumno regular de nuestro programa, desde el año <strong>${data.admisionDate.getFullYear()}</strong> a la fecha. 
 </i></div>`;
 };

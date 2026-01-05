@@ -46,9 +46,9 @@ interface DataTableProps<TData> {
   }) => Promise<PaginationResponse<TData>>;
 
   createDialog?: React.ComponentType<{ closeDialog: () => void }>;
-  buttonLabel: string;
+  buttonLabel?: string;
   emptyTitle: string;
-  emptyDescription: string;
+  emptyDescription?: string;
   onDialog?: boolean;
 }
 
