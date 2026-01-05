@@ -13,7 +13,6 @@ export default function UserActivitiesTable({
     <div className="mt-4">
       <h3 className="text-lg font-semibold mb-4">Actividades</h3>
       <DataTable
-        onDialog
         columns={columns}
         queryFn={({ pageParam }) => listUserActivities({ pageParam, userId })}
         queryKey="list-user-activity"

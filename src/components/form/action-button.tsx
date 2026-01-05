@@ -1,5 +1,5 @@
 "use client";
-import { Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
+import { Download, Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,12 +13,14 @@ type ActionButtonProps = {
   onView?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onDownload?: () => void;
 };
 
 export default function ActionButton({
   onView,
   onEdit,
   onDelete,
+  onDownload,
 }: ActionButtonProps) {
   // Determine available actions
   const actions = [];
@@ -37,6 +39,14 @@ export default function ActionButton({
       icon: <Edit className="h-4 w-4" />,
       onClick: onEdit,
       type: "edit",
+    });
+  }
+  if (onDownload) {
+    actions.push({
+      label: "Descargar",
+      icon: <Download className="h-4 w-4" />,
+      onClick: onDownload,
+      type: "download",
     });
   }
   if (onDelete) {
@@ -93,6 +103,9 @@ export default function ActionButton({
           >
             {action.type === "view" && <Eye className="mr-2 h-4 w-4" />}
             {action.type === "edit" && <Edit className="mr-2 h-4 w-4" />}
+            {action.type === "download" && (
+              <Download className="mr-2 h-4 w-4" />
+            )}
             {action.type === "delete" && (
               <Trash className="mr-2 h-4 w-4 text-destructive" />
             )}

@@ -8,7 +8,7 @@ import ViewDialog from "./history-view-dialog";
 export const columns: ColumnDef<HistoryEntry>[] = [
   {
     accessorKey: "certName",
-    header: "Constancia",
+    header: "Tipo de Constancia",
     cell: ({ row }) => {
       const certName = row.original.certName;
       return <span className="flex flex-1 items-center">{certName}</span>;
@@ -17,23 +17,13 @@ export const columns: ColumnDef<HistoryEntry>[] = [
 
   {
     accessorKey: "name",
-    header: "Nombre",
+    header: "Nombre de Usuario",
     cell: ({ row }) => {
       const name = row.original.name;
       return <span className="flex flex-1 items-center ">{name}</span>;
     },
   },
 
-  {
-    accessorKey: "rut",
-    header: () => <span className="flex flex-1 justify-center">Rut</span>,
-    cell: ({ row }) => {
-      const rut = row.original.rut;
-      return (
-        <span className="flex flex-1 items-center justify-center">{rut}</span>
-      );
-    },
-  },
 
   {
     accessorKey: "role",

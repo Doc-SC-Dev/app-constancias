@@ -80,6 +80,7 @@ export const getActivitiesPaginated = async ({
     session.user.role || "",
   );
   const start = pageParam * PAGE_SIZE;
+
   const [count, data] = await db.$transaction([
     db.activity.count({
       where: isAdmin
@@ -135,6 +136,7 @@ export const getActivitiesPaginated = async ({
       },
     }),
   ]);
+
   return {
     data: data.map<ActivityDTO>((activity) => ({
       activityType: activity.activityType.name,
