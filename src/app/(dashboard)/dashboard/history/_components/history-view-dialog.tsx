@@ -27,9 +27,7 @@ export default function ViewDialog({
   const handleDownload = async () => {
     setLoading(true);
     try {
-      //console.log("Starting download request...");
       const { success, data, message } = await downloadCertificate(user.id);
-     // console.log("Download response:", { success, message, dataLength: data?.length });
 
       if (success && data) {
         const link = document.createElement("a");

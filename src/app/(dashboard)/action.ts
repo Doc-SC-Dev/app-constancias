@@ -101,7 +101,6 @@ export const createRequest = async (data: {
 };
 
 export const downloadCertificate = async (requestId: string) => {
- // console.log(`[downloadCertificate] Starting for requestId: ${requestId}`);
   try {
     await isAuthenticated();
 
@@ -131,34 +130,24 @@ export const downloadCertificate = async (requestId: string) => {
     });
 
     if (!request) {
-     // console.log(`[downloadCertificate] Request not found for id: ${requestId}`);
       return {
         success: false,
         message: "Solicitud no encontrada",
       };
     }
 
- /*    console.log(`[downloadCertificate] Request found: ${JSON.stringify({
-      id: request.id,
-      certName: request.certificate.name,
-      userId: request.userId
-    })}`); */
-
     const createRequestData: CreateRequest = {
       certificateName: request.certificate.name,
       activityId: request.activityId ?? undefined,
     };
 
-   // console.log("[downloadCertificate] Calling createPdf...");
     const pdf = await createPdf(request.user as User, createRequestData);
-    //console.log("[downloadCertificate] PDF generated successfully");
 
     return {
       success: true,
       data: pdf,
     };
   } catch (error) {
-    //console.error(`[downloadCertificate] Error:`, error);
     return {
       success: false,
       message: error instanceof Error ? error.message : "Error al descargar el certificado",
@@ -299,7 +288,6 @@ const getCertificateText = async (user: User, certificate: CreateRequest) => {
 };
 
 const createPdf = async (user: User, certificate: CreateRequest) => {
-  //console.log("[createPdf] Starting PDF generation...");
   const templatePath = path.join(
     process.cwd(),
     "public",
@@ -316,16 +304,12 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
     "Roboto.ttf",
   );
 
-  //console.log(`[createPdf] Paths - Template: ${templatePath}, Font: ${robotoPath}`);
-
   const templateBytes = readFileSync(templatePath);
   const robotoBytes = readFileSync(robotoPath);
-  //console.log("[createPdf] Files read successfully");
 
   const pdfDoc = await PDFDocument.load(templateBytes);
   pdfDoc.registerFontkit(fontkit);
 
-  //console.log("[createPdf] Launching puppeteer...");
   const browser = await puppeteer.launch({
     headless: true,
     args: [
@@ -336,10 +320,8 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
     ],
   });
   const page = await browser.newPage();
-  //console.log("[createPdf] Puppeteer page created");
 
   const text = await getCertificateText(user, certificate);
- // console.log(`[createPdf] Certificate text generated (length: ${text.length})`);
 
   await page.addStyleTag({
     content: `
@@ -363,8 +345,7 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
   });
 
   await browser.close();
-  //console.log("[createPdf] Puppeteer closed, patch generated");
-
+  
   const parcheDoc = await PDFDocument.load(parcheBuffer);
   const [parchePage] = await pdfDoc.copyPages(parcheDoc, [0]);
   const embeddedPage = await pdfDoc.embedPage(parchePage);
@@ -392,8 +373,6 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
     yScale: 1,
   });
 
-  // 4. Retornar el PDF final como Base64 string
   const pdfFinalBytes = await pdfDoc.save();
-  //console.log(`[createPdf] Final PDF saved (size: ${pdfFinalBytes.byteLength})`);
   return Buffer.from(pdfFinalBytes).toString("base64");
 };
