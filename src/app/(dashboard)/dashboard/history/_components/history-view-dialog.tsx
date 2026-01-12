@@ -26,24 +26,42 @@ export default function ViewDialog({
 
   const handleDownload = async () => {
     setLoading(true);
-    const { success, data, message } = await downloadCertificate(user.id);
-    if (success && data) {
-      const link = document.createElement("a");
-      link.href = `data:application/pdf;base64,${data}`;
-      const date = new Date(user.createdAt).toLocaleDateString("es-CL").replace(/\//g, "-");
-      link.download = `${certName || "constancia"}-${date}.pdf`;
-      link.click();
-      toast.success("Certificado descargado exitosamente");
-    } else {
-      toast.error(message || "Error al descargar el certificado");
+    try {
+      //console.log("Starting download request...");
+      const { success, data, message } = await downloadCertificate(user.id);
+     // console.log("Download response:", { success, message, dataLength: data?.length });
+
+      if (success && data) {
+        const link = document.createElement("a");
+        link.href = `data:application/pdf;base64,${data}`;
+        const date = new Date(user.createdAt)
+          .toLocaleDateString("es-CL")
+          .replace(/\//g, "-");
+        link.download = `${certName || "constancia"}-${date}.pdf`;
+        link.click();
+        toast.success("Certificado descargado exitosamente");
+      } else {
+        toast.error(message || "Error al descargar el certificado");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Ocurrió un error inesperado al descargar");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <DialogContent className="max-w-4xl flex flex-col">
       <DialogHeader>
-        <DialogTitle>Detalle de Constancia</DialogTitle>
+        {/* ------------------------------------------------------------------- */}
+        <DialogTitle className="flex items-center justify-between">
+          Detalle de Constancia
+          <span className="bg-green-100 text-green-800 text-base font-normal px-2.5 py-0.5 rounded border border-green-400">
+            Aprovada
+          </span>
+        </DialogTitle>
+        {/* ------------------------------------------------------------------- */}
       </DialogHeader>
       <div className="flex flex-col gap-6 py-4">
         <div className="grid grid-cols-2 gap-4">

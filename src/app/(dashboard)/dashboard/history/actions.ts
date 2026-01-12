@@ -43,8 +43,25 @@ export const getHistoryPaginated = async ({
         | "superadmin"
         | "guest") || "guest",
     certName: request.certificate.name,
+    state: request.state,
     createdAt: request.createdAt,
     updatedAt: request.updatedAt,
   }));
   return { data: historyData, nextPage: pageParam + 1, totalRows: count };
+};
+
+export const updateRequestState = async (
+  requestId: string,
+  newState: "PENDING" | "APPROVED" | "REJECTED",
+) => {
+  try {
+    await db.request.update({
+      where: { id: requestId },
+      data: { state: newState },
+    });
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Error al actualizar el estado" };
+  }
 };
