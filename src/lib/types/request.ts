@@ -15,4 +15,4 @@ export enum Certificates {
   EXAMEN_CALIFICACION = "Constancia de examen de calificación",
   COLABORACION = "Constancia de colaboración",
   TESIS = "Constancia de tesis",
-}
+} 

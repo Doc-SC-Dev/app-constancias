@@ -101,50 +101,58 @@ export const createRequest = async (data: {
 };
 
 export const downloadCertificate = async (requestId: string) => {
- await isAuthenticated();
+  try {
+    await isAuthenticated();
 
-  const request = await db.request.findUnique({
-    where: {
-      id: requestId,
-    },
-    include: {
-      user: true,
-      certificate: true,
-      activity: {
-        include: {
-          participants: {
-            include: {
-              user: {
-                include: {
-                  student: true,
+    const request = await db.request.findUnique({
+      where: {
+        id: requestId,
+      },
+      include: {
+        user: true,
+        certificate: true,
+        activity: {
+          include: {
+            participants: {
+              include: {
+                user: {
+                  include: {
+                    student: true,
+                  },
                 },
+                type: true,
               },
-              type: true,
             },
+            activityType: true,
           },
-          activityType: true,
         },
       },
-    },
-  });
+    });
 
-  if (!request) {
+    if (!request) {
+      return {
+        success: false,
+        message: "Solicitud no encontrada",
+      };
+    }
+
+    const createRequestData: CreateRequest = {
+      certificateName: request.certificate.name,
+      activityId: request.activityId ?? undefined,
+    };
+
+    const pdf = await createPdf(request.user as User, createRequestData);
+
+    return {
+      success: true,
+      data: pdf,
+    };
+  } catch (error) {
     return {
       success: false,
-      message: "Solicitud no encontrada",
+      message: error instanceof Error ? error.message : "Error al descargar el certificado",
     };
   }
-
-  const createRequestData: CreateRequest = {
-    certificateName: request.certificate.name,
-    activityId: request.activityId ?? undefined,
-  };
-  const pdf = await createPdf(request.user as User, createRequestData);
-
-  return {
-    success: true,
-    data: pdf,
-  };
 };
 
 const getAlumnoRegularText = async (user: User) => {
@@ -314,6 +322,7 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
   const page = await browser.newPage();
 
   const text = await getCertificateText(user, certificate);
+
   await page.addStyleTag({
     content: `
     @font-face {
@@ -336,7 +345,7 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
   });
 
   await browser.close();
-
+  
   const parcheDoc = await PDFDocument.load(parcheBuffer);
   const [parchePage] = await pdfDoc.copyPages(parcheDoc, [0]);
   const embeddedPage = await pdfDoc.embedPage(parchePage);
@@ -364,7 +373,6 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
     yScale: 1,
   });
 
-  // 4. Retornar el PDF final como Base64 string
   const pdfFinalBytes = await pdfDoc.save();
   return Buffer.from(pdfFinalBytes).toString("base64");
 };
