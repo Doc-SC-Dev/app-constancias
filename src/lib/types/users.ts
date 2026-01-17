@@ -146,3 +146,9 @@ export const resetPasswordSchema = type({
 });
 
 export type ResetPassword = typeof resetPasswordSchema.infer;
+
+export type UserRequestDTO = {
+  name: string;
+  createdAt: Date;
+  state: string;
+};

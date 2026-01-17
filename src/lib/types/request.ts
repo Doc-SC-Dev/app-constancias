@@ -1,4 +1,5 @@
 import { type } from "arktype";
+import type { RequestState } from "@/generated/prisma";
 
 export const createRequestSchema = type({
   certificateName: "string",
@@ -16,3 +17,10 @@ export enum Certificates {
   COLABORACION = "Constancia de colaboración",
   TESIS = "Constancia de tesis",
 }
+
+export type UserRequest = {
+  id: string;
+  name: string;
+  createdAt: Date;
+  state: RequestState;
+};

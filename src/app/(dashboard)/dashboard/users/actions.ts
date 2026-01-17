@@ -9,6 +9,7 @@ import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
+import type { UserRequest } from "@/lib/types/request";
 import type { User, UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
 
 export async function updateUser(userData: UserEdit, id: string) {
@@ -234,3 +235,59 @@ export const listUserActivities = async ({
   }));
   return { data: participants, nextPage: pageParam + 1, totalRows: count };
 };
+
+export async function getUserById(id: string): Promise<User> {
+  const user = await db.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      role: true,
+      academicGrade: true,
+      genre: true,
+      rut: true,
+      banned: true,
+    },
+  });
+  if (!user) throw new Error("Usuario no encontrado");
+  return user as User;
+}
+
+export async function listUserRequest({
+  pageParam,
+  userId,
+}: {
+  pageParam: number;
+  userId: string;
+}): Promise<PaginationResponse<UserRequest>> {
+  const [count, data] = await db.$transaction([
+    db.request.count({ where: { userId } }),
+    db.request.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        id: true,
+        state: true,
+        createdAt: true,
+        certificate: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    }),
+  ]);
+  return {
+    data: data.map((request) => ({
+      id: request.id,
+      name: request.certificate.name,
+      createdAt: request.createdAt,
+      state: request.state,
+    })),
+    nextPage: pageParam + 1,
+    totalRows: count,
+  };
+}
