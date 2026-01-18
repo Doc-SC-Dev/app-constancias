@@ -133,12 +133,15 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
     cell: ({ row }) => {
       const entry = row.original;
       const isDownloadDisabled = entry.state === "PENDING" || entry.state === "REJECTED";
+      const canViewReason = entry.state === "REJECTED";
+
       return (
         <div className="flex flex-1 items-center justify-center">
           <ActionDialogManager<HistoryEntry>
             data={entry}
             isHistory={true}
             isDownloadDisabled={isDownloadDisabled}
+            canViewReason={canViewReason}
           />
         </div>
       );

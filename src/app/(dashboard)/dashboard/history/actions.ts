@@ -59,6 +59,7 @@ export const getHistoryPaginated = async ({
     createdAt: request.createdAt,
     updatedAt: request.updatedAt,
     link: request.otherRequest?.link || undefined,
+    rejectionReason: request.otherRequest?.rejectionReason || undefined,
   }));
   return { data: historyData, nextPage: pageParam + 1, totalRows: count };
 };
@@ -67,11 +68,12 @@ export const updateRequestState = async (
   requestId: string,
   newState: "PENDING" | "APPROVED" | "REJECTED",
   link?: string,
+  rejectionReason?: string,
 ) => {
   try {
     const updateData: any = { state: newState };
 
-    if (link !== undefined) {
+    if (link !== undefined || rejectionReason !== undefined) {
       const request = await db.request.findUnique({
         where: { id: requestId },
         include: { otherRequest: true }
@@ -80,7 +82,10 @@ export const updateRequestState = async (
       if (request?.otherRequest) {
         await db.otherRequest.update({
           where: { id: request.otherRequest.id },
-          data: { link }
+          data: {
+            link: link,
+            rejectionReason: rejectionReason
+          }
         });
       }
     }

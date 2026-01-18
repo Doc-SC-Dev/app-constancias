@@ -15,6 +15,7 @@ type ActionButtonProps = {
   onEdit?: () => void;
   onDelete?: () => void;
   onDownload?: () => void;
+  onViewReason?: () => void;
   onDownloadDisabled?: boolean;
 };
 
@@ -23,6 +24,7 @@ export default function ActionButton({
   onEdit,
   onDelete,
   onDownload,
+  onViewReason,
   onDownloadDisabled,
 }: ActionButtonProps) {
   // Determine available actions
@@ -52,6 +54,14 @@ export default function ActionButton({
       type: "download",
     });
   }
+  if (onViewReason) {
+    actions.push({
+      label: "Ver Motivo",
+      icon: <Eye className="h-4 w-4" />,
+      onClick: onViewReason,
+      type: "view-reason",
+    });
+  }
   if (onDelete) {
     actions.push({
       label: "Eliminar",
@@ -68,6 +78,7 @@ export default function ActionButton({
     const action = actions[0];
     const isDisabled = action.type === "download" && onDownloadDisabled;
 
+    /* estas son variables de estilo */
     return (
       <Button
         variant="ghost"
@@ -114,6 +125,7 @@ export default function ActionButton({
           >
             {action.type === "view" && <Eye className="mr-2 h-4 w-4" />}
             {action.type === "edit" && <Edit className="mr-2 h-4 w-4" />}
+            {action.type === "view-reason" && <Eye className="mr-2 h-4 w-4" />}
             {action.type === "download" && (
               <Download className="mr-2 h-4 w-4" />
             )}

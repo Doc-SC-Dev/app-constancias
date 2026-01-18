@@ -18,6 +18,7 @@ export const historyEntrySchema = type({
   createdAt: "Date",
   updatedAt: "Date",
   "link?": "string",
+  "rejectionReason?": "string",
 });
 
 export type HistoryEntry = typeof historyEntrySchema.infer;
