@@ -5,6 +5,7 @@ import { AlertCircleIcon } from "lucide-react";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { FormInput } from "@/components/form/FormInput";
 import { FormSelect } from "@/components/form/FormSelect";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export default function CreateRequestDialog() {
     defaultValues: {
       certificateName: Certificates.ALUMNO_REGULAR,
       activityId: "",
+      description: "",
     },
     shouldUnregister: true,
   });
@@ -56,12 +58,9 @@ export default function CreateRequestDialog() {
     } = await createRequest({
       certificateName: data.certificateName,
       activity: activityById.get(data.activityId),
+      description: data.description,
     });
     if (success) {
-      const link = document.createElement("a");
-      link.href = `data:application/pdf;base64,${pdf}`;
-      link.download = `${data.certificateName}.pdf`;
-      link.click();
       toast.success(message);
       form.reset();
     } else {
@@ -106,6 +105,17 @@ export default function CreateRequestDialog() {
                 ))}
               </FormSelect>
             )}
+            {!Object.values(Certificates).includes(
+              certificate as Certificates,
+            ) && (
+                <FormInput
+                  control={form.control}
+                  name="description"
+                  label="Descripción"
+                  description="Describa el motivo de la solicitud."
+                  placeholder="Ingrese una descripción..."
+                />
+              )}
           </FieldGroup>
         )}
         {error && (

@@ -12,6 +12,8 @@ import { Dialog } from "../ui/dialog";
 import ActionButton from "./action-button";
 import { downloadCertificate } from "@/app/(dashboard)/action";
 import { toast } from "sonner";
+import HistoryViewDialog from "@/app/(dashboard)/dashboard/history/_components/history-view-dialog";
+import HistoryStateDialog from "@/app/(dashboard)/dashboard/history/_components/history-state-dialog";
 
 type ActionDialogProps<T> = {
   data?: T;
@@ -26,6 +28,8 @@ type ActionDialogProps<T> = {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost";
   className?: string;
   isHistory?: boolean;
+  canViewReason?: boolean;
+  isDownloadDisabled?: boolean;
 };
 
 export default function ActionDialogManager<T>({
@@ -39,6 +43,8 @@ export default function ActionDialogManager<T>({
   variant = "default",
   className = "",
   isHistory = false,
+  isDownloadDisabled = false,
+  canViewReason = false,
 }: ActionDialogProps<T>) {
   const [showDialog, setShowDialog] = useState<boolean>(false);
   const [action, setAction] = useState<Action>(Actions.VIEW);
@@ -49,6 +55,12 @@ export default function ActionDialogManager<T>({
 
   const handleDownload = async () => {
     if (!data || !(data as any).id) return;
+
+    if ((data as any).link) {
+      window.open((data as any).link, '_blank');
+      return;
+    }
+
     const promise = async () => {
       const { success, data: base64, message } = await downloadCertificate(
         (data as any).id,
@@ -68,6 +80,11 @@ export default function ActionDialogManager<T>({
       success: (data) => data,
       error: (err) => err.message,
     });
+  };
+
+  const handleViewReason = () => {
+    setAction(Actions.VIEW_REASON);
+    setShowDialog(true);
   };
 
   return (
@@ -98,7 +115,9 @@ export default function ActionDialogManager<T>({
               }
               : undefined
           }
-          onDownload={isHistory ? handleDownload : undefined}
+          onDownload={isHistory && !canViewReason ? handleDownload : undefined}
+          onViewReason={canViewReason ? handleViewReason : undefined}
+          onDownloadDisabled={isDownloadDisabled}
         />
       ) : (
         <Button
@@ -121,6 +140,12 @@ export default function ActionDialogManager<T>({
             )}
             {action === Actions.EDIT && EditDialog && (
               <EditDialog data={data} closeDialog={closeDialog} />
+            )}
+            {action === Actions.VIEW_REASON && (
+              <HistoryViewDialog data={data as any} closeDialog={closeDialog} />
+            )}
+            {action === Actions.UPDATE_STATE && (
+              <HistoryStateDialog data={data as any} closeDialog={closeDialog} />
             )}
           </>
         ) : (

@@ -9,16 +9,27 @@ export const getHistoryPaginated = async ({
   pageParam,
   user,
   isAdmin,
+  filter,
 }: {
   pageParam: number;
   user: User;
   isAdmin: boolean;
+  filter?: "standard" | "other";
 }): Promise<PaginationResponse<HistoryEntry>> => {
   const start = pageParam * PAGE_SIZE;
+
+  const where: any = isAdmin ? {} : { userId: user.id };
+
+  if (filter === "standard") {
+    where.otherRequest = { is: null };
+  } else if (filter === "other") {
+    where.otherRequest = { isNot: null };
+  }
+
   const [count, data] = await db.$transaction([
-    db.request.count({ where: isAdmin ? undefined : { userId: user.id } }),
+    db.request.count({ where }),
     db.request.findMany({
-      where: isAdmin ? undefined : { userId: user.id },
+      where,
       take: PAGE_SIZE,
       skip: start,
       orderBy: {
@@ -27,6 +38,7 @@ export const getHistoryPaginated = async ({
       include: {
         user: true,
         certificate: true,
+        otherRequest: true,
       },
     }),
   ]);
@@ -46,6 +58,8 @@ export const getHistoryPaginated = async ({
     state: request.state,
     createdAt: request.createdAt,
     updatedAt: request.updatedAt,
+    link: request.otherRequest?.link || undefined,
+    rejectionReason: request.otherRequest?.rejectionReason || undefined,
   }));
   return { data: historyData, nextPage: pageParam + 1, totalRows: count };
 };
@@ -53,11 +67,32 @@ export const getHistoryPaginated = async ({
 export const updateRequestState = async (
   requestId: string,
   newState: "PENDING" | "APPROVED" | "REJECTED",
+  link?: string,
+  rejectionReason?: string,
 ) => {
   try {
+    const updateData: any = { state: newState };
+
+    if (link !== undefined || rejectionReason !== undefined) {
+      const request = await db.request.findUnique({
+        where: { id: requestId },
+        include: { otherRequest: true }
+      });
+
+      if (request?.otherRequest) {
+        await db.otherRequest.update({
+          where: { id: request.otherRequest.id },
+          data: {
+            link: link,
+            rejectionReason: rejectionReason
+          }
+        });
+      }
+    }
+
     await db.request.update({
       where: { id: requestId },
-      data: { state: newState },
+      data: updateData,
     });
     return { success: true };
   } catch (error) {

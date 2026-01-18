@@ -1,5 +1,6 @@
 "use client";
 import { Download, Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +15,8 @@ type ActionButtonProps = {
   onEdit?: () => void;
   onDelete?: () => void;
   onDownload?: () => void;
+  onViewReason?: () => void;
+  onDownloadDisabled?: boolean;
 };
 
 export default function ActionButton({
@@ -21,6 +24,8 @@ export default function ActionButton({
   onEdit,
   onDelete,
   onDownload,
+  onViewReason,
+  onDownloadDisabled,
 }: ActionButtonProps) {
   // Determine available actions
   const actions = [];
@@ -49,6 +54,14 @@ export default function ActionButton({
       type: "download",
     });
   }
+  if (onViewReason) {
+    actions.push({
+      label: "Ver Motivo",
+      icon: <Eye className="h-4 w-4" />,
+      onClick: onViewReason,
+      type: "view-reason",
+    });
+  }
   if (onDelete) {
     actions.push({
       label: "Eliminar",
@@ -63,16 +76,25 @@ export default function ActionButton({
 
   if (actions.length === 1) {
     const action = actions[0];
+    const isDisabled = action.type === "download" && onDownloadDisabled;
+
+    /* estas son variables de estilo */
     return (
       <Button
         variant="ghost"
+        /* variant={action.type === "download" ? "default" : "ghost"} */
         size="default"
-        onClick={action.onClick}
-        className={
+        onClick={isDisabled ? undefined : action.onClick}
+        disabled={isDisabled}
+        className={cn(
           action.type === "delete"
             ? "text-destructive hover:text-destructive"
-            : ""
-        }
+            : "",
+          isDisabled ? "opacity-50 pointer-events-none" : ""
+          /* : action.type === "download"
+            ? "text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+            : "" */
+        )}
         title={action.label}
       >
         {action.icon}
@@ -103,6 +125,7 @@ export default function ActionButton({
           >
             {action.type === "view" && <Eye className="mr-2 h-4 w-4" />}
             {action.type === "edit" && <Edit className="mr-2 h-4 w-4" />}
+            {action.type === "view-reason" && <Eye className="mr-2 h-4 w-4" />}
             {action.type === "download" && (
               <Download className="mr-2 h-4 w-4" />
             )}

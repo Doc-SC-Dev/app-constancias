@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { PaginationResponse } from "@/lib/types/pagination";
+import { cn } from "@/lib/utils";
 import { EmptyPage } from "./empty-page";
 import { Spinner } from "./ui/spinner";
 
@@ -196,7 +197,10 @@ export function DataTable<TData>({
                   return (
                     <TableHead
                       key={header.id}
-                      className="flex flex-1 items-center"
+                      className={cn(
+                        "flex items-center",
+                        (header.column.columnDef.meta as any)?.className ?? "flex-1"
+                      )}
                     >
                       {header.isPlaceholder
                         ? null
@@ -233,7 +237,10 @@ export function DataTable<TData>({
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="flex w-full"
+                        className={cn(
+                          "flex",
+                          (cell.column.columnDef.meta as any)?.className ?? "flex-1"
+                        )}
                         style={{}}
                       >
                         {flexRender(
