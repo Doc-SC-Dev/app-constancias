@@ -1,5 +1,6 @@
 "use client";
 import { Download, Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ type ActionButtonProps = {
   onEdit?: () => void;
   onDelete?: () => void;
   onDownload?: () => void;
+  onDownloadDisabled?: boolean;
 };
 
 export default function ActionButton({
@@ -21,6 +23,7 @@ export default function ActionButton({
   onEdit,
   onDelete,
   onDownload,
+  onDownloadDisabled,
 }: ActionButtonProps) {
   // Determine available actions
   const actions = [];
@@ -63,16 +66,24 @@ export default function ActionButton({
 
   if (actions.length === 1) {
     const action = actions[0];
+    const isDisabled = action.type === "download" && onDownloadDisabled;
+
     return (
       <Button
         variant="ghost"
+        /* variant={action.type === "download" ? "default" : "ghost"} */
         size="default"
-        onClick={action.onClick}
-        className={
+        onClick={isDisabled ? undefined : action.onClick}
+        disabled={isDisabled}
+        className={cn(
           action.type === "delete"
             ? "text-destructive hover:text-destructive"
-            : ""
-        }
+            : "",
+          isDisabled ? "opacity-50 pointer-events-none" : ""
+          /* : action.type === "download"
+            ? "text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+            : "" */
+        )}
         title={action.label}
       >
         {action.icon}

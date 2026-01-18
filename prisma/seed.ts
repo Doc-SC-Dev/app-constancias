@@ -123,6 +123,23 @@ async function main() {
       });
       console.log("Certificates created successfully");
     }
+
+    const testCertName = "Constancia de prueba";
+    const testCert = await db.certificate.findUnique({
+      where: { name: testCertName },
+    });
+
+    if (!testCert) {
+      console.log(`Creating ${testCertName}...`);
+      await db.certificate.create({
+        data: {
+          name: testCertName,
+          pdfLink: "",
+          id: uuid(),
+        },
+      });
+      console.log(`${testCertName} created successfully`);
+    }
     // create Activity types of table is emtpty
     console.log("Checking activity types...");
     const countActivityType = await db.activityType.count();

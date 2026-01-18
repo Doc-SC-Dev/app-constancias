@@ -26,6 +26,7 @@ type ActionDialogProps<T> = {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost";
   className?: string;
   isHistory?: boolean;
+  isDownloadDisabled?: boolean;
 };
 
 export default function ActionDialogManager<T>({
@@ -39,6 +40,7 @@ export default function ActionDialogManager<T>({
   variant = "default",
   className = "",
   isHistory = false,
+  isDownloadDisabled = false,
 }: ActionDialogProps<T>) {
   const [showDialog, setShowDialog] = useState<boolean>(false);
   const [action, setAction] = useState<Action>(Actions.VIEW);
@@ -49,6 +51,12 @@ export default function ActionDialogManager<T>({
 
   const handleDownload = async () => {
     if (!data || !(data as any).id) return;
+
+    if ((data as any).link) {
+      window.open((data as any).link, '_blank');
+      return;
+    }
+
     const promise = async () => {
       const { success, data: base64, message } = await downloadCertificate(
         (data as any).id,
@@ -99,6 +107,7 @@ export default function ActionDialogManager<T>({
               : undefined
           }
           onDownload={isHistory ? handleDownload : undefined}
+          onDownloadDisabled={isDownloadDisabled}
         />
       ) : (
         <Button

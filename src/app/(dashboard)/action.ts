@@ -57,9 +57,15 @@ export const getRequestsTypes = async () => {
 export const createRequest = async (data: {
   certificateName: string;
   activity: { id: string; name: string };
+  description?: string;
 }) => {
   const session = await isAuthenticated();
   const { user } = session;
+
+  const isStandard = Object.values(Certificates).includes(
+    data.certificateName as Certificates
+  );
+
   const {
     success,
     error,
@@ -84,19 +90,29 @@ export const createRequest = async (data: {
             name: data.certificateName,
           },
         },
-        state: "READY",
+        otherRequest: !isStandard
+          ? {
+            create: {
+              name: data.certificateName,
+              description: data.description ?? "",
+              userId: user.id,
+            },
+          }
+          : undefined,
+        state: !isStandard
+          ? "PENDING"
+          : "READY",
       },
     }),
   );
 
   if (!success) return { success: false, message: error };
 
-  const pdf = await createPdf(user, data);
   revalidatePath("/dashboard/history");
   return {
     success: true,
     message: `Solicitud creada exitosamente con id ${request.id}`,
-    data: pdf,
+    data: null,
   };
 };
 
@@ -345,7 +361,7 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
   });
 
   await browser.close();
-  
+
   const parcheDoc = await PDFDocument.load(parcheBuffer);
   const [parchePage] = await pdfDoc.copyPages(parcheDoc, [0]);
   const embeddedPage = await pdfDoc.embedPage(parchePage);

@@ -14,9 +14,10 @@ export const historyEntrySchema = type({
   rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9kK]$/,
   role: roles,
   certName: "string >= 1",
-  state: "string", // RequestState: APPROVED, REJECTED, PENDING
+  state: "string",
   createdAt: "Date",
   updatedAt: "Date",
+  "link?": "string",
 });
 
 export type HistoryEntry = typeof historyEntrySchema.infer;
