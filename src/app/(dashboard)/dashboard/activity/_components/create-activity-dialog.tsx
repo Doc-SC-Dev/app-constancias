@@ -2,6 +2,7 @@
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarIcon, Trash } from "lucide-react";
+import { useEffect } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormInput } from "@/components/form/FormInput";
@@ -54,6 +55,7 @@ import {
 } from "@/lib/types/activity";
 import { listUsersAdmin } from "../../users/actions";
 import { createActivity, getActivityTypes } from "../actions";
+import { UserSelect } from "./user-select";
 
 type CreateActivityDialogProps = {
   closeDialog: () => void;
@@ -93,7 +95,31 @@ export default function CreateActivityDialog({
     fields: participants,
     append: addParticipant,
     remove: removeParticipant,
+    replace: replaceParticipants,
   } = useFieldArray({ control: form.control, name: "participants" });
+
+  useEffect(() => {
+    if (!activityType) {
+      replaceParticipants([]);
+      return;
+    }
+
+    const activityConfig = activityTypes?.find(
+      (aType) => aType.id === activityType,
+    );
+    if (activityConfig) {
+      const initialParticipants = activityConfig.participantTypes.map<
+        ActivityCreateDTO["participants"][0]
+      >((p) => ({
+        id: "",
+        type: p.id,
+        hours: 0,
+        bloqueado: p.required,
+      }));
+
+      replaceParticipants(initialParticipants);
+    }
+  }, [activityType, replaceParticipants, activityTypes]);
 
   const onSubmit = async (data: ActivityCreateDTO) => {
     const { success, message } = await createActivity({ activity: data });
@@ -109,6 +135,7 @@ export default function CreateActivityDialog({
       });
     }
   };
+
   return (
     <DialogContent className="sm:max-w-md md:max-w-xl lg:max-w-2xl">
       <DialogHeader className="w-full">
@@ -186,46 +213,6 @@ export default function CreateActivityDialog({
             )}
           />
 
-          {/* <Controller
-              name="endAt"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldContent>
-                    <FieldLabel>Fecha de fin</FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        {...field}
-                        aria-invalid={fieldState.invalid}
-                        value={field.value.toLocaleDateString("es-CL")}
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button type="button" variant="ghost">
-                              <CalendarIcon />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent>
-                            <Calendar
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              mode="single"
-                              captionLayout="dropdown"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </FieldContent>
-                </Field>
-              )}
-            /> */}
-          {/* </div> */}
-
           <FieldSeparator />
 
           <FieldSet className="w-full">
@@ -252,6 +239,7 @@ export default function CreateActivityDialog({
                     id: "",
                     type: "",
                     hours: 0,
+                    bloqueado: false,
                   })
                 }
               >
@@ -275,26 +263,19 @@ export default function CreateActivityDialog({
                         <TableCell>
                           {isLoading && <Spinner />}
                           {users && (
-                            <FormSelect
+                            <UserSelect
+                              index={index}
+                              fieldName="participants"
+                              users={users}
                               control={form.control}
-                              name={`participants.${index}.id`}
-                            >
-                              {users.map((user) => {
-                                if (participants.find((p) => p.id === user.id))
-                                  return null;
-                                return (
-                                  <SelectItem value={user.id} key={user.id}>
-                                    {user.name}
-                                  </SelectItem>
-                                );
-                              })}
-                            </FormSelect>
+                            />
                           )}
                         </TableCell>
                         <TableCell>
                           <FormSelect
                             control={form.control}
                             name={`participants.${index}.type`}
+                            disabled={participant.bloqueado}
                           >
                             {activityTypes
                               ?.find((type) => type.id === activityType)
@@ -303,6 +284,9 @@ export default function CreateActivityDialog({
                                   value={participantType.id}
                                   key={participantType.id}
                                 >
+                                  {participantType.required && (
+                                    <b className="text-red-500">*</b>
+                                  )}{" "}
                                   {participantType.name}
                                 </SelectItem>
                               ))}
@@ -315,15 +299,17 @@ export default function CreateActivityDialog({
                           />
                         </TableCell>
                         <TableCell>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => removeParticipant(index)}
-                            aria-label={`Remove Participant ${index + 1}`}
-                          >
-                            <Trash />
-                          </Button>
+                          {!participant.bloqueado && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              onClick={() => removeParticipant(index)}
+                              aria-label={`Remove Participant ${index + 1}`}
+                            >
+                              <Trash />
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

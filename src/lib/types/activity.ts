@@ -40,7 +40,19 @@ const participantSchema = type({
   id: "string > 0",
   type: "string",
   hours: "number >= 1",
-}).array();
+  bloqueado: "boolean",
+})
+  .array()
+  .narrow((value, ctx) => {
+    const allUnique =
+      new Set<string>(value.map((v) => v.id)).size === value.length;
+    if (!allUnique)
+      return ctx.reject({
+        message: "No debes repetir participantes",
+        code: "predicate",
+      });
+    return true;
+  });
 
 export const activityEditSchema = type({
   name: "string",
@@ -53,10 +65,6 @@ export const activityEditSchema = type({
 
 export type ActivityParticipant = typeof participantSchema.infer;
 export type ActivityEdit = typeof activityEditSchema.infer;
-
-// export type ActivityWithUser = Activity & {
-//   professor: string;
-// };
 
 export const activityCreateSchema = type({
   name: "string > 1",

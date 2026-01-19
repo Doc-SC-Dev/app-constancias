@@ -195,6 +195,7 @@ export const getActivityTypes = async () => {
         select: {
           id: true,
           name: true,
+          required: true,
         },
       },
     },
