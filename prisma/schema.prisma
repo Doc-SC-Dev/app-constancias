@@ -130,10 +130,14 @@ model QualificationExamGrade {
 }
 
 model OtherRequest {
-  id     String @id @default(uuid())
-  userId String
-  name   String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String    @id @default(uuid())
+  userId          String
+  name            String
+  description     String
+  link            String?
+  rejectionReason String?
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requests        Request[]
 
   @@map("other_request")
 }
@@ -236,16 +240,18 @@ enum RequestState {
 }
 
 model Request {
-  id            String       @id @default(uuid())
-  userId        String
-  certificateId String
-  state         RequestState
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @default(now()) @updatedAt
-  user          User         @relation(fields: [userId], references: [id])
-  certificate   Certificate  @relation(fields: [certificateId], references: [id])
-  activityId    String?
-  activity      Activity?    @relation(fields: [activityId], references: [id])
+  id             String        @id @default(uuid())
+  userId         String
+  certificateId  String
+  state          RequestState
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  user           User          @relation(fields: [userId], references: [id])
+  certificate    Certificate   @relation(fields: [certificateId], references: [id])
+  activityId     String?
+  activity       Activity?     @relation(fields: [activityId], references: [id])
+  otherRequestId String?
+  otherRequest   OtherRequest? @relation(fields: [otherRequestId], references: [id])
 
   @@map("request")
 }
