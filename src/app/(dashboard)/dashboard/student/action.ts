@@ -29,6 +29,7 @@ export const listStudents = async ({
   return {
     data: students.map((student) => ({
       id: student.id,
+      studentId: student.studentId,
       name: student.user.name,
       email: student.user.email,
       isRegular: student.isRegularStudent,
@@ -49,7 +50,7 @@ export const updateRegularStudent = async ({
   const { success, error } = await withTryCatch<DbStudent>(
     db.student.update({
       where: {
-        id: studentId,
+        studentId,
       },
       data: {
         isRegularStudent: isRegular,

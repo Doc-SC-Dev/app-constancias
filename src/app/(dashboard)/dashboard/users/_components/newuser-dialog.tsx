@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/popover";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { AcademicGrade, Genre } from "@/generated/prisma";
+import { AcademicGrade, Gender, Role } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
@@ -55,12 +55,12 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
       defaultValues: {
         name: "",
         email: "",
-        role: Roles.GUEST,
+        role: Roles.STUDENT,
         rut: "",
         studentId: undefined,
         academicGrade: undefined,
         admissionDate: undefined,
-        gender: Genre.FEMALE,
+        gender: Gender.OTHER,
       },
       shouldUnregister: true,
     });
@@ -128,7 +128,7 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
               label="Género"
               description="Seleccione el género del nuevo usuario"
             >
-              {Object.values(Genre).map((gender) => (
+              {Object.values(Gender).map((gender) => (
                 <SelectItem value={gender} key={gender}>
                   {gender.toLowerCase()}
                 </SelectItem>
@@ -156,7 +156,7 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
               })}
             </FormSelect>
 
-            {role === "student" && (
+            {role === Role.STUDENT && (
               <>
                 <FieldSeparator />
                 <FormInput

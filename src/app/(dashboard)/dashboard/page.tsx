@@ -15,7 +15,7 @@ export default async function HomePage() {
   const cardData = Object.values(menus).filter(
     (menu) => menu.name !== "Inicio",
   );
-  const isAdmin = ["administrator", "superadmin"].includes(user.role as string);
+  const isAdmin = ["ADMINISTRATOR", "SUPERADMIN"].includes(user.role as string);
   const permissions: Record<string, boolean> = {
     Usuarios: isAdmin,
     Estudiantes: isAdmin,
@@ -46,6 +46,7 @@ export default async function HomePage() {
                 description={card.description}
                 icon={card.icon}
                 url={card.url}
+                user={user}
               />
             );
           })}

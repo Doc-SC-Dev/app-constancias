@@ -14,24 +14,18 @@ export const statement = {
 
 export const ac = createAccessControl(statement);
 
-export const student = ac.newRole({
+export const STUDENT = ac.newRole({
   ...userAc.statements,
   request: ["create", "read", "list"],
 });
 
-export const professor = ac.newRole({
+export const PROFESSOR = ac.newRole({
   ...userAc.statements,
   activity: ["read", "list"],
   request: ["create", "read", "list"],
 });
 
-export const guest = ac.newRole({
-  ...userAc.statements,
-  request: ["create", "read", "list"],
-  activity: ["read", "list"],
-});
-
-export const administrator = ac.newRole({
+export const ADMINISTRATOR = ac.newRole({
   ...adminAc.statements,
   activity: ["create", "read", "update", "list"],
   request: ["create", "read", "update", "list"],
@@ -39,7 +33,7 @@ export const administrator = ac.newRole({
   user: ["ban", "create", "update", "set-role", "set-password", "list", "get"],
 });
 
-export const superadmin = ac.newRole({
+export const SUPERADMIN = ac.newRole({
   ...adminAc.statements,
   activity: ["create", "read", "update", "delete", "list"],
   request: ["create", "read", "update", "delete", "list"],
@@ -47,11 +41,16 @@ export const superadmin = ac.newRole({
 });
 
 export enum Roles {
-  ADMIN = "administrator",
-  STUDENT = "student",
-  PROFESSOR = "professor",
-  SUPERADMIN = "superadmin",
-  GUEST = "guest",
+  ADMIN = "ADMINISTRATOR",
+  STUDENT = "STUDENT",
+  PROFESSOR = "PROFESSOR",
+  SUPERADMIN = "SUPERADMIN",
 }
 
 export type Role = `${Roles}`;
+
+type AdminRole = Roles.SUPERADMIN | Roles.ADMIN;
+
+export const isAdmin = (role: Role): role is AdminRole => {
+  return role === Roles.ADMIN || role === Roles.SUPERADMIN;
+};
