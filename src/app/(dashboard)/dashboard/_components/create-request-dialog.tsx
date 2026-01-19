@@ -2,7 +2,6 @@
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
-import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormSelect } from "@/components/form/FormSelect";
@@ -19,17 +18,29 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import type { Role } from "@/generated/prisma";
+import { isAdmin } from "@/lib/authorization/permissions";
 import {
   Certificates,
   type CreateRequest,
   createRequestSchema,
 } from "@/lib/types/request";
-import { createRequest, getRequestsTypes } from "../../action";
+import type { User } from "@/lib/types/users";
+import {
+  createRequest,
+  getNotAdminUsers,
+  getRequestsTypes,
+} from "../../action";
 
-export default function CreateRequestDialog() {
+export default function CreateRequestDialog({ user }: { user: User }) {
   const { data, error } = useQuery({
     queryKey: ["certificate-types"],
     queryFn: getRequestsTypes,
+  });
+
+  const { data: users, isLoading } = useQuery({
+    queryKey: ["get-none-admin-user"],
+    queryFn: getNotAdminUsers,
   });
 
   const form = useForm<CreateRequest>({
@@ -39,15 +50,12 @@ export default function CreateRequestDialog() {
     defaultValues: {
       certificateName: Certificates.ALUMNO_REGULAR,
       activityId: "",
+      userId: isAdmin(user.role as Role) ? "" : user.id,
     },
-    shouldUnregister: true,
+    shouldUnregister: false,
   });
   const certificate = form.watch("certificateName");
-  const activityById = useMemo(() => {
-    if (!data) return new Map();
-    return new Map(data.activities.map((activity) => [activity.id, activity]));
-  }, [data]);
-
+  const userId = form.watch("userId");
   const onSubmit = async (data: CreateRequest) => {
     const {
       success,
@@ -55,7 +63,8 @@ export default function CreateRequestDialog() {
       data: pdf,
     } = await createRequest({
       certificateName: data.certificateName,
-      activity: activityById.get(data.activityId),
+      activityId: data.activityId,
+      userId: data.userId ?? user.id,
     });
     if (success) {
       const link = document.createElement("a");
@@ -80,30 +89,61 @@ export default function CreateRequestDialog() {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         {data && (
           <FieldGroup>
-            <FormSelect
-              control={form.control}
-              name="certificateName"
-              label="Tipo de constancia"
-              description="Selecciona el tipo de constancia que deseas solicitar."
-            >
-              {data.certificates.map((certificate) => (
-                <SelectItem key={certificate.id} value={certificate.name}>
-                  {certificate.name}
-                </SelectItem>
-              ))}
-            </FormSelect>
-            {certificate !== Certificates.ALUMNO_REGULAR && (
+            {isAdmin(user.role as Role) && (
+              <FormSelect
+                control={form.control}
+                name="userId"
+                label="Usuario"
+                description="Seleccione un usuario crear una solicitud en su nombre"
+              >
+                {isLoading && !users && <Spinner />}
+                {users
+                  ? users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))
+                  : ""}
+              </FormSelect>
+            )}
+            {users && (userId || !isAdmin(user.role as Role)) && (
+              <FormSelect
+                control={form.control}
+                name="certificateName"
+                label="Tipo de constancia"
+                description="Selecciona el tipo de constancia que deseas solicitar."
+              >
+                {data.certificates.map((certificate) => {
+                  const user = users.find((user) => user.id === userId);
+                  if (certificate.roles.includes(user?.role as Role))
+                    return (
+                      <SelectItem key={certificate.id} value={certificate.name}>
+                        {certificate.name}
+                      </SelectItem>
+                    );
+                  else return "";
+                })}
+              </FormSelect>
+            )}
+            {users && userId && certificate !== Certificates.ALUMNO_REGULAR && (
               <FormSelect
                 control={form.control}
                 name="activityId"
                 label="Actividad"
                 description="Selecciona la actividad a la que deseas solicitar la constancia."
               >
-                {data.activities.map((activity) => (
-                  <SelectItem key={activity.id} value={activity.id}>
-                    {activity.name}
-                  </SelectItem>
-                ))}
+                {data.activities.map((activity) => {
+                  if (
+                    activity.participants.find((p) => p.userId === userId) !==
+                    undefined
+                  ) {
+                    return (
+                      <SelectItem key={activity.id} value={activity.id}>
+                        {activity.name}
+                      </SelectItem>
+                    );
+                  } else return "";
+                })}
               </FormSelect>
             )}
           </FieldGroup>
