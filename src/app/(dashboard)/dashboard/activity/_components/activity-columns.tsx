@@ -16,37 +16,32 @@ export const columns: ColumnDef<ActivityDTO>[] = [
     header: "Tipo",
     cell({ row }) {
       const type = row.original.activityType;
-      return <span>{type.replace(/_/g, " ").toLowerCase()}</span>;
-    },
-  },
-  {
-    accessorKey: "startAt",
-    header: () => (
-      <span className="flex flex-1 justify-center">Fecha de inicio</span>
-    ),
-    cell({ row }) {
-      const date = new Date(row.original.startAt);
       return (
-        <span className="flex flex-1 justify-center">
-          {date.toLocaleDateString("es-CL")}
-        </span>
+        <span className="w-full">{type.replace(/_/g, " ").toLowerCase()}</span>
       );
     },
   },
   {
-    accessorKey: "endAt",
-    header: () => (
-      <span className="flex flex-1 justify-center">Fecha de finalización</span>
-    ),
+    id: "dates",
+    header: () => <span className="flex flex-1 justify-center">Fechas</span>,
     cell({ row }) {
-      const date = new Date(row.original.endAt ?? "");
+      const from = new Date(row.original.startAt)
+        .toLocaleDateString("es-CL")
+        .replaceAll("-", "/");
+      const to = row.original.endAt;
+
       return (
         <span className="flex flex-1 justify-center">
-          {date.toLocaleDateString("es-CL")}
+          {to
+            ? from +
+              " - " +
+              new Date(to).toLocaleDateString("es-CL").replaceAll("-", "/")
+            : from}
         </span>
       );
     },
   },
+
   {
     accessorKey: "nParticipants",
     header: () => (
