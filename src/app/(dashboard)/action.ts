@@ -8,7 +8,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
-import { AcademicGrade, Genre, type Student } from "@/generated/prisma";
+import { AcademicGrade, Gender, type Student } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
@@ -74,10 +74,10 @@ export const createRequest = async (data: {
         },
         activity: data.activity
           ? {
-            connect: {
-              id: data.activity.id,
-            },
-          }
+              connect: {
+                id: data.activity.id,
+              },
+            }
           : {},
         certificate: {
           connect: {
@@ -101,7 +101,7 @@ export const createRequest = async (data: {
 };
 
 export const downloadCertificate = async (requestId: string) => {
- await isAuthenticated();
+  await isAuthenticated();
 
   const request = await db.request.findUnique({
     where: {
@@ -157,7 +157,7 @@ const getAlumnoRegularText = async (user: User) => {
   <div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
   <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong><i>, Director del Programa de 
 Doctorado en Ciencias Médicas, de la Universidad de La Frontera, deja 
-constancia que <strong>${user.genre === Genre.MALE ? "el Sr." : "la Sra."} ${user.name}</strong>, Matrícula Nº <strong>${data.id}</strong>, 
+constancia que <strong>${user.gender === Gender.MALE ? "el Sr." : "la Sra."} ${user.name}</strong>, Matrícula Nº <strong>${data.id}</strong>, 
 es alumno regular de nuestro programa, desde el año <strong>${data.admisionDate.getFullYear()}</strong> a la fecha. 
 </i></div>`;
 };
@@ -179,7 +179,7 @@ const getActivityTesisProfesorText = async (user: User, activityId: string) => {
           user: {
             select: {
               name: true,
-              genre: true,
+              gender: true,
               academicGrade: true,
             },
           },
@@ -193,13 +193,13 @@ const getActivityTesisProfesorText = async (user: User, activityId: string) => {
     },
   });
   if (!activity) throw new Error("Actividad no pudo ser encontrada");
-  const isMale = user.genre === Genre.MALE;
+  const isMale = user.gender === Gender.MALE;
   const isDoctor = user.academicGrade === AcademicGrade.DOCTOR;
   const profesor = activity.participants.find((p) => p.user.name === user.name);
   const tesista = activity.participants.find((p) => p.type.name === "Tesista");
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
   <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
-Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? (isDoctor ? "el Dr. " : "el Sr.") : isDoctor ? "la Dra. " : "la Sra."} ${user.name}</strong>, participa como ${profesor?.type.name} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.genre === Genre.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
+Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? (isDoctor ? "el Dr. " : "el Sr.") : isDoctor ? "la Dra. " : "la Sra."} ${user.name}</strong>, participa como ${profesor?.type.name} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.gender === Gender.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
 </div>`;
 };
 
@@ -222,7 +222,7 @@ const getActivityTesisStudentText = async (user: User, activityId: string) => {
             select: {
               id: true,
               name: true,
-              genre: true,
+              gender: true,
               academicGrade: true,
               student: {
                 select: {
@@ -241,7 +241,7 @@ const getActivityTesisStudentText = async (user: User, activityId: string) => {
     },
   });
   if (!activity) throw new Error("Actividad no pudo ser encontrada");
-  const isMale = user.genre === Genre.MALE;
+  const isMale = user.gender === Gender.MALE;
   const student = activity.participants.find((p) => p.user.id === user.id);
   const guia = activity.participants.find(
     (p) => p.type.name === "Profesor guia",
@@ -251,7 +251,7 @@ const getActivityTesisStudentText = async (user: User, activityId: string) => {
 <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
 Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${!isMale ? "la estudiante, Sra." : "el estudiante, Sr."} 
 ${student?.user.name}, matricula Nº ${student?.user.student?.id}, se encuentra realizando su Trabajo 
-de título (equivalente a tesis), modalidad proyecto de titulación “${activity.name}” bajo dirección de ${guia?.user.genre === Genre.FEMALE ? `la ${isDoctor ? "Dra." : "Sra."}` : `el ${isDoctor ? "Dr." : "Sr."}`} 
+de título (equivalente a tesis), modalidad proyecto de titulación “${activity.name}” bajo dirección de ${guia?.user.gender === Gender.FEMALE ? `la ${isDoctor ? "Dra." : "Sra."}` : `el ${isDoctor ? "Dr." : "Sr."}`} 
 ${guia?.user.name}, desde ${activity.startAt.getUTCMonth()} del ${activity.startAt.getFullYear()} a la fecha.
 </div>`;
 };
