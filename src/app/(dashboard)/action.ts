@@ -62,9 +62,7 @@ export const createRequest = async (data: {
   userId: string;
   description?: string;
 }) => {
-  const isStandard = Object.values(Certificates).includes(
-    data.certificateName as Certificates,
-  );
+  const isStandard = data.certificateName !== Certificates.OTHER;
 
   const {
     success,
@@ -95,7 +93,7 @@ export const createRequest = async (data: {
               create: {
                 name: data.certificateName,
                 description: data.description ?? "",
-                userId: useId,
+                userId: data.userId,
               },
             }
           : undefined,
@@ -173,7 +171,15 @@ export const createRequest = async (data: {
 
   if (!success) return { success: false, message: error };
 
-  const pdf = await createPdf(request);
+  if (isStandard) {
+    const pdf = await createPdf(request);
+    revalidatePath("/dashboard/history");
+    return {
+      success: true,
+      message: `Solicitud creada exitosamente con id ${request.id}`,
+      data: pdf,
+    };
+  }
   revalidatePath("/dashboard/history");
   return {
     success: true,

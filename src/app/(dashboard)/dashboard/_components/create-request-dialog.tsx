@@ -124,30 +124,32 @@ export default function CreateRequestDialog({ user }: { user: User }) {
                 })}
               </FormSelect>
             )}
-            {users && userId && certificate !== Certificates.ALUMNO_REGULAR && (
-              <FormSelect
-                control={form.control}
-                name="activityId"
-                label="Actividad"
-                description="Selecciona la actividad a la que deseas solicitar la constancia."
-              >
-                {data.activities.map((activity) => {
-                  if (
-                    activity.participants.find((p) => p.userId === userId) !==
-                    undefined
-                  ) {
-                    return (
-                      <SelectItem key={activity.id} value={activity.id}>
-                        {activity.name}
-                      </SelectItem>
-                    );
-                  } else return "";
-                })}
-              </FormSelect>
-            )}
-            {!Object.values(Certificates).includes(
-              certificate as Certificates,
-            ) && (
+            {users &&
+              userId &&
+              ![Certificates.ALUMNO_REGULAR, Certificates.OTHER].includes(
+                certificate as Certificates,
+              ) && (
+                <FormSelect
+                  control={form.control}
+                  name="activityId"
+                  label="Actividad"
+                  description="Selecciona la actividad a la que deseas solicitar la constancia."
+                >
+                  {data.activities.map((activity) => {
+                    if (
+                      activity.participants.find((p) => p.userId === userId) !==
+                      undefined
+                    ) {
+                      return (
+                        <SelectItem key={activity.id} value={activity.id}>
+                          {activity.name}
+                        </SelectItem>
+                      );
+                    } else return "";
+                  })}
+                </FormSelect>
+              )}
+            {certificate === Certificates.OTHER && (
               <FormInput
                 control={form.control}
                 name="description"

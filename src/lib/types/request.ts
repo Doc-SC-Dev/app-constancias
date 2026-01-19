@@ -22,6 +22,7 @@ export enum Certificates {
   PARTICIPACION = "Constancia de participación",
   EXAMEN_CALIFICACION = "Constancia de examen de calificación",
   COLABORACION = "Constancia de colaboración",
+  OTHER = "Otra Constancia",
 }
 
 export type RequestUserWithParticipants = {

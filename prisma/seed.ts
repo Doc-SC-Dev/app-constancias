@@ -316,7 +316,7 @@ async function main() {
     // Create certificates
     await createCertificates();
 
-    const testCertName = "Constancia de prueba";
+    const testCertName = "Otra Constancia";
     const testCert = await db.certificate.findUnique({
       where: { name: testCertName },
     });
@@ -327,6 +327,7 @@ async function main() {
         data: {
           name: testCertName,
           pdfLink: "",
+          roles: ["PROFESSOR", "STUDENT"],
         },
       });
       console.log(`${testCertName} created successfully`);
