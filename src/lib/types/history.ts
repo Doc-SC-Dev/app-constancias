@@ -4,9 +4,7 @@ import type { auth } from "../auth";
 export type User = typeof auth.$Infer.Session.user;
 export type Session = typeof auth.$Infer.Session;
 
-const roles = type(
-  "'administrator' | 'professor' | 'student' | 'superadmin'| 'guest'"
-);
+const roles = type("'administrator' | 'professor' | 'student' | 'superadmin'");
 
 export const historyEntrySchema = type({
   id: "string",
