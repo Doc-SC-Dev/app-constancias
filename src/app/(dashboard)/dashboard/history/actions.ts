@@ -18,18 +18,18 @@ export const getHistoryPaginated = async ({
 }): Promise<PaginationResponse<HistoryEntry>> => {
   const start = pageParam * PAGE_SIZE;
 
-  const where: any = isAdmin ? {} : { userId: user.id };
-
-  if (filter === "standard") {
-    where.otherRequest = { is: null };
-  } else if (filter === "other") {
-    where.otherRequest = { isNot: null };
-  }
-
   const [count, data] = await db.$transaction([
-    db.request.count({ where }),
+    db.request.count({
+      where: {
+        userId: isAdmin ? undefined : user.id,
+        otherRequest: filter === "standard" ? { is: null } : { isNot: null },
+      },
+    }),
     db.request.findMany({
-      where,
+      where: {
+        userId: isAdmin ? undefined : user.id,
+        otherRequest: filter === "standard" ? { is: null } : { isNot: null },
+      },
       take: PAGE_SIZE,
       skip: start,
       orderBy: {
@@ -52,8 +52,7 @@ export const getHistoryPaginated = async ({
         | "administrator"
         | "professor"
         | "student"
-        | "superadmin"
-        | "guest") || "guest",
+        | "superadmin") || "student",
     certName: request.certificate.name,
     state: request.state,
     createdAt: request.createdAt,
@@ -76,7 +75,7 @@ export const updateRequestState = async (
     if (link !== undefined || rejectionReason !== undefined) {
       const request = await db.request.findUnique({
         where: { id: requestId },
-        include: { otherRequest: true }
+        include: { otherRequest: true },
       });
 
       if (request?.otherRequest) {
@@ -84,8 +83,8 @@ export const updateRequestState = async (
           where: { id: request.otherRequest.id },
           data: {
             link: link,
-            rejectionReason: rejectionReason
-          }
+            rejectionReason: rejectionReason,
+          },
         });
       }
     }
