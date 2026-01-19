@@ -4,18 +4,20 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
+import type { Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
+import { isAdmin } from "@/lib/authorization/permissions";
 import type { HistoryEntry } from "@/lib/types/history";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { HistoryClient } from "./_components/history-client";
 import { getHistoryPaginated } from "./actions";
 
 export default async function HistoryPage() {
-  const session = await isAuthenticated();
+  const { user } = await isAuthenticated();
 
   const { success } = await auth.api.userHasPermission({
     body: {
-      userId: session.user.id,
+      userId: user.id,
       permissions: {
         request: ["list"],
       },
@@ -26,8 +28,7 @@ export default async function HistoryPage() {
     return redirect("/dashboard");
   }
 
-  const userRole = session.user.role || "guest";
-  const isAdmin = userRole === "administrator" || userRole === "superadmin";
+  const userRole = user.role as Role;
 
   const queryClient = new QueryClient();
 
@@ -36,8 +37,8 @@ export default async function HistoryPage() {
     queryFn: ({ pageParam }) =>
       getHistoryPaginated({
         pageParam,
-        user: session.user,
-        isAdmin,
+        user: user,
+        isAdmin: isAdmin(userRole),
       }),
     initialPageParam: 0,
     getNextPageParam: (
@@ -49,7 +50,7 @@ export default async function HistoryPage() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container h-full mx-auto">
-        <HistoryClient isAdmin={isAdmin} user={session.user} />
+        <HistoryClient isAdmin={isAdmin(userRole)} user={user} />
       </div>
     </HydrationBoundary>
   );

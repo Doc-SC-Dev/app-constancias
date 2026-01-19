@@ -46,6 +46,7 @@ export default async function HomePage() {
                 description={card.description}
                 icon={card.icon}
                 url={card.url}
+                user={user}
               />
             );
           })}
