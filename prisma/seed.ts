@@ -1,21 +1,276 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin } from "better-auth/plugins";
-import { v4 as uuid } from "uuid";
+import { AcademicGrade, Gender, type Prisma, Role } from "@/generated/prisma";
 import {
+  ADMINISTRATOR,
   ac,
-  administrator,
-  guest,
-  professor,
-  student,
-  superadmin,
+  PROFESSOR,
+  STUDENT,
+  SUPERADMIN,
 } from "@/lib/authorization/permissions";
 import { db } from "../src/lib/db";
+
+type UserInputType = {
+  email: string;
+  rut: string;
+  name: string;
+  academicGrade: AcademicGrade;
+  gender: Gender;
+  role: Role;
+  studentId?: number;
+};
+
+const users: UserInputType[] = [
+  {
+    name: "Isidora Acevedo",
+    rut: "20.643.500-3",
+    email: "isi.acevedog8625@gmail.com",
+    academicGrade: AcademicGrade.MAGISTER,
+    gender: Gender.FEMALE,
+    role: Role.STUDENT,
+    studentId: 871249,
+  },
+  {
+    name: "Tomás Alonso Bravo Cañete",
+    rut: "20.488.616-4",
+    email: "tomas.b.c@outlook.com",
+    academicGrade: AcademicGrade.DOCTOR,
+    gender: Gender.MALE,
+    role: Role.PROFESSOR,
+  },
+];
+
+const activityTypes: Prisma.ActivityTypeCreateInput[] = [
+  {
+    name: "Docencia",
+    participantTypes: {
+      createMany: {
+        data: [
+          { name: "Profesor encargado", required: true },
+          { name: "Profesor invitado" },
+          { name: "Colaborador" },
+        ],
+      },
+    },
+  },
+  {
+    name: "Examen de calificación",
+    participantTypes: {
+      createMany: {
+        data: [
+          { name: "Estudiante", required: true },
+          { name: "Profesor guía", required: true },
+          { name: "Profesor co-guia" },
+          { name: "Comisión 1" },
+          { name: "Comision 2" },
+          { name: "Comision 3" },
+        ],
+      },
+    },
+  },
+  {
+    name: "Trabajo de investigación",
+    participantTypes: {
+      createMany: {
+        data: [{ name: "Autor", required: true }, { name: "Co-autor" }],
+      },
+    },
+  },
+  {
+    name: "Trabajo de título",
+    participantTypes: {
+      createMany: {
+        data: [
+          { name: "Estudiante", required: true },
+          { name: "Profesor guia", required: true },
+          { name: "Profesor co-guia" },
+          { name: "Comisión 1" },
+          { name: "Comisión 2" },
+          { name: "Comisión 3" },
+        ],
+      },
+    },
+  },
+  {
+    name: "Proyecto de investigación",
+    participantTypes: {
+      createMany: {
+        data: [
+          { name: "Autor", required: true },
+          { name: "Co-autor" },
+          { name: "ayudante" },
+        ],
+      },
+    },
+  },
+  {
+    name: "Pasantía",
+    participantTypes: {
+      createMany: {
+        data: [
+          { name: "Pasante", required: true },
+          { name: "Guía", required: true },
+        ],
+      },
+    },
+  },
+];
+const createUser = async ({
+  email,
+  rut,
+  name,
+  academicGrade,
+  gender,
+  role,
+  studentId,
+}: UserInputType) => {
+  const existUser = await db.user.findUnique({
+    where: {
+      email,
+    },
+  });
+  if (existUser) {
+    console.log("✅ User already exists. Skipping creation.");
+  } else {
+    console.log(`Creating user with email ${email}`);
+    const userResponse = await auth.api.signUpEmail({
+      body: {
+        email,
+        rut,
+        name,
+        password: `${name}Password123!`,
+        academicGrade,
+        gender,
+      },
+    });
+
+    if (!userResponse.user) {
+      throw new Error(`Failed to create the user with name ${name}`);
+    }
+
+    await db.user.update({
+      where: { id: userResponse.user.id },
+      data: {
+        emailVerified: true,
+        role,
+      },
+    });
+
+    if (role === Role.STUDENT) {
+      await db.student.create({
+        data: {
+          studentId: studentId ?? 0,
+          admisionDate: new Date(),
+          isRegularStudent: true,
+          user: {
+            connect: {
+              id: userResponse.user.id,
+            },
+          },
+        },
+      });
+    }
+    console.log(`✅ User with email ${email} created successfully.`);
+  }
+};
+const createSuperAdmin = async () => {
+  const existingAdmin = await db.user.findFirst({
+    where: {
+      role: {
+        equals: "SUPERADMIN",
+      },
+    },
+  });
+
+  if (existingAdmin) {
+    console.log("✅ Admin user already exists. Skipping creation.");
+  } else {
+    // Create admin user using Better Auth signUpEmail
+    console.log("Creating Superadmin user.");
+    const adminUserResponse = await auth.api.signUpEmail({
+      body: {
+        email: "admin@constancias.cl",
+        password: "AdminPassword123!", // Change this password in production
+        name: "Administrador",
+        rut: "11.111.111-1",
+        academicGrade: AcademicGrade.DOCTOR,
+        gender: Gender.MALE,
+      },
+    });
+
+    // Check if the response has a user (successful creation)
+    if (!adminUserResponse.user) {
+      throw new Error("Failed to create admin user");
+    }
+
+    // Update the user role to admin and verify email
+    await db.user.update({
+      where: { id: adminUserResponse.user.id },
+      data: {
+        emailVerified: true,
+        role: Role.SUPERADMIN,
+      },
+    });
+
+    console.log("✅ Superadmin user created successfully.");
+  }
+};
+
+const createCertificates = async () => {
+  console.log("Checking certificates...");
+  const countCertificates = await db.certificate.count();
+  if (!countCertificates) {
+    console.log("Creating certificates...");
+    await db.certificate.createMany({
+      data: [
+        {
+          name: "Constancia de participación",
+          pdfLink: "",
+          roles: ["STUDENT", "PROFESSOR"],
+        },
+        {
+          name: "Constancia de alumno regular",
+          pdfLink: "",
+          roles: ["STUDENT"],
+        },
+        {
+          name: "Constancia de examen de calificación",
+          pdfLink: "",
+          roles: ["PROFESSOR", "STUDENT"],
+        },
+        {
+          name: "Constancia de colaboración",
+          pdfLink: "",
+          roles: ["PROFESSOR"],
+        },
+      ],
+    });
+    console.log("✅ Certificates created successfully");
+  }
+};
+
+const createActivityTypes = async () => {
+  console.log("Checking activity types...");
+  const countActivityType = await db.activityType.count();
+  if (!countActivityType) {
+    console.log("Creating activity types...");
+    await Promise.all(
+      activityTypes.map((activityType) =>
+        db.activityType.create({ data: activityType }),
+      ),
+    );
+    console.log("✅ Activity types created successfully");
+  }
+};
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
     provider: "postgresql",
   }),
+  emailAndPassword: {
+    enabled: true,
+  },
   user: {
     additionalFields: {
       rut: {
@@ -30,8 +285,8 @@ export const auth = betterAuth({
         input: true,
         returned: true,
       },
-      genre: {
-        default: "FEMALE",
+      gender: {
+        default: Gender.FEMALE,
         required: true,
         type: "string",
         input: true,
@@ -42,9 +297,9 @@ export const auth = betterAuth({
   plugins: [
     admin({
       ac: ac,
-      roles: { professor, guest, superadmin, student, administrator },
-      adminRoles: ["administrator", "superadmin"],
-      defaultRole: "guest",
+      roles: { PROFESSOR, SUPERADMIN, STUDENT, ADMINISTRATOR },
+      adminRoles: [Role.ADMINISTRATOR, Role.SUPERADMIN],
+      defaultRole: Role.STUDENT,
     }),
   ],
   trustedOrigins: ["http://localhost:3000"],
@@ -55,139 +310,14 @@ async function main() {
 
   try {
     // Check if admin user already exists
-    const existingAdmin = await db.user.findFirst({
-      where: {
-        role: {
-          equals: "superadmin",
-        },
-      },
-    });
-
-    if (existingAdmin) {
-      console.log("✅ Admin user already exists. Skipping creation.");
-    } else {
-      // Create admin user using Better Auth signUpEmail
-      const adminUserResponse = await auth.api.signUpEmail({
-        body: {
-          email: "admin@constancias.cl",
-          password: "AdminPassword123!", // Change this password in production
-          name: "Administrador",
-          rut: "11.111.111-1",
-          academicGrade: "DOCTOR",
-          genre: "FEMALE",
-        },
-      });
-
-      // Check if the response has a user (successful creation)
-      if (!adminUserResponse.user) {
-        throw new Error("Failed to create admin user");
-      }
-
-      // Update the user role to admin and verify email
-      await db.user.update({
-        where: { id: adminUserResponse.user.id },
-        data: {
-          emailVerified: true,
-        },
-      });
-    }
-
+    await createSuperAdmin();
+    // create user
+    await Promise.all(users.map((user) => createUser(user)));
     // Create certificates
-    console.log("Checking certificates...");
-    const countCertificates = await db.certificate.count();
-    if (!countCertificates) {
-      console.log("Creating certificates...");
-      await db.certificate.createMany({
-        data: [
-          {
-            name: "Constancia de participación",
-            pdfLink: "",
-            id: uuid(),
-          },
-          {
-            name: "Constancia de alumno regular",
-            pdfLink: "",
-            id: uuid(),
-          },
-          {
-            name: "Constancia de examen de calificación",
-            pdfLink: "",
-            id: uuid(),
-          },
-          {
-            name: "Constancia de colaboración",
-            pdfLink: "",
-            id: uuid(),
-          },
-        ],
-      });
-      console.log("Certificates created successfully");
-    }
+    await createCertificates();
     // create Activity types of table is emtpty
-    console.log("Checking activity types...");
-    const countActivityType = await db.activityType.count();
-    if (!countActivityType) {
-      console.log("Creating activity types...");
-      await db.activityType.createMany({
-        data: [
-          { name: "Docencia" },
-          { name: "Examen de calificación" },
-          { name: "Trabajo de investigación" },
-          { name: "Trabajo de título" },
-          { name: "Proyecto de investigación" },
-          { name: "Pasantía" },
-        ],
-      });
-      console.log("Activity types created successfully");
-    }
+    await createActivityTypes();
 
-    const docencia = await db.activityType.findUnique({
-      where: {
-        name: "Docencia",
-      },
-    });
-
-    const trabajoInvestigacion = await db.activityType.findUnique({
-      where: {
-        name: "Trabajo de investigación",
-      },
-    });
-
-    const examenCalificacion = await db.activityType.findUnique({
-      where: {
-        name: "Examen de calificación",
-      },
-    });
-
-    const trabajoTitulo = await db.activityType.findUnique({
-      where: {
-        name: "Trabajo de título",
-      },
-    });
-    //creating Participant types
-    console.log("Checking participant types...");
-    const countParticipantType = await db.participantType.count();
-    if (!countParticipantType) {
-      console.log("Creating participant types...");
-      await db.participantType.createMany({
-        data: [
-          { name: "Co-autor", activityTypeId: trabajoInvestigacion?.id },
-          { name: "Ayudante", activityTypeId: docencia?.id },
-          { name: "Estudiante", activityTypeId: trabajoTitulo?.id },
-          {
-            name: "Profesor encargado",
-            activityTypeId: examenCalificacion?.id,
-          },
-          { name: "Autor", activityTypeId: trabajoInvestigacion?.id },
-          { name: "Profesor encargado", activityTypeId: docencia?.id },
-          { name: "Colaborador", activityTypeId: docencia?.id },
-          { name: "Estudiante", activityTypeId: examenCalificacion?.id },
-          { name: "Pasante", activityTypeId: trabajoInvestigacion?.id },
-          { name: "Profesor Adjunto", activityTypeId: docencia?.id },
-        ],
-      });
-      console.log("Participant types created successfully");
-    }
     console.log("\n🎉 Database seed completed!");
   } catch (error) {
     console.error("❌ Error during seed:", error);
