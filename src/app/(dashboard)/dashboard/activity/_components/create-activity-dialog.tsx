@@ -158,7 +158,6 @@ export default function CreateActivityDialog({
             </FormSelect>
           )}
           <FieldSeparator />
-          {/* <div className="flex flex-1 gap-2"> */}
           <Controller
             name="date"
             control={form.control}
@@ -187,14 +186,26 @@ export default function CreateActivityDialog({
                           <Calendar
                             selected={field.value}
                             onSelect={(value) => {
-                              const to = value?.to
-                                ? value.to.toLocaleDateString("es-CL") ===
-                                  value.from?.toLocaleDateString("es-CL")
+                              if (value === undefined) {
+                                field.onChange({
+                                  from: new Date(),
+                                  to: undefined,
+                                });
+                                return;
+                              }
+                              const from =
+                                value.from === undefined
+                                  ? new Date()
+                                  : value.from;
+                              const to =
+                                value.to === undefined
                                   ? undefined
-                                  : value.to
-                                : undefined;
+                                  : value.to.toLocaleDateString("es-CL") ===
+                                      from.toLocaleDateString("es-CL")
+                                    ? undefined
+                                    : value.to;
                               field.onChange({
-                                from: value?.from ? value?.from : new Date(),
+                                from,
                                 to,
                               });
                             }}

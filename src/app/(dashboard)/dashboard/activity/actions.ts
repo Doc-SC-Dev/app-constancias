@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { withTryCatch } from "@/app/action";
+import type { Role } from "@/generated/prisma";
 import { isAuthenticated } from "@/lib/auth";
+import { isAdmin } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import type {
   ActivityCreateDTO,
@@ -76,14 +78,11 @@ export const getActivitiesPaginated = async ({
   pageParam: number;
 }): Promise<PaginationResponse<ActivityDTO>> => {
   const session = await isAuthenticated();
-  const isAdmin = ["administrator", "superadmin"].includes(
-    session.user.role || "",
-  );
   const start = pageParam * PAGE_SIZE;
 
   const [count, data] = await db.$transaction([
     db.activity.count({
-      where: isAdmin
+      where: isAdmin(session.user.role as Role)
         ? {}
         : {
             participants: {
@@ -96,7 +95,7 @@ export const getActivitiesPaginated = async ({
           },
     }),
     db.activity.findMany({
-      where: isAdmin
+      where: isAdmin(session.user.role as Role)
         ? {}
         : {
             participants: {

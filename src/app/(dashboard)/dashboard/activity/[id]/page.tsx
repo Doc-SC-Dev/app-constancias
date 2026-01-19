@@ -105,18 +105,6 @@ export default async function ActivityViewPage({
                 </TableBody>
               </Table>
             </div>
-            {/* <DataTable
-              columns={columns}
-              queryKey={`activity-${activity.id}-participants`}
-              queryFn={({ pageParam }) =>
-                getActivityParticipants({ activityId: activity.id, pageParam })
-              }
-              placeholder="Buscar participantes..."
-              emptyDescription="Agregar participantes para verlos aquí"
-              emptyTitle="No hay participantes"
-            >
-              {""}
-            </DataTable> */}
           </div>
         </div>
       </CardContent>
