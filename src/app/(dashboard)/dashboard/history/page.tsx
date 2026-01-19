@@ -33,12 +33,13 @@ export default async function HistoryPage() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchInfiniteQuery({
-    queryKey: ["list-history"],
+    queryKey: ["list-history-standard"],
     queryFn: ({ pageParam }) =>
       getHistoryPaginated({
         pageParam,
         user: user,
         isAdmin: isAdmin(userRole),
+        filter: "standard",
       }),
     initialPageParam: 0,
     getNextPageParam: (

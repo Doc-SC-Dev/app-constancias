@@ -315,6 +315,22 @@ async function main() {
     await Promise.all(users.map((user) => createUser(user)));
     // Create certificates
     await createCertificates();
+
+    const testCertName = "Constancia de prueba";
+    const testCert = await db.certificate.findUnique({
+      where: { name: testCertName },
+    });
+
+    if (!testCert) {
+      console.log(`Creating ${testCertName}...`);
+      await db.certificate.create({
+        data: {
+          name: testCertName,
+          pdfLink: "",
+        },
+      });
+      console.log(`${testCertName} created successfully`);
+    }
     // create Activity types of table is emtpty
     await createActivityTypes();
 

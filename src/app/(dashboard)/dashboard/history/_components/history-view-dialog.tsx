@@ -1,87 +1,47 @@
-import { Badge } from "@/components/ui/badge";
+"use client";
+
 import {
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { HistoryEntry } from "@/lib/types/history";
-import { Download } from "lucide-react";
-import { toast } from "sonner";
-import { downloadCertificate } from "@/app/(dashboard)/action";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { Spinner } from "@/components/ui/spinner";
 
 type DialogContentProps = {
   data: HistoryEntry;
-  certName?: string;
+  closeDialog: () => void;
 };
 
-export default function ViewDialog({
-  data: user,
-  certName,
+export default function HistoryViewDialog({
+  data: request,
+  closeDialog,
 }: DialogContentProps) {
-  const [loading, setLoading] = useState(false);
-
-  const handleDownload = async () => {
-    setLoading(true);
-    const { success, data, message } = await downloadCertificate(user.id);
-    if (success && data) {
-      const link = document.createElement("a");
-      link.href = `data:application/pdf;base64,${data}`;
-      const date = new Date(user.createdAt).toLocaleDateString("es-CL").replace(/\//g, "-");
-      link.download = `${certName || "constancia"}-${date}.pdf`;
-      link.click();
-      toast.success("Certificado descargado exitosamente");
-    } else {
-      toast.error(message || "Error al descargar el certificado");
-    }
-    setLoading(false);
-  };
-
   return (
-    <DialogContent className="max-w-4xl flex flex-col">
+    <DialogContent className="max-w-md flex flex-col">
       <DialogHeader>
-        <DialogTitle>Detalle de Constancia</DialogTitle>
+        <DialogTitle>Motivo de Rechazo</DialogTitle>
       </DialogHeader>
+
       <div className="flex flex-col gap-6 py-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="font-medium text-sm text-muted-foreground">
-              Tipo de Constancia
-            </span>
-            <span className="text-sm">{user.certName}</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="font-medium text-sm text-muted-foreground">
-              Fecha de emisión
-            </span>
-            <span className="text-sm">
-              {new Date(user.createdAt).toLocaleDateString()}
-            </span>
-          </div>
+        <div className="flex flex-col gap-2">
+          <span className="font-medium text-sm text-muted-foreground">Tipo de Constancia</span>
+          <span>{request.certName}</span>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <span className="font-medium text-sm text-muted-foreground">Motivo</span>
+          <p className="text-sm text-foreground bg-gray-50 p-3 rounded-md border">
+            {request.rejectionReason || "No se ha especificado un motivo."}
+          </p>
         </div>
       </div>
-      <DialogFooter className="sm:justify-center">
-        <Button
-          className="min-w-32"
-          onClick={handleDownload}
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <Spinner className="mr-2 size-4" />
-              Descargando...
-            </>
-          ) : (
-            <>
-              Descargar
-              <Download className="ml-2 size-4" />
-            </>
-          )}
+
+      <div className="flex justify-end">
+        <Button onClick={closeDialog}>
+          Cerrar
         </Button>
-      </DialogFooter>
+      </div>
     </DialogContent>
   );
 }

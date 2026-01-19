@@ -10,6 +10,7 @@ export const createRequestSchema = type({
   certificateName: "string",
   userId: "string",
   "activityId?": "string",
+  "description?": "string",
 });
 
 export type CreateRequest = typeof createRequestSchema.infer;

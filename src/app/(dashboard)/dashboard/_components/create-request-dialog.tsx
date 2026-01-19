@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { FormInput } from "@/components/form/FormInput";
 import { FormSelect } from "@/components/form/FormSelect";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ export default function CreateRequestDialog({ user }: { user: User }) {
       certificateName: Certificates.ALUMNO_REGULAR,
       activityId: "",
       userId: isAdmin(user.role as Role) ? "" : user.id,
+      description: "",
     },
     shouldUnregister: false,
   });
@@ -65,12 +67,9 @@ export default function CreateRequestDialog({ user }: { user: User }) {
       certificateName: data.certificateName,
       activityId: data.activityId,
       userId: data.userId ?? user.id,
+      description: data.description,
     });
     if (success) {
-      const link = document.createElement("a");
-      link.href = `data:application/pdf;base64,${pdf}`;
-      link.download = `${data.certificateName}.pdf`;
-      link.click();
       toast.success(message);
       form.reset();
     } else {
@@ -145,6 +144,17 @@ export default function CreateRequestDialog({ user }: { user: User }) {
                   } else return "";
                 })}
               </FormSelect>
+            )}
+            {!Object.values(Certificates).includes(
+              certificate as Certificates,
+            ) && (
+              <FormInput
+                control={form.control}
+                name="description"
+                label="Descripción"
+                description="Describa el motivo de la solicitud."
+                placeholder="Ingrese una descripción..."
+              />
             )}
           </FieldGroup>
         )}

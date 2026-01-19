@@ -60,7 +60,12 @@ export const createRequest = async (data: {
   certificateName: string;
   activityId: string | undefined;
   userId: string;
+  description?: string;
 }) => {
+  const isStandard = Object.values(Certificates).includes(
+    data.certificateName as Certificates,
+  );
+
   const {
     success,
     error,
@@ -85,7 +90,16 @@ export const createRequest = async (data: {
             name: data.certificateName,
           },
         },
-        state: "READY",
+        otherRequest: !isStandard
+          ? {
+              create: {
+                name: data.certificateName,
+                description: data.description ?? "",
+                userId: useId,
+              },
+            }
+          : undefined,
+        state: !isStandard ? "PENDING" : "READY",
       },
       select: {
         id: true,
@@ -164,7 +178,7 @@ export const createRequest = async (data: {
   return {
     success: true,
     message: `Solicitud creada exitosamente con id ${request.id}`,
-    data: pdf,
+    data: null,
   };
 };
 
@@ -448,7 +462,6 @@ const createPdf = async (request: FullRequest) => {
     yScale: 1,
   });
 
-  // 4. Retornar el PDF final como Base64 string
   const pdfFinalBytes = await pdfDoc.save();
   return Buffer.from(pdfFinalBytes).toString("base64");
 };
