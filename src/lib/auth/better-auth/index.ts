@@ -3,12 +3,11 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
 import {
+  ADMINISTRATOR,
   ac,
-  administrator,
-  guest,
-  professor,
-  student,
-  superadmin,
+  PROFESSOR,
+  STUDENT,
+  SUPERADMIN,
 } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { sendForgotPasswordEmail } from "@/lib/email/resend";
@@ -37,7 +36,7 @@ export const auth = betterAuth({
         input: true,
         returned: true,
       },
-      genre: {
+      gender: {
         default: "FEMALE",
         required: true,
         type: "string",
@@ -50,9 +49,9 @@ export const auth = betterAuth({
     nextCookies(),
     admin({
       ac: ac,
-      roles: { professor, guest, superadmin, student, administrator },
-      adminRoles: ["administrator", "superadmin"],
-      defaultRole: "guest",
+      roles: { PROFESSOR, SUPERADMIN, STUDENT, ADMINISTRATOR },
+      adminRoles: ["ADMINISTRATOR", "SUPERADMIN"],
+      defaultRole: "STUDENT",
     }),
   ],
   trustedOrigins: ["http://localhost:3000"],
