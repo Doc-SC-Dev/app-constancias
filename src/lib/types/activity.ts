@@ -73,12 +73,13 @@ export const activityCreateSchema = type({
   participants: participantSchema,
 }).narrow((value, ctx) => {
   if (!value.date.to) return true;
-  if (value.date.to > value.date.from)
+  if (value.date.to.getTime() <= value.date.from.getTime()) {
     return ctx.reject({
       message: "La fecha de fin debe ser mayor a la fecha de inicio",
       code: "predicate",
       path: ["date"],
     });
+  }
   return true;
 });
 
