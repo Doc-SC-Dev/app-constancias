@@ -1,11 +1,10 @@
 import { QueryClient } from "@tanstack/react-query";
-import { ArrowLeftIcon, DotIcon, MailIcon } from "lucide-react";
+import { ArrowLeftIcon, MailIcon } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Toggle } from "@/components/ui/toggle";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
 import type { UserRequest } from "@/lib/types/request";
@@ -13,6 +12,7 @@ import type { User } from "@/lib/types/users";
 import { listUserActivities, listUserRequest } from "../../actions";
 import UserActivitiesTable from "./user-activity-table";
 import UserRequestTable from "./user-request-table";
+import UserStateToggle from "./user-state-toggle";
 
 export default async function UserCard({ user }: { user: User }) {
   const queryClient = new QueryClient();
@@ -74,15 +74,7 @@ export default async function UserCard({ user }: { user: User }) {
           </div>
           <div>
             <p className="text-md font-medium">Estado</p>
-            <Toggle
-              size="default"
-              variant="outline"
-              aria-checked={user.banned ? "false" : "true"}
-              className="data-[state=off]:bg-green-300 data-[state=on]:bg-red-300 data-[state=off]:text-green-700 data-[state=on]:text-red-700 data-[state=off]:border-green-500 data-[state=on]:border-red-500"
-            >
-              <DotIcon />
-              {user.banned ? "Desactivo" : "Activo"}
-            </Toggle>
+            <UserStateToggle banned={user.banned ?? false} id={user.id} />
           </div>
         </div>
 

@@ -114,12 +114,6 @@ export const columns: ColumnDef<User>[] = [
             editLink={`/dashboard/users/${user.id}/edit`}
             deleteDialog={DeleteDialog}
           />
-          {/* <ActionDialogManager<User>
-            data={user}
-            viewDialog={ViewDialog}
-            editDialog={EditDialog}
-            deleteDialog={DeleteDialog}
-          /> */}
         </span>
       );
     },

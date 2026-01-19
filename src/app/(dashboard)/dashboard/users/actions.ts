@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { withTryCatch } from "@/app/action";
 import { auth, isAuthenticated } from "@/lib/auth";
-import { Roles } from "@/lib/authorization/permissions";
+import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
@@ -41,7 +41,8 @@ export async function updateUser(userData: UserEdit, id: string) {
 }
 
 export async function createUser(userData: UserCreate) {
-  const { studentId, rut, academicGrade, ...newUserData } = userData;
+  const { studentId, rut, academicGrade, gender, role, ...newUserData } =
+    userData;
 
   const password = userData.rut.replaceAll(".", "");
   const { success, data, error } = await withTryCatch<UserSelect>(
@@ -51,9 +52,10 @@ export async function createUser(userData: UserCreate) {
         headers: await headers(),
         body: {
           ...newUserData,
+          role,
           password,
           data: {
-            genre: newUserData.gender,
+            gender,
             rut,
             academicGrade: academicGrade ?? "",
           },
@@ -64,7 +66,7 @@ export async function createUser(userData: UserCreate) {
       if (session.user.role === Roles.STUDENT && studentId) {
         const student = await tx.student.create({
           data: {
-            id: parseInt(studentId, 10),
+            studentId: parseInt(studentId, 10),
             isRegularStudent: false,
             user: {
               connect: {
@@ -178,7 +180,7 @@ export async function listUsersAdmin(): Promise<User[]> {
         not: session.user.id,
       },
       role: {
-        notIn: ["administrator", "superadmin"],
+        notIn: [Roles.ADMIN, Roles.SUPERADMIN],
       },
     },
   });
@@ -246,7 +248,7 @@ export async function getUserById(id: string): Promise<User> {
       image: true,
       role: true,
       academicGrade: true,
-      genre: true,
+      gender: true,
       rut: true,
       banned: true,
     },
@@ -291,3 +293,29 @@ export async function listUserRequest({
     totalRows: count,
   };
 }
+
+export const userStateChange = async (id: string, banned: boolean) => {
+  const { user } = await isAuthenticated();
+  if (!isAdmin((user.role ?? Roles.STUDENT) as Roles))
+    throw new Error("No estas authorizado para realizar esta acción");
+  const auxHeaders = await headers();
+  if (!banned) {
+    await auth.api.banUser({
+      headers: auxHeaders,
+      body: {
+        userId: id,
+      },
+    });
+  } else {
+    await auth.api.unbanUser({
+      headers: auxHeaders,
+      body: {
+        userId: id,
+      },
+    });
+  }
+  revalidatePath(`/dashboard/users`);
+  revalidatePath(`/dashboard/users/${id}`);
+
+  return !banned;
+};
