@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { HistoryEntry } from "@/lib/types/history";
 import type { User } from "@/lib/types/users";
 import CreateRequestDialog from "../../_components/create-request-dialog";
 import { getHistoryPaginated } from "../actions";
@@ -53,10 +54,15 @@ export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
             emptyDescription="No se han creado constancias. Para iniciar debe crear una constancia"
             emptyTitle="No hay constancias"
             buttonLabel="Crear constancia"
-            createDialog={CreateRequestDialog}
+            createDialog={() => <CreateRequestDialog user={user} />}
             queryKey="list-history-standard"
             queryFn={({ pageParam }) =>
-              getHistoryPaginated({ pageParam, user, isAdmin, filter: "standard" })
+              getHistoryPaginated({
+                pageParam,
+                user,
+                isAdmin,
+                filter: "standard",
+              })
             }
             columns={filteredColumns}
             placeholder={
@@ -66,7 +72,7 @@ export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
             }
           >
             <ActionDialogManager
-              createDialog={CreateRequestDialog}
+              createDialog={() => <CreateRequestDialog user={user} />}
               triggerLabel="Crear constancia"
             />
           </DataTable>
@@ -76,7 +82,7 @@ export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
           <DataTable
             emptyDescription="No se han creado otras solicitudes."
             emptyTitle="No hay solicitudes"
-            createDialog={CreateRequestDialog}
+            createDialog={() => <CreateRequestDialog user={user} />}
             queryKey="list-history-other"
             queryFn={({ pageParam }) =>
               getHistoryPaginated({ pageParam, user, isAdmin, filter: "other" })
@@ -89,7 +95,7 @@ export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
             }
           >
             <ActionDialogManager
-              createDialog={CreateRequestDialog}
+              createDialog={() => <CreateRequestDialog user={user} />}
               triggerLabel="Crear solicitud"
             />
           </DataTable>

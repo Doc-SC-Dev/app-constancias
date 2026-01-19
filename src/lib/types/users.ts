@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import type { UserWithRole } from "better-auth/plugins";
-import { AcademicGrade, Genre } from "@/generated/prisma";
+import { AcademicGrade, Gender, Role } from "@/generated/prisma";
 import type { auth } from "../auth";
 import { Roles } from "../authorization/permissions";
 
@@ -19,7 +19,7 @@ export type UserWithActivities = User & {
   }[];
 };
 
-const roleSchema = type.enumerated(...Object.values(Roles));
+const roleSchema = type.enumerated(...Object.values(Role));
 export const userEditSchema = type({
   name: "string >= 1",
   rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
@@ -31,9 +31,9 @@ export type UserEdit = typeof userEditSchema.infer;
 
 const academicGrade = type.enumerated(...Object.values(AcademicGrade));
 
-const genderSchema = type.enumerated(...Object.values(Genre));
+const genderSchema = type.enumerated(...Object.values(Gender));
 
-export type Gender = typeof genderSchema.infer;
+export type GenderType = typeof genderSchema.infer;
 
 export const userCreateSchema = type({
   name: "string > 1",
@@ -45,21 +45,21 @@ export const userCreateSchema = type({
   "admissionDate?": "Date",
   "academicGrade?": academicGrade,
 }).narrow((val, ctx) => {
-  if (val.role === "student" && !val.admissionDate) {
+  if (val.role === Roles.STUDENT && !val.admissionDate) {
     return ctx.reject({
       code: "predicate",
       message: "La fecha de ingreso es requerida",
       path: ["admissionDate"],
     });
   }
-  if (val.role === "student" && !val.studentId) {
+  if (val.role === Roles.STUDENT && !val.studentId) {
     return ctx.reject({
       code: "predicate",
       message: "La matricula es requerida",
       path: ["studentId"],
     });
   }
-  if (val.role !== "student" && !val.academicGrade) {
+  if (val.role !== Roles.STUDENT && !val.academicGrade) {
     return ctx.reject({
       code: "predicate",
       message: "El grado académico es requerido",
@@ -146,3 +146,9 @@ export const resetPasswordSchema = type({
 });
 
 export type ResetPassword = typeof resetPasswordSchema.infer;
+
+export type UserRequestDTO = {
+  name: string;
+  createdAt: Date;
+  state: string;
+};

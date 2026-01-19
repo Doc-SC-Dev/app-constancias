@@ -1,7 +1,14 @@
 import { type } from "arktype";
+import type {
+  AcademicGrade,
+  Gender,
+  RequestState,
+  Role,
+} from "@/generated/prisma";
 
 export const createRequestSchema = type({
   certificateName: "string",
+  userId: "string",
   "activityId?": "string",
   "description?": "string",
 });
@@ -15,5 +22,69 @@ export enum Certificates {
   PARTICIPACION = "Constancia de participación",
   EXAMEN_CALIFICACION = "Constancia de examen de calificación",
   COLABORACION = "Constancia de colaboración",
-  TESIS = "Constancia de tesis",
-} 
+  OTHER = "Otra Constancia",
+}
+
+export type RequestUserWithParticipants = {
+  name: string;
+  rut: string;
+  role: Role;
+  gender: Gender;
+  academicGrade: AcademicGrade | null;
+  student: {
+    studentId: number;
+    admisionDate: Date;
+  } | null;
+  participants: {
+    type: {
+      name: string;
+    };
+  }[];
+};
+export type RequestUserWithoutParticipant = {
+  name: string;
+  rut: string;
+  role: Role;
+  gender: Gender;
+  academicGrade: AcademicGrade | null;
+  student: {
+    studentId: number;
+    admisionDate: Date;
+  } | null;
+};
+export type RequestActivity = {
+  name: string;
+  startAt: Date;
+  endAt: Date | null;
+  activityType: {
+    name: string;
+  };
+  participants: {
+    user: {
+      name: string;
+      academicGrade: AcademicGrade | null;
+      gender: Gender;
+    };
+    hours: number;
+    type: {
+      name: string;
+    };
+  }[];
+};
+
+export type RequestCertificate = {
+  name: string;
+};
+export type FullRequest = {
+  id: string;
+  user: RequestUserWithParticipants | RequestUserWithoutParticipant;
+  activity: RequestActivity | null;
+  certificate: RequestCertificate;
+};
+
+export type UserRequest = {
+  id: string;
+  name: string;
+  createdAt: Date;
+  state: RequestState;
+};

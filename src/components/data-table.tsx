@@ -51,6 +51,7 @@ interface DataTableProps<TData> {
   emptyTitle: string;
   emptyDescription?: string;
   onDialog?: boolean;
+  size?: "bg" | "md" | "sm";
 }
 
 export function DataTable<TData>({
@@ -64,6 +65,7 @@ export function DataTable<TData>({
   emptyDescription,
   emptyTitle,
   onDialog = false,
+  size = "bg",
 }: DataTableProps<TData>) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [globalFilter, setGlobalFilter] = useState<"">("");
@@ -143,13 +145,26 @@ export function DataTable<TData>({
     //measure dynamic row height, except in firefox because it measures table border height incorrectly
     measureElement:
       typeof window !== "undefined" &&
-        navigator.userAgent.indexOf("Firefox") === -1
+      navigator.userAgent.indexOf("Firefox") === -1
         ? (element) => element?.getBoundingClientRect().height
         : undefined,
     overscan: 5,
   });
 
-  if (rows.length === 0) {
+  const getHeight = () => {
+    switch (size) {
+      case "bg":
+        return 600;
+      case "md":
+        return 300;
+      case "sm":
+        return 100;
+      default:
+        return 600;
+    }
+  };
+
+  if (data?.pages.length === 0) {
     return (
       <EmptyPage
         title={emptyTitle}
@@ -177,7 +192,7 @@ export function DataTable<TData>({
         </div>
       )}
       <div
-        className="container h-[600px] overflow-auto relative  rounded-md border"
+        className={`container h-[${getHeight()}px] overflow-auto relative  rounded-md border`}
         ref={tableContainerRef}
         onScroll={(e) => fetchMoreOnBottomReached(e.currentTarget)}
       >
@@ -205,9 +220,9 @@ export function DataTable<TData>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
@@ -217,10 +232,10 @@ export function DataTable<TData>({
           <TableBody
             className={`grid relative w-full`}
             style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
+              height: `${rowVirtualizer.getTotalSize() ? rowVirtualizer.getTotalSize() : 100}px`,
             }}
           >
-            {rowVirtualizer.getVirtualItems().length ? (
+            {rowVirtualizer.getVirtualItems().length && !isFetching ? (
               rowVirtualizer.getVirtualItems().map((virtualRow) => {
                 const row = rows[virtualRow.index] as Row<TData>;
                 return (
@@ -258,14 +273,14 @@ export function DataTable<TData>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {!isFetching && "No hay resultados."}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
         {isFetching && (
-          <span className="flex flex-1 justify-center items-center gap-4">
+          <span className="flex flex-1 justify-center items-center gap-4 pb-4">
             <Spinner /> Cargando...
           </span>
         )}

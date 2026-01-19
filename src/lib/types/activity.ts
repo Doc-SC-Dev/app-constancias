@@ -40,7 +40,19 @@ const participantSchema = type({
   id: "string > 0",
   type: "string",
   hours: "number >= 1",
-}).array();
+  bloqueado: "boolean",
+})
+  .array()
+  .narrow((value, ctx) => {
+    const allUnique =
+      new Set<string>(value.map((v) => v.id)).size === value.length;
+    if (!allUnique)
+      return ctx.reject({
+        message: "No debes repetir participantes",
+        code: "predicate",
+      });
+    return true;
+  });
 
 export const activityEditSchema = type({
   name: "string",
@@ -54,10 +66,6 @@ export const activityEditSchema = type({
 export type ActivityParticipant = typeof participantSchema.infer;
 export type ActivityEdit = typeof activityEditSchema.infer;
 
-// export type ActivityWithUser = Activity & {
-//   professor: string;
-// };
-
 export const activityCreateSchema = type({
   name: "string > 1",
   date: type({ to: "Date | undefined ", from: "Date" }),
@@ -65,12 +73,13 @@ export const activityCreateSchema = type({
   participants: participantSchema,
 }).narrow((value, ctx) => {
   if (!value.date.to) return true;
-  if (value.date.to > value.date.from)
+  if (value.date.to.getTime() <= value.date.from.getTime()) {
     return ctx.reject({
       message: "La fecha de fin debe ser mayor a la fecha de inicio",
       code: "predicate",
       path: ["date"],
     });
+  }
   return true;
 });
 

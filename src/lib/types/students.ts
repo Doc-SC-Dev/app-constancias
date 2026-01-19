@@ -1,7 +1,8 @@
 import { type } from "arktype";
 
 const studentSchema = type({
-  id: "number",
+  id: "string",
+  studentId: "number",
   name: "string",
   email: "string",
   admissionDate: "number",

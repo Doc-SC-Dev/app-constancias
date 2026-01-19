@@ -7,14 +7,14 @@ import {
 } from "../ui/select";
 import { FormBase, type FormControlFunc } from "./base";
 
-export const FormSelect: FormControlFunc<{ children: ReactNode }> = ({
-  children,
-  ...props
-}) => {
+export const FormSelect: FormControlFunc<{
+  children: ReactNode;
+  disabled?: boolean;
+}> = ({ children, disabled, ...props }) => {
   return (
     <FormBase {...props}>
       {({ onChange, onBlur, ...field }) => (
-        <Select {...field} onValueChange={onChange}>
+        <Select {...field} onValueChange={onChange} disabled={disabled}>
           <SelectTrigger
             aria-invalid={field["aria-invalid"]}
             id={field.id}

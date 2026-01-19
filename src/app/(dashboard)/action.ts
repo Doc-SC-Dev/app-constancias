@@ -8,16 +8,18 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
-import { AcademicGrade, Genre, type Student } from "@/generated/prisma";
+import { AcademicGrade, Gender, Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
-import { Roles } from "@/lib/authorization/permissions";
+import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import {
   Certificates,
-  type CreateRequest,
-  type Request,
+  type FullRequest,
+  type RequestActivity,
+  type RequestCertificate,
+  type RequestUserWithoutParticipant,
+  type RequestUserWithParticipants,
 } from "@/lib/types/request";
-import type { User } from "@/lib/types/users";
 import { withTryCatch } from "../action";
 
 export const logoutAction = async () => {
@@ -29,25 +31,25 @@ export const logoutAction = async () => {
 };
 
 export const getRequestsTypes = async () => {
-  const session = await isAuthenticated();
+  const { user } = await isAuthenticated();
   const [certificates, activities] = await Promise.all([
     db.certificate.findMany({
       select: {
         name: true,
         id: true,
+        roles: true,
       },
     }),
     db.activity.findMany({
-      where: {
-        participants: {
-          some: {
-            userId: session.user.id,
-          },
-        },
-      },
       select: {
         name: true,
         id: true,
+        participants: {
+          where: isAdmin(user.role as Role) ? {} : { userId: user.id },
+          select: {
+            userId: true,
+          },
+        },
       },
     }),
   ]);
@@ -56,34 +58,30 @@ export const getRequestsTypes = async () => {
 
 export const createRequest = async (data: {
   certificateName: string;
-  activity: { id: string; name: string };
+  activityId: string | undefined;
+  userId: string;
   description?: string;
 }) => {
-  const session = await isAuthenticated();
-  const { user } = session;
-
-  const isStandard = Object.values(Certificates).includes(
-    data.certificateName as Certificates
-  );
+  const isStandard = data.certificateName !== Certificates.OTHER;
 
   const {
     success,
     error,
     data: request,
-  } = await withTryCatch<Request>(
+  } = await withTryCatch<FullRequest>(
     db.request.create({
       data: {
         user: {
           connect: {
-            id: user.id,
+            id: data.userId,
           },
         },
-        activity: data.activity
+        activity: data.activityId
           ? {
-            connect: {
-              id: data.activity.id,
-            },
-          }
+              connect: {
+                id: data.activityId,
+              },
+            }
           : {},
         certificate: {
           connect: {
@@ -92,22 +90,96 @@ export const createRequest = async (data: {
         },
         otherRequest: !isStandard
           ? {
-            create: {
-              name: data.certificateName,
-              description: data.description ?? "",
-              userId: user.id,
-            },
-          }
+              create: {
+                name: data.certificateName,
+                description: data.description ?? "",
+                userId: data.userId,
+              },
+            }
           : undefined,
-        state: !isStandard
-          ? "PENDING"
-          : "READY",
+        state: !isStandard ? "PENDING" : "READY",
+      },
+      select: {
+        id: true,
+        user: {
+          select: {
+            academicGrade: true,
+            name: true,
+            rut: true,
+            gender: true,
+            role: true,
+            student: {
+              select: {
+                admisionDate: true,
+                studentId: true,
+              },
+            },
+            participants: {
+              where: {
+                activityId: data.activityId,
+              },
+              select: {
+                type: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        activity: {
+          select: {
+            name: true,
+            startAt: true,
+            endAt: true,
+            activityType: {
+              select: {
+                name: true,
+              },
+            },
+            participants: {
+              where: {
+                userId: { not: data.userId },
+              },
+              select: {
+                user: {
+                  select: {
+                    name: true,
+                    academicGrade: true,
+                    gender: true,
+                  },
+                },
+                hours: true,
+                type: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        certificate: {
+          select: {
+            name: true,
+          },
+        },
       },
     }),
   );
 
   if (!success) return { success: false, message: error };
 
+  if (isStandard) {
+    const pdf = await createPdf(request);
+    revalidatePath("/dashboard/history");
+    return {
+      success: true,
+      message: `Solicitud creada exitosamente con id ${request.id}`,
+      data: pdf,
+    };
+  }
   revalidatePath("/dashboard/history");
   return {
     success: true,
@@ -117,156 +189,137 @@ export const createRequest = async (data: {
 };
 
 export const downloadCertificate = async (requestId: string) => {
-  try {
-    await isAuthenticated();
+  await isAuthenticated();
 
-    const request = await db.request.findUnique({
-      where: {
-        id: requestId,
-      },
-      include: {
-        user: true,
-        certificate: true,
-        activity: {
-          include: {
-            participants: {
-              include: {
-                user: {
-                  include: {
-                    student: true,
+  const response = await db.request.findUnique({
+    where: { id: requestId },
+    select: {
+      userId: true,
+      activityId: true,
+    },
+  });
+  const request = await db.request.findUnique({
+    where: {
+      id: requestId,
+    },
+    select: {
+      id: true,
+      user: {
+        select: {
+          academicGrade: true,
+          name: true,
+          rut: true,
+          gender: true,
+          role: true,
+          student: {
+            select: {
+              admisionDate: true,
+              studentId: true,
+            },
+          },
+          participants: response
+            ? {
+                where: {
+                  activityId: response.activityId ?? undefined,
+                },
+                select: {
+                  type: {
+                    select: {
+                      name: true,
+                    },
                   },
                 },
-                type: true,
+              }
+            : false,
+        },
+      },
+      activity: {
+        select: {
+          name: true,
+          startAt: true,
+          endAt: true,
+          activityType: {
+            select: {
+              name: true,
+            },
+          },
+          participants: {
+            where: {
+              userId: { not: response?.userId },
+            },
+            select: {
+              user: {
+                select: {
+                  name: true,
+                  academicGrade: true,
+                  gender: true,
+                },
+              },
+              hours: true,
+              type: {
+                select: {
+                  name: true,
+                },
               },
             },
-            activityType: true,
           },
         },
       },
-    });
-
-    if (!request) {
-      return {
-        success: false,
-        message: "Solicitud no encontrada",
-      };
-    }
-
-    const createRequestData: CreateRequest = {
-      certificateName: request.certificate.name,
-      activityId: request.activityId ?? undefined,
-    };
-
-    const pdf = await createPdf(request.user as User, createRequestData);
-
-    return {
-      success: true,
-      data: pdf,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "Error al descargar el certificado",
-    };
-  }
-};
-
-const getAlumnoRegularText = async (user: User) => {
-  const { success, error, data } = await withTryCatch<Student | null>(
-    db.student.findUnique({ where: { userId: user.id } }),
-  );
-  if (error) throw new Error(error);
-  if (!success || !data) throw new Error("No se encontro el estudiante");
-  return `
-  <div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
-  <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong><i>, Director del Programa de 
-Doctorado en Ciencias Médicas, de la Universidad de La Frontera, deja 
-constancia que <strong>${user.genre === Genre.MALE ? "el Sr." : "la Sra."} ${user.name}</strong>, Matrícula Nº <strong>${data.id}</strong>, 
-es alumno regular de nuestro programa, desde el año <strong>${data.admisionDate.getFullYear()}</strong> a la fecha. 
-</i></div>`;
-};
-
-const getActivityTesisProfesorText = async (user: User, activityId: string) => {
-  const activity = await db.activity.findUnique({
-    where: {
-      id: activityId,
-    },
-    select: {
-      name: true,
-      activityType: {
+      certificate: {
         select: {
           name: true,
         },
       },
-      participants: {
-        select: {
-          user: {
-            select: {
-              name: true,
-              genre: true,
-              academicGrade: true,
-            },
-          },
-          type: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
     },
   });
-  if (!activity) throw new Error("Actividad no pudo ser encontrada");
-  const isMale = user.genre === Genre.MALE;
-  const isDoctor = user.academicGrade === AcademicGrade.DOCTOR;
-  const profesor = activity.participants.find((p) => p.user.name === user.name);
-  const tesista = activity.participants.find((p) => p.type.name === "Tesista");
-  return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
-  <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
-Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? (isDoctor ? "el Dr. " : "el Sr.") : isDoctor ? "la Dra. " : "la Sra."} ${user.name}</strong>, participa como ${profesor?.type.name} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.genre === Genre.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
+
+  if (!request) {
+    return {
+      success: false,
+      message: "Solicitud no encontrada",
+    };
+  }
+
+  const pdf = await createPdf(request);
+
+  return {
+    success: true,
+    data: pdf,
+  };
+};
+
+const getAlumnoRegularText = (user: RequestUserWithoutParticipant) => {
+  const { student } = user;
+  if (!student) throw new Error("Alumno no encontrado");
+  return `
+  <div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
+  <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de 
+Doctorado en Ciencias Médicas, de la Universidad de La Frontera, deja 
+constancia que ${user.gender === Gender.MALE ? "el Sr." : "la Sra."} ${user.name}, Matrícula Nº ${student.studentId}, 
+es alumno regular de nuestro programa, desde el año ${student.admisionDate.getFullYear()} a la fecha. 
 </div>`;
 };
 
-const getActivityTesisStudentText = async (user: User, activityId: string) => {
-  const activity = await db.activity.findUnique({
-    where: {
-      id: activityId,
-    },
-    select: {
-      name: true,
-      startAt: true,
-      activityType: {
-        select: {
-          name: true,
-        },
-      },
-      participants: {
-        select: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              genre: true,
-              academicGrade: true,
-              student: {
-                select: {
-                  id: true,
-                },
-              },
-            },
-          },
-          type: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
-    },
-  });
-  if (!activity) throw new Error("Actividad no pudo ser encontrada");
-  const isMale = user.genre === Genre.MALE;
-  const student = activity.participants.find((p) => p.user.id === user.id);
+const getActivityTesisProfesorText = (
+  user: RequestUserWithParticipants,
+  activity: RequestActivity,
+) => {
+  const isMale = user.gender === Gender.MALE;
+  const isDoctor = user.academicGrade === AcademicGrade.DOCTOR;
+  const tesista = activity.participants.find((p) => p.type.name === "Tesista");
+  return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
+  <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
+Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? (isDoctor ? "el Dr. " : "el Sr.") : isDoctor ? "la Dra. " : "la Sra."} ${user.name}</strong>, participa como ${user.participants[0].type.name} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.gender === Gender.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
+</div>`;
+};
+
+const getActivityTesisStudentText = (
+  user: RequestUserWithParticipants,
+  activity: RequestActivity,
+) => {
+  const { student } = user;
+  if (!student) throw new Error("Estudiante no fue encontrado");
+  const isMale = user.gender === Gender.MALE;
   const guia = activity.participants.find(
     (p) => p.type.name === "Profesor guia",
   );
@@ -274,36 +327,56 @@ const getActivityTesisStudentText = async (user: User, activityId: string) => {
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
 <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
 Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${!isMale ? "la estudiante, Sra." : "el estudiante, Sr."} 
-${student?.user.name}, matricula Nº ${student?.user.student?.id}, se encuentra realizando su Trabajo 
-de título (equivalente a tesis), modalidad proyecto de titulación “${activity.name}” bajo dirección de ${guia?.user.genre === Genre.FEMALE ? `la ${isDoctor ? "Dra." : "Sra."}` : `el ${isDoctor ? "Dr." : "Sr."}`} 
+${user.name}, matricula Nº ${student.studentId}, se encuentra realizando su Trabajo 
+de título (equivalente a tesis), modalidad proyecto de titulación “${activity.name}” bajo dirección de ${guia?.user.gender === Gender.FEMALE ? `la ${isDoctor ? "Dra." : "Sra."}` : `el ${isDoctor ? "Dr." : "Sr."}`} 
 ${guia?.user.name}, desde ${activity.startAt.getUTCMonth()} del ${activity.startAt.getFullYear()} a la fecha.
 </div>`;
 };
 
+const getStudentQualificationExamBody = (
+  user: RequestUserWithParticipants,
+  activity: RequestActivity,
+) => {
+  const { rut: userRut, student } = user;
+  if (!student) throw new Error("Estudiante no ha sido encontrado");
+  const { studentId } = student;
+  const adjetivo = user.gender === Gender.FEMALE ? "Sra. " : "Sr. ";
+  const userName = adjetivo + user.name;
+  const studentMOF = user.gender === Gender.FEMALE ? "alumna" : "alumno";
+  const activityStartDate = activity.startAt
+    .toLocaleDateString("es-CL")
+    .replaceAll("-", "/");
+  return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
+<strong>DRA. TOMARA OTZEN HERNÁDEZ</strong>, Director del Programa de Doctorado en 
+Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${userName}, matrícula Nº ${studentId}, RUT ${userRut} es ${studentMOF} regular de nuestro programa y con fecha ${activityStartDate}, aprobó su examen de calificación con nota 6,9.
+</div>`;
+};
 // TODO: Implementar mensajes de forma dinamica desde la DB
-const getCertificateText = async (user: User, certificate: CreateRequest) => {
+const getCertificateText = (
+  user: RequestUserWithParticipants,
+  certificate: RequestCertificate,
+  activity: RequestActivity | null,
+) => {
   // TODO: Implementar mensajes para el resto de certificados de forma estatica por ahora
-  switch (certificate.certificateName) {
-    case Certificates.ALUMNO_REGULAR:
-      return await getAlumnoRegularText(user);
-    case Certificates.TESIS:
+  if (!activity) throw new Error("Activida no encontrada");
+  switch (certificate.name) {
+    case Certificates.PARTICIPACION:
       if (user.role === Roles.PROFESSOR)
-        return await getActivityTesisProfesorText(
-          user,
-          certificate.activityId ?? "",
-        );
+        return getActivityTesisProfesorText(user, activity);
       if (user.role === Roles.STUDENT)
-        return await getActivityTesisStudentText(
-          user,
-          certificate.activityId ?? "",
-        );
+        return getActivityTesisStudentText(user, activity);
       return "";
+    case Certificates.EXAMEN_CALIFICACION:
+      if (user.role === Role.STUDENT)
+        return getStudentQualificationExamBody(user, activity);
+      else return "";
     default:
       return "";
   }
 };
 
-const createPdf = async (user: User, certificate: CreateRequest) => {
+const createPdf = async (request: FullRequest) => {
+  const { user, activity, certificate } = request;
   const templatePath = path.join(
     process.cwd(),
     "public",
@@ -337,8 +410,14 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
   });
   const page = await browser.newPage();
 
-  const text = await getCertificateText(user, certificate);
-
+  const text =
+    certificate.name === Certificates.ALUMNO_REGULAR
+      ? getAlumnoRegularText(user)
+      : getCertificateText(
+          user as RequestUserWithParticipants,
+          certificate,
+          activity,
+        );
   await page.addStyleTag({
     content: `
     @font-face {
@@ -375,7 +454,7 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
   footerField.setFontSize(12);
   footerField.updateAppearances(robotoFont);
   footerField.setText(
-    `TEMUCO, CHILE - ${month.at(0)?.toUpperCase() + month.slice(1)} de ${date.getFullYear()}.`,
+    `Temuco, Chile - ${month.at(0)?.toUpperCase() + month.slice(1)} de ${date.getFullYear()}.`,
   );
 
   const firstPage = pdfDoc.getPages()[0];
@@ -391,4 +470,21 @@ const createPdf = async (user: User, certificate: CreateRequest) => {
 
   const pdfFinalBytes = await pdfDoc.save();
   return Buffer.from(pdfFinalBytes).toString("base64");
+};
+
+export const getNotAdminUsers = async () => {
+  const user = await db.user.findMany({
+    where: {
+      role: {
+        notIn: [Role.ADMINISTRATOR, Role.SUPERADMIN],
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      role: true,
+    },
+  });
+
+  return user;
 };

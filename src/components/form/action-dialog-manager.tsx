@@ -6,14 +6,14 @@ import {
   type RefAttributes,
   useState,
 } from "react";
+import { toast } from "sonner";
+import { downloadCertificate } from "@/app/(dashboard)/action";
+import HistoryStateDialog from "@/app/(dashboard)/dashboard/history/_components/history-state-dialog";
+import HistoryViewDialog from "@/app/(dashboard)/dashboard/history/_components/history-view-dialog";
 import { Button } from "@/components/ui/button";
 import { type Action, Actions } from "@/lib/types/action";
 import { Dialog } from "../ui/dialog";
 import ActionButton from "./action-button";
-import { downloadCertificate } from "@/app/(dashboard)/action";
-import { toast } from "sonner";
-import HistoryViewDialog from "@/app/(dashboard)/dashboard/history/_components/history-view-dialog";
-import HistoryStateDialog from "@/app/(dashboard)/dashboard/history/_components/history-state-dialog";
 
 type ActionDialogProps<T> = {
   data?: T;
@@ -57,14 +57,16 @@ export default function ActionDialogManager<T>({
     if (!data || !(data as any).id) return;
 
     if ((data as any).link) {
-      window.open((data as any).link, '_blank');
+      window.open((data as any).link, "_blank");
       return;
     }
 
     const promise = async () => {
-      const { success, data: base64, message } = await downloadCertificate(
-        (data as any).id,
-      );
+      const {
+        success,
+        data: base64,
+        message,
+      } = await downloadCertificate((data as any).id);
       if (success && base64) {
         const link = document.createElement("a");
         link.href = `data:application/pdf;base64,${base64}`;
@@ -94,25 +96,25 @@ export default function ActionDialogManager<T>({
           onDelete={
             DeleteDialog
               ? () => {
-                setAction(Actions.DELETE);
-                setShowDialog(true);
-              }
+                  setAction(Actions.DELETE);
+                  setShowDialog(true);
+                }
               : undefined
           }
           onEdit={
             EditDialog
               ? () => {
-                setAction(Actions.EDIT);
-                setShowDialog(true);
-              }
+                  setAction(Actions.EDIT);
+                  setShowDialog(true);
+                }
               : undefined
           }
           onView={
             ViewDialog
               ? () => {
-                setAction(Actions.VIEW);
-                setShowDialog(true);
-              }
+                  setAction(Actions.VIEW);
+                  setShowDialog(true);
+                }
               : undefined
           }
           onDownload={isHistory && !canViewReason ? handleDownload : undefined}
@@ -145,7 +147,10 @@ export default function ActionDialogManager<T>({
               <HistoryViewDialog data={data as any} closeDialog={closeDialog} />
             )}
             {action === Actions.UPDATE_STATE && (
-              <HistoryStateDialog data={data as any} closeDialog={closeDialog} />
+              <HistoryStateDialog
+                data={data as any}
+                closeDialog={closeDialog}
+              />
             )}
           </>
         ) : (

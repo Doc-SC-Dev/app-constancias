@@ -13,23 +13,31 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
-enum Genre {
+enum Gender {
   MALE
   FEMALE
+  OTHER
+}
+
+enum Role {
+  SUPERADMIN
+  ADMINISTRATOR
+  PROFESSOR
+  STUDENT
 }
 
 model User {
   id            String         @id
-  rut           String
+  rut           String         @unique
   name          String
-  email         String
+  email         String         @unique
   emailVerified Boolean        @default(false)
   image         String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
-  role          String
+  role          Role           @default(STUDENT)
   banned        Boolean        @default(false)
   banReason     String?
   banExpires    DateTime?
@@ -38,10 +46,9 @@ model User {
   requests      Request[]
   logs          Log[]
   academicGrade AcademicGrade?
-  genre         Genre
+  gender        Gender
   otherRequests OtherRequest[]
 
-  @@unique([rut, email])
   @@map("user")
 }
 
@@ -103,8 +110,9 @@ enum AcademicGrade {
 }
 
 model Student {
-  id                      Int                      @id
-  userId                  String
+  id                      String                   @id @default(uuid())
+  studentId               Int                      @unique
+  userId                  String                   @unique
   isRegularStudent        Boolean                  @default(false)
   admisionDate            DateTime                 @default(now())
   updatedAt               DateTime                 @default(now()) @updatedAt
@@ -112,12 +120,11 @@ model Student {
   user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   qualificationExamGrades QualificationExamGrade[]
 
-  @@unique([userId])
   @@map("student")
 }
 
 model QualificationExamGrade {
-  studentId  Int
+  studentId  String
   activityId String
   grade      Float
   updatedAt  DateTime @updatedAt
@@ -141,15 +148,6 @@ model OtherRequest {
 
   @@map("other_request")
 }
-
-// enum ActivityType {
-//   DOCENCIA
-//   EXAMEN_CALIFICACION
-//   TRABAJO_INVESTIGACION
-//   TRABAJO_DE_TITULO
-//   PROYECTO_DE_INVESTIGACION
-//   PASANTIA
-// }
 
 model ActivityType {
   id               String            @id @default(uuid())
@@ -180,23 +178,13 @@ model Activity {
   @@map("activity")
 }
 
-// enum ParticipantType {
-//   CO_AUTOR
-//   AYUDANTE
-//   TESISTA
-//   AUTOR
-//   PROFESOR_ENCARGADO
-//   COLABORADOR
-//   ESTUDIANTE
-//   PASANTE
-// }
-
 model ParticipantType {
   id             String        @id @default(uuid())
   name           String
   activityType   ActivityType? @relation(fields: [activityTypeId], references: [id])
   activityTypeId String?
   participants   Participant[]
+  required       Boolean       @default(false)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @default(now()) @updatedAt
 
@@ -224,6 +212,7 @@ model Certificate {
   id        String    @id @default(uuid())
   pdfLink   String
   name      String    @unique
+  roles     Role[]    @default([ADMINISTRATOR, SUPERADMIN])
   requests  Request[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt

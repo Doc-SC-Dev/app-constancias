@@ -2,15 +2,13 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
+import LinkActionButton from "@/components/link-action-button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { admin } from "@/lib/auth/better-auth/client";
 import type { User } from "@/lib/types/users";
 import DeleteDialog from "./delete-dialog";
-import EditDialog from "./edit-dialog";
-import ViewDialog from "./view-dialog";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -110,10 +108,10 @@ export const columns: ColumnDef<User>[] = [
 
       return (
         <span className="flex flex-1 items-center justify-center">
-          <ActionDialogManager<User>
+          <LinkActionButton
             data={user}
-            viewDialog={ViewDialog}
-            editDialog={EditDialog}
+            seeLink={`/dashboard/users/${user.id}`}
+            editLink={`/dashboard/users/${user.id}/edit`}
             deleteDialog={DeleteDialog}
           />
         </span>

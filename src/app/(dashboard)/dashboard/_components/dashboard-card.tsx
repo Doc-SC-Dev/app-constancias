@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { menus } from "@/lib/types/menus";
+import type { User } from "@/lib/types/users";
 import CreateActivityDialog from "../activity/_components/create-activity-dialog";
 import NewUserDialog from "../users/_components/newuser-dialog";
 import CreateRequestDialog from "./create-request-dialog";
@@ -20,15 +21,21 @@ interface DashboardCardProps {
   description: string;
   icon: string;
   url: string;
+  user: User;
 }
 
-export function DashboardCard({ title, description, url }: DashboardCardProps) {
+export function DashboardCard({
+  title,
+  description,
+  url,
+  user,
+}: DashboardCardProps) {
   const selectDialog: () => ReactNode = () => {
     switch (title) {
       case menus.students.name:
         return <></>;
       case menus.history.name:
-        return <CreateRequestDialog />;
+        return <CreateRequestDialog user={user} />;
       case menus.activities.name:
         return <CreateActivityDialog closeDialog={() => {}} />;
       case menus.users.name:

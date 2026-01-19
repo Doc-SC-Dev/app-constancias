@@ -81,7 +81,7 @@ export default function ActivityEditForm({
     control: form.control,
     name: "participants",
   });
-
+  // TODO: implementar edicion de las actividades
   const [open, setOpen] = useState(false);
   const onSubmit = async (updatedData: ActivityUpdateType) => {
     const { date, participants } = updatedData;
@@ -204,6 +204,7 @@ export default function ActivityEditForm({
                     id: "",
                     type: "",
                     hours: 0,
+                    bloqueado: false,
                   })
                 }
               >

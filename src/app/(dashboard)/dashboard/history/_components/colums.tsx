@@ -1,25 +1,29 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
-import type { HistoryEntry } from "@/lib/types/history";
-import HistoryStateDialog from "./history-state-dialog";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-
-
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
-
+import ActionDialogManager from "@/components/form/action-dialog-manager";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import type { HistoryEntry } from "@/lib/types/history";
 import { Certificates } from "@/lib/types/request";
+import { cn } from "@/lib/utils";
+import HistoryStateDialog from "./history-state-dialog";
 
 // Helper component for the state cell to manage dialog state
-function StateCell({ entry, isAdmin }: { entry: HistoryEntry; isAdmin: boolean }) {
+function StateCell({
+  entry,
+  isAdmin,
+}: {
+  entry: HistoryEntry;
+  isAdmin: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const state = entry.state;
-  const isStandardCertificate = Object.values(Certificates).includes(entry.certName as Certificates);
+  const isStandardCertificate = entry.certName !== Certificates.OTHER;
 
-  let badgeClass = "bg-green-100 text-green-800 border-green-200 hover:bg-green-100";
+  let badgeClass =
+    "bg-green-100 text-green-800 border-green-200 hover:bg-green-100";
   let dotClass = "bg-green-500";
   let label = "Aprobada";
 
@@ -28,7 +32,8 @@ function StateCell({ entry, isAdmin }: { entry: HistoryEntry; isAdmin: boolean }
     dotClass = "bg-red-500";
     label = "Rechazada";
   } else if (state === "PENDING") {
-    badgeClass = "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100";
+    badgeClass =
+      "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100";
     dotClass = "bg-yellow-500";
     label = "En proceso";
   }
@@ -39,7 +44,7 @@ function StateCell({ entry, isAdmin }: { entry: HistoryEntry; isAdmin: boolean }
       className={cn(
         "gap-2 font-normal hover:opacity-80 transition-opacity",
         badgeClass,
-        !isStandardCertificate && isAdmin && "cursor-pointer"
+        !isStandardCertificate && isAdmin && "cursor-pointer",
       )}
     >
       <span className={cn("size-2 rounded-full", dotClass)} />
@@ -48,15 +53,15 @@ function StateCell({ entry, isAdmin }: { entry: HistoryEntry; isAdmin: boolean }
   );
 
   if (isStandardCertificate || !isAdmin) {
-    return <div className="flex flex-1 items-center justify-center">{badge}</div>;
+    return (
+      <div className="flex flex-1 items-center justify-center">{badge}</div>
+    );
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <div className="flex flex-1 items-center justify-center">
-        <DialogTrigger asChild>
-          {badge}
-        </DialogTrigger>
+        <DialogTrigger asChild>{badge}</DialogTrigger>
       </div>
       <HistoryStateDialog data={entry} closeDialog={() => setOpen(false)} />
     </Dialog>
@@ -83,7 +88,6 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
       return <span className="flex flex-1 items-center ">{name}</span>;
     },
   },
-
 
   {
     accessorKey: "role",
@@ -132,7 +136,8 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
     enableGlobalFilter: false,
     cell: ({ row }) => {
       const entry = row.original;
-      const isDownloadDisabled = entry.state === "PENDING" || entry.state === "REJECTED";
+      const isDownloadDisabled =
+        entry.state === "PENDING" || entry.state === "REJECTED";
       const canViewReason = entry.state === "REJECTED";
 
       return (
