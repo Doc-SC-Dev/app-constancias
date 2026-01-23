@@ -10,6 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { useState } from "react";
 
 type Props = {
   title: string;
@@ -23,6 +24,7 @@ export function EmptyPage({
   createDialog: CreateDialog,
   buttonLabel,
 }: Props) {
+  const [open, setOpen] = useState(false);
   return (
     <div className="h-full flex items-center">
       <Empty>
@@ -36,14 +38,14 @@ export function EmptyPage({
         {CreateDialog && (
           <EmptyContent>
             <div className="flex gap-2">
-              <Dialog>
+              <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button>
                     <Plus />
                     {buttonLabel}
                   </Button>
                 </DialogTrigger>
-                <CreateDialog closeDialog={() => {}} />
+                <CreateDialog closeDialog={() => setOpen(false)} />
               </Dialog>
             </div>
           </EmptyContent>

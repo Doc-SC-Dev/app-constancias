@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Certificates } from "@/lib/types/request";
+import { Textos } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
@@ -117,8 +118,19 @@ export default function HistoryStateDialog({
                   <SelectValue placeholder="Seleccione un estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="APPROVED">Aprobada</SelectItem>
-                  <SelectItem value="REJECTED">Rechazada</SelectItem>
+                  <SelectItem value="APPROVED">
+                    {Textos.State.APPROVED}
+                  </SelectItem>
+                  {request.certName === Certificates.OTHER && (
+                    <>
+                      <SelectItem value="PENDING">
+                        {Textos.State.PENDING}
+                      </SelectItem>
+                      <SelectItem value="REJECTED">
+                        {Textos.State.REJECTED}
+                      </SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>

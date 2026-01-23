@@ -113,28 +113,34 @@ export default function ActionButton({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-        {actions.map((action) => (
-          <DropdownMenuItem
-            key={action.type}
-            onSelect={action.onClick}
-            className={
-              action.type === "delete"
-                ? "text-destructive focus:text-destructive"
-                : ""
-            }
-          >
-            {action.type === "view" && <Eye className="mr-2 h-4 w-4" />}
-            {action.type === "edit" && <Edit className="mr-2 h-4 w-4" />}
-            {action.type === "view-reason" && <Eye className="mr-2 h-4 w-4" />}
-            {action.type === "download" && (
-              <Download className="mr-2 h-4 w-4" />
-            )}
-            {action.type === "delete" && (
-              <Trash className="mr-2 h-4 w-4 text-destructive" />
-            )}
-            {action.label}
-          </DropdownMenuItem>
-        ))}
+        {actions.map((action) => {
+          const isDisabled = action.type === "download" && onDownloadDisabled;
+          return (
+            <DropdownMenuItem
+              key={action.type}
+              onSelect={isDisabled ? undefined : action.onClick}
+              disabled={isDisabled}
+              className={
+                action.type === "delete"
+                  ? "text-destructive focus:text-destructive"
+                  : ""
+              }
+            >
+              {action.type === "view" && <Eye className="mr-2 h-4 w-4" />}
+              {action.type === "edit" && <Edit className="mr-2 h-4 w-4" />}
+              {action.type === "view-reason" && (
+                <Eye className="mr-2 h-4 w-4" />
+              )}
+              {action.type === "download" && (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              {action.type === "delete" && (
+                <Trash className="mr-2 h-4 w-4 text-destructive" />
+              )}
+              {action.label}
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -40,6 +40,7 @@ import { AcademicGrade, Gender, Role } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
+import { Textos } from "@/lib/utils";
 import { createUser } from "../actions";
 
 type DialogContentProps = {
@@ -118,7 +119,7 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
             >
               {Object.values(AcademicGrade).map((grade) => (
                 <SelectItem value={grade} key={grade}>
-                  {grade.toLowerCase()}
+                  {Textos.AcademicGrade[grade] || grade}
                 </SelectItem>
               ))}
             </FormSelect>
@@ -130,7 +131,7 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
             >
               {Object.values(Gender).map((gender) => (
                 <SelectItem value={gender} key={gender}>
-                  {gender.toLowerCase()}
+                  {Textos.Gender[gender] || gender}
                 </SelectItem>
               ))}
             </FormSelect>
@@ -150,7 +151,7 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
                 }
                 return (
                   <SelectItem value={rol} key={rol}>
-                    {rol}
+                    {Textos.Role[rol] || rol}
                   </SelectItem>
                 );
               })}

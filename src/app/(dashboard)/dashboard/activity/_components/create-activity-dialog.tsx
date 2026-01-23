@@ -3,7 +3,7 @@ import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarIcon, Trash } from "lucide-react";
 import { useEffect } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, type FieldError as RHFFieldError } from "react-hook-form";
 import { toast } from "sonner";
 import { FormInput } from "@/components/form/FormInput";
 import { FormSelect } from "@/components/form/FormSelect";
@@ -201,7 +201,7 @@ export default function CreateActivityDialog({
                                 value.to === undefined
                                   ? undefined
                                   : value.to.toLocaleDateString("es-CL") ===
-                                      from.toLocaleDateString("es-CL")
+                                    from.toLocaleDateString("es-CL")
                                     ? undefined
                                     : value.to;
                               field.onChange({
@@ -235,11 +235,6 @@ export default function CreateActivityDialog({
                 <FieldDescription>
                   Ingresar los particpantes de la actividad y su rol
                 </FieldDescription>
-                {form.formState.errors.participants?.root && (
-                  <FieldError
-                    errors={[form.formState.errors.participants.root]}
-                  />
-                )}
               </FieldContent>
               <Button
                 type="button"
@@ -258,6 +253,19 @@ export default function CreateActivityDialog({
               </Button>
             </div>
             <FieldGroup>
+              {(form.formState.errors.participants as RHFFieldError | undefined)
+                ?.message && (
+                  <FieldError
+                    errors={[
+                      {
+                        message:
+                          (
+                            form.formState.errors.participants as RHFFieldError
+                          )?.message ?? "",
+                      },
+                    ]}
+                  />
+                )}
               {participants.length > 0 && (
                 <Table>
                   <TableHeader>
@@ -279,6 +287,7 @@ export default function CreateActivityDialog({
                               fieldName="participants"
                               users={users}
                               control={form.control}
+                              hideError={true}
                             />
                           )}
                         </TableCell>
@@ -307,6 +316,7 @@ export default function CreateActivityDialog({
                           <FormNumberInput
                             control={form.control}
                             name={`participants.${index}.hours`}
+                            hideError={true}
                           />
                         </TableCell>
                         <TableCell>

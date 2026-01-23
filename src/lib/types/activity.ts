@@ -36,21 +36,62 @@ export const toActivityDTO = type.instanceOf(ActivityModel).pipe(
 
 export type ActivityDTO = typeof activityDTO.infer;
 
+const activityNameSchema = type("string").narrow((s, ctx) => {
+  if (s.length < 2) {
+    return ctx.reject({
+      code: "predicate",
+      message: "El nombre debe tener al menos 2 caracteres",
+    });
+  }
+  return true;
+});
+
+const participantIdSchema = type("string").narrow((s, ctx) => {
+  if (s.length === 0) {
+    return ctx.reject({
+      code: "predicate",
+      message: "Debe seleccionar un usuario",
+    });
+  }
+  return true;
+});
+
+const participantHoursSchema = type("number").narrow((n, ctx) => {
+  if (n < 1) {
+    return ctx.reject({
+      code: "predicate",
+      message: "Las horas deben ser mayor a 0",
+    });
+  }
+  return true;
+});
+
 const participantSchema = type({
-  id: "string > 0",
+  id: participantIdSchema,
   type: "string",
-  hours: "number >= 1",
+  hours: participantHoursSchema,
   bloqueado: "boolean",
 })
   .array()
   .narrow((value, ctx) => {
     const allUnique =
       new Set<string>(value.map((v) => v.id)).size === value.length;
-    if (!allUnique)
+
+    if (!allUnique) {
       return ctx.reject({
         message: "No debes repetir participantes",
         code: "predicate",
       });
+    }
+
+    const allValid = value.every((v) => v.id.length > 0 && v.hours > 0);
+    if (!allValid) {
+      return ctx.reject({
+        message: "Se deben completar todos los campos",
+        code: "predicate",
+      });
+    }
+
     return true;
   });
 
@@ -67,9 +108,16 @@ export type ActivityParticipant = typeof participantSchema.infer;
 export type ActivityEdit = typeof activityEditSchema.infer;
 
 export const activityCreateSchema = type({
-  name: "string > 1",
+  name: activityNameSchema,
   date: type({ to: "Date | undefined ", from: "Date" }),
-  type: "string",
+  type: type("string").narrow((value, ctx) =>
+    value.length === 0
+      ? ctx.reject({
+        message: "Debes seleccionar un tipo de actividad",
+        code: "predicate",
+      })
+      : true,
+  ),
   participants: participantSchema,
 }).narrow((value, ctx) => {
   if (!value.date.to) return true;

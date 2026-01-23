@@ -43,6 +43,7 @@ export async function loginAction(
         return { success: false, message: "Sin conexión a internet" };
       }
     }
+    console.error(error);
     return { success: false, message: "Error en el inicio de sesión" };
   }
 }
