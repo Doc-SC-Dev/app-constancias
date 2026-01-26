@@ -2,8 +2,8 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { type } from "arktype";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRouter, useRouter } from "next/navigation";
+import { useState, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,8 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input, Input } from "@/components/ui/input";
+import { Label, Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -24,6 +24,8 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import type { HistoryEntry } from "@/lib/types/history";
+import { Certificates } from "@/lib/types/request";
+import { Textos } from "@/lib/utils";
 import { updateRequestState } from "../actions";
 
 type DialogContentProps = {
@@ -130,8 +132,19 @@ export default function HistoryStateDialog({
                   <SelectValue placeholder="Seleccione un estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="APPROVED">Aprobada</SelectItem>
-                  <SelectItem value="REJECTED">Rechazada</SelectItem>
+                  <SelectItem value="APPROVED">
+                    {Textos.State.APPROVED}
+                  </SelectItem>
+                  {request.certName === Certificates.OTHER && (
+                    <>
+                      <SelectItem value="PENDING">
+                        {Textos.State.PENDING}
+                      </SelectItem>
+                      <SelectItem value="REJECTED">
+                        {Textos.State.REJECTED}
+                      </SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { admin } from "@/lib/auth/better-auth/client";
 import type { User } from "@/lib/types/users";
+import { Textos } from "@/lib/utils";
 import DeleteDialog from "./delete-dialog";
 
 export const columns: ColumnDef<User>[] = [
@@ -71,7 +72,7 @@ export const columns: ColumnDef<User>[] = [
               row.getValue("role") === "admin" ? "destructive" : "outline"
             }
           >
-            {`${(row.getValue("role") as string).toLowerCase().replace("_", "-")}`}
+            {Textos.Role[row.getValue("role") as string] || row.getValue("role")}
           </Badge>
         </span>
       );

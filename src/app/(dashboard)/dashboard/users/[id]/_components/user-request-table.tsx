@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import type { RequestState } from "@/generated/prisma";
 import type { UserRequest } from "@/lib/types/request";
 import { listUserRequest } from "../../actions";
+import { Textos } from "@/lib/utils";
 
 const getBadgeColor = (state: RequestState) => {
   switch (state) {
@@ -13,10 +14,6 @@ const getBadgeColor = (state: RequestState) => {
       return { bg: "amber-100", fg: "amber-800" };
     case "APPROVED":
       return { bg: "green-100", fg: "green-800" };
-    case "READY":
-      return { bg: "blue-100", fg: "blue-800" };
-    case "CANCELED":
-      return { bg: "red-100", fg: "red-800" };
     default:
       return { bg: "red-100", fg: "red-800" };
   }
@@ -38,7 +35,7 @@ const columns: ColumnDef<UserRequest>[] = [
           className={`text-${colors.fg} bg-${colors.bg} border-${colors.fg}`}
         >
           <Dot />
-          {data.getValue<string>()}
+          {Textos.State[data.getValue<string>()] || data.getValue<string>()}
         </Badge>
       );
     },

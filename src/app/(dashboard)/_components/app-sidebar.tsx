@@ -19,6 +19,7 @@ import type { Role } from "@/generated/prisma";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isAdmin } from "@/lib/authorization/permissions";
 import type { User } from "@/lib/types/users";
+import { Textos } from "@/lib/utils";
 import { AppAvatar } from "./app-avatar";
 import { AppSidebarMenuItem } from "./app-sidebar-menu-item";
 
@@ -45,7 +46,7 @@ export function AppSideBar({
       permission: hasUser,
     },
     {
-      title: "Constancias",
+      title: "Solicitudes",
       url: "/dashboard/history",
       icon: History,
       permission: hasRequest,
@@ -79,7 +80,7 @@ export function AppSideBar({
                 {user.name}
               </span>
               <span className="text-primary-foreground text-xs font-normal text-start">
-                {user.role}
+                {Textos.Role[user.role as string] || user.role}
               </span>
             </div>
           </div>
