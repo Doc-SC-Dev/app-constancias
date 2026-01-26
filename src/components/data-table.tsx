@@ -8,7 +8,9 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
   type Row,
+  type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -69,6 +71,7 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [globalFilter, setGlobalFilter] = useState<"">("");
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const { data, fetchNextPage, isFetching } = useInfiniteQuery({
     queryKey: [queryKey],
@@ -131,8 +134,11 @@ export function DataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     state: {
       globalFilter,
+      sorting,
     },
   });
 
@@ -164,7 +170,7 @@ export function DataTable<TData>({
     }
   };
 
-  if (data?.pages.length === 0) {
+  if (data?.pages.at(0)?.totalRows === 0) {
     return (
       <EmptyPage
         title={emptyTitle}
@@ -205,6 +211,7 @@ export function DataTable<TData>({
               zIndex: 1,
               width: "100%",
             }}
+            className="sticky"
           >
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="flex w-full gap-4">
@@ -214,7 +221,7 @@ export function DataTable<TData>({
                       key={header.id}
                       className={cn(
                         "flex items-center",
-                        (header.column.columnDef.meta as any)?.className ?? "flex-1"
+                        header.column.columnDef.meta?.className ?? "flex-1",
                       )}
                     >
                       {header.isPlaceholder
@@ -254,7 +261,7 @@ export function DataTable<TData>({
                         key={cell.id}
                         className={cn(
                           "flex",
-                          (cell.column.columnDef.meta as any)?.className ?? "flex-1"
+                          cell.column.columnDef.meta?.className ?? "flex-1",
                         )}
                         style={{}}
                       >
