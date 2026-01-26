@@ -8,13 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
 import type { UserRequest } from "@/lib/types/request";
-import type { User } from "@/lib/types/users";
+import type { UserWithAcademicDegree } from "@/lib/types/users";
 import { listUserActivities, listUserRequest } from "../../actions";
 import UserActivitiesTable from "./user-activity-table";
 import UserRequestTable from "./user-request-table";
 import UserStateToggle from "./user-state-toggle";
 
-export default async function UserCard({ user }: { user: User }) {
+export default async function UserCard({
+  user,
+}: {
+  user: UserWithAcademicDegree;
+}) {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchInfiniteQuery({
