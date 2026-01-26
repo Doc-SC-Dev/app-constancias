@@ -3,31 +3,36 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
+import type { Role } from "@/generated/prisma";
 import { isAuthenticated } from "@/lib/auth";
+import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import { menus } from "@/lib/types/menus";
-import { getRequestsTypes } from "../action";
+import { getAcademicDegree, getRequestsTypes } from "../action";
 import { DashboardCard } from "./_components/dashboard-card";
 
 export default async function HomePage() {
-  const session = await isAuthenticated();
-  const { user } = session;
+  const { user } = await isAuthenticated();
 
   const cardData = Object.values(menus).filter(
     (menu) => menu.name !== "Inicio",
   );
-  const isAdmin = ["ADMINISTRATOR", "SUPERADMIN"].includes(user.role as string);
+  const adminPrevilige = isAdmin(user.role as Role);
   const permissions: Record<string, boolean> = {
-    Usuarios: isAdmin,
-    Estudiantes: isAdmin,
+    Usuarios: adminPrevilige,
+    Estudiantes: adminPrevilige,
     Constancias: true,
-    Actividades:
-      isAdmin || ["professor", "guest"].includes(user.role as string),
+    Actividades: adminPrevilige || user.role === Roles.PROFESSOR,
   };
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
     queryKey: ["certificate-types"],
     queryFn: getRequestsTypes,
+  });
+
+  await queryClient.prefetchQuery({
+    queryKey: ["get-all-academic-degree"],
+    queryFn: getAcademicDegree,
   });
 
   return (
