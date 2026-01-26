@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import type { UserWithRole } from "better-auth/plugins";
-import { AcademicGrade, Gender, Role } from "@/generated/prisma";
+import { Gender, Role } from "@/generated/prisma";
 import type { auth } from "../auth";
 import { Roles } from "../authorization/permissions";
 
@@ -19,6 +19,12 @@ export type UserWithActivities = User & {
   }[];
 };
 
+export type UserWithAcademicDegree = User & {
+  academicDegree: {
+    name: string;
+  };
+};
+
 const roleSchema = type.enumerated(...Object.values(Role));
 export const userEditSchema = type({
   name: "string >= 1",
@@ -28,8 +34,6 @@ export const userEditSchema = type({
 });
 
 export type UserEdit = typeof userEditSchema.infer;
-
-const academicGrade = type.enumerated(...Object.values(AcademicGrade));
 
 const genderSchema = type.enumerated(...Object.values(Gender));
 
@@ -43,7 +47,7 @@ export const userCreateSchema = type({
   gender: genderSchema,
   "studentId?": "string.numeric",
   "admissionDate?": "Date",
-  "academicGrade?": academicGrade,
+  academicGrade: "string",
 }).narrow((val, ctx) => {
   if (val.role === Roles.STUDENT && !val.admissionDate) {
     return ctx.reject({
@@ -57,13 +61,6 @@ export const userCreateSchema = type({
       code: "predicate",
       message: "La matricula es requerida",
       path: ["studentId"],
-    });
-  }
-  if (val.role !== Roles.STUDENT && !val.academicGrade) {
-    return ctx.reject({
-      code: "predicate",
-      message: "El grado académico es requerido",
-      path: ["academicGrade"],
     });
   }
   return true;
