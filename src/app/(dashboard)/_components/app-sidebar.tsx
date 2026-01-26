@@ -1,13 +1,23 @@
 "use client";
-import { Activity, History, Home, User as UserIcon, Users } from "lucide-react";
+import {
+  Activity,
+  History,
+  Home,
+  Settings,
+  User as UserIcon,
+  Users,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
 } from "@/components/ui/sidebar";
+import type { Role } from "@/generated/prisma";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { isAdmin } from "@/lib/authorization/permissions";
 import type { User } from "@/lib/types/users";
 import { Textos } from "@/lib/utils";
 import { AppAvatar } from "./app-avatar";
@@ -94,6 +104,17 @@ export function AppSideBar({
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-    </Sidebar >
+      <SidebarFooter className="px-0">
+        {isAdmin(user.role as Role) && (
+          <SidebarMenu>
+            <AppSidebarMenuItem
+              title="Ajustes"
+              url="/admin?tab=general"
+              icon={Settings}
+            />
+          </SidebarMenu>
+        )}
+      </SidebarFooter>
+    </Sidebar>
   );
 }

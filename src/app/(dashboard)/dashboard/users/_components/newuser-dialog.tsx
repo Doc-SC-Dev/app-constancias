@@ -1,9 +1,12 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
+import { useQuery } from "@tanstack/react-query";
 import { CalendarIcon } from "lucide-react";
+import { es } from "react-day-picker/locale";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { getAcademicDegree } from "@/app/(dashboard)/action";
 import { FormInput } from "@/components/form/FormInput";
 import { FormSelect } from "@/components/form/FormSelect";
 import { Button } from "@/components/ui/button";
@@ -34,9 +37,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { AcademicGrade, Gender, Role } from "@/generated/prisma";
+import { Gender, Role } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
@@ -49,6 +53,10 @@ type DialogContentProps = {
 
 export default function NewUserDialog({ closeDialog }: DialogContentProps) {
   const { data } = useSession();
+  const { data: academicDegree, isLoading: loadingDegree } = useQuery({
+    queryKey: ["get-all-academic-degree"],
+    queryFn: getAcademicDegree,
+  });
   const { handleSubmit, control, formState, reset, watch } =
     useForm<UserCreate>({
       resolver: arktypeResolver(userCreateSchema),
@@ -56,11 +64,11 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
       defaultValues: {
         name: "",
         email: "",
-        role: Roles.STUDENT,
+        role: Roles.PROFESSOR,
         rut: "",
-        studentId: undefined,
-        academicGrade: undefined,
-        admissionDate: undefined,
+        studentId: "",
+        academicGrade: "",
+        admissionDate: new Date(),
         gender: Gender.OTHER,
       },
       shouldUnregister: true,
@@ -82,16 +90,16 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
     }
   };
   return (
-    <DialogContent className="max-w-xl w-lg">
-      <DialogHeader className="mb-4">
+    <DialogContent className="w-full p-0">
+      <DialogHeader className="mb-4 w-full px-6 pt-6">
         <DialogTitle>Crear nuevo usuario</DialogTitle>
         <DialogDescription>
           Ingresar datos para crear un nuevo usuario
         </DialogDescription>
       </DialogHeader>
-      <div className="overflow-y-scroll max-h-96 overflow-x-hidden">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FieldGroup className="gap-4 w-full">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <ScrollArea className="h-[400] w-full px-2">
+          <FieldGroup className="gap-4 w-full px-4">
             <FormInput
               label="Nombre"
               control={control}
@@ -117,9 +125,14 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
               name="academicGrade"
               description="Seleccione el grado académico del nuevo usuario"
             >
-              {Object.values(AcademicGrade).map((grade) => (
-                <SelectItem value={grade} key={grade}>
-                  {Textos.AcademicGrade[grade] || grade}
+              {loadingDegree && !academicDegree && (
+                <SelectItem value={""}>
+                  <Spinner />
+                </SelectItem>
+              )}
+              {academicDegree?.map((grade) => (
+                <SelectItem value={grade.id} key={grade.id}>
+                  {grade.name.toLowerCase()}
                 </SelectItem>
               ))}
             </FormSelect>
@@ -193,6 +206,8 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
                                   onSelect={field.onChange}
                                   mode="single"
                                   captionLayout="dropdown"
+                                  fixedWeeks={true}
+                                  locale={es}
                                 />
                               </PopoverContent>
                             </Popover>
@@ -208,21 +223,21 @@ export default function NewUserDialog({ closeDialog }: DialogContentProps) {
               </>
             )}
           </FieldGroup>
-          <DialogFooter className="mt-6">
-            <DialogClose asChild onClick={() => reset()}>
-              <Button variant="outline">Cancelar</Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              variant="default"
-              disabled={formState.isSubmitting}
-            >
-              {formState.isSubmitting && <Spinner />}
-              Crear
-            </Button>
-          </DialogFooter>
-        </form>
-      </div>
+        </ScrollArea>
+        <DialogFooter className="mt-6 pb-6 px-6">
+          <DialogClose asChild onClick={() => reset()}>
+            <Button variant="outline">Cancelar</Button>
+          </DialogClose>
+          <Button
+            type="submit"
+            variant="default"
+            disabled={formState.isSubmitting}
+          >
+            {formState.isSubmitting && <Spinner />}
+            Crear
+          </Button>
+        </DialogFooter>
+      </form>
     </DialogContent>
   );
 }

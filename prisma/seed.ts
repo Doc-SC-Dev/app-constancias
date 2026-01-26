@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin } from "better-auth/plugins";
-import { AcademicGrade, Gender, type Prisma, Role } from "@/generated/prisma";
+import { Gender, type Prisma, Role } from "@/generated/prisma";
 import {
   ADMINISTRATOR,
   ac,
@@ -15,10 +15,62 @@ type UserInputType = {
   email: string;
   rut: string;
   name: string;
-  academicGrade: AcademicGrade;
+  academicDegreeId: string;
   gender: Gender;
   role: Role;
   studentId?: number;
+};
+
+const degrees: Prisma.AcademicDegreeCreateInput[] = [
+  {
+    name: "Doctorado",
+    title: {
+      createMany: {
+        data: [
+          {
+            gender: Gender.FEMALE,
+            abbrev: "Dra.",
+          },
+          {
+            gender: Gender.MALE,
+            abbrev: "Dr.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    name: "Magister",
+    title: {
+      createMany: {
+        data: [
+          {
+            gender: Gender.FEMALE,
+            abbrev: "Mg.",
+          },
+          {
+            gender: Gender.MALE,
+            abbrev: "Mg.",
+          },
+        ],
+      },
+    },
+  },
+];
+
+const createAcademicDegree = async () => {
+  console.log("Creando Grados...");
+  await db.academicDegree.createMany({
+    data: degrees,
+  });
+
+  console.log("Grados creados exitosamente.");
+  const doctorate = await db.academicDegree.findFirstOrThrow({
+    where: {
+      name: "Doctorado",
+    },
+  });
+  return doctorate;
 };
 
 const users: UserInputType[] = [
@@ -26,18 +78,18 @@ const users: UserInputType[] = [
     name: "Isidora Acevedo",
     rut: "20.643.500-3",
     email: "isi.acevedog8625@gmail.com",
-    academicGrade: AcademicGrade.MAGISTER,
     gender: Gender.FEMALE,
     role: Role.STUDENT,
     studentId: 871249,
+    academicDegreeId: "",
   },
   {
     name: "Tomás Alonso Bravo Cañete",
     rut: "20.488.616-4",
     email: "tomas.b.c@outlook.com",
-    academicGrade: AcademicGrade.DOCTOR,
     gender: Gender.MALE,
     role: Role.PROFESSOR,
+    academicDegreeId: "",
   },
 ];
 
@@ -120,8 +172,8 @@ const createUser = async ({
   email,
   rut,
   name,
-  academicGrade,
   gender,
+  academicDegreeId,
   role,
   studentId,
 }: UserInputType) => {
@@ -140,7 +192,7 @@ const createUser = async ({
         rut,
         name,
         password: `${name}Password123!`,
-        academicGrade,
+        academicDegreeId,
         gender,
       },
     });
@@ -174,7 +226,7 @@ const createUser = async ({
     console.log(`✅ User with email ${email} created successfully.`);
   }
 };
-const createSuperAdmin = async () => {
+const createSuperAdmin = async ({ doctorateId }: { doctorateId: string }) => {
   const existingAdmin = await db.user.findFirst({
     where: {
       role: {
@@ -194,7 +246,7 @@ const createSuperAdmin = async () => {
         password: "AdminPassword123!", // Change this password in production
         name: "Administrador",
         rut: "11.111.111-1",
-        academicGrade: AcademicGrade.DOCTOR,
+        academicDegreeId: doctorateId,
         gender: Gender.MALE,
       },
     });
@@ -280,7 +332,7 @@ export const auth = betterAuth({
         returned: true,
         unique: true,
       },
-      academicGrade: {
+      academicDegreeId: {
         type: "string",
         input: true,
         returned: true,
@@ -305,18 +357,62 @@ export const auth = betterAuth({
   trustedOrigins: ["http://localhost:3000"],
 });
 
+function addMonths(fecha: Date, meses: number): Date {
+  const d = new Date(fecha);
+
+  // Guardamos el día original (ej: 31)
+  const diaOriginal = d.getDate();
+
+  // Establecemos el día a 1 para evitar errores prematuros al cambiar de mes
+  d.setDate(1);
+
+  // Sumamos los meses
+  d.setMonth(d.getMonth() + meses);
+
+  // Verificamos cuántos días tiene el nuevo mes
+  // (El día 0 del mes siguiente es el último día del mes actual)
+  const diasEnNuevoMes = new Date(
+    d.getFullYear(),
+    d.getMonth() + 1,
+    0,
+  ).getDate();
+
+  // Ajustamos: si el día original es mayor al máximo del nuevo mes, usamos el máximo.
+  d.setDate(Math.min(diaOriginal, diasEnNuevoMes));
+
+  return d;
+}
+
+async function createAcademicPeriod() {
+  const today = new Date();
+  await db.academicPeriod.create({
+    data: {
+      createdBy: "Tomás Alonso Bravo Cañete",
+      name: "2026-1",
+      startDate: today,
+      endDate: addMonths(today, 6),
+      active: true,
+    },
+  });
+}
+
 async function main() {
   console.log("🌱 Starting database seed...");
 
   try {
+    const doctorate = await createAcademicDegree();
     // Check if admin user already exists
-    await createSuperAdmin();
+    await createSuperAdmin({ doctorateId: doctorate.id });
     // create user
-    await Promise.all(users.map((user) => createUser(user)));
+    await Promise.all(
+      users.map((user) =>
+        createUser({ ...user, academicDegreeId: doctorate.id }),
+      ),
+    );
     // Create certificates
     await createCertificates();
 
-    const testCertName = "Otra Constancia";
+    const testCertName = "Constancia Especial";
     const testCert = await db.certificate.findUnique({
       where: { name: testCertName },
     });
@@ -334,6 +430,7 @@ async function main() {
     }
     // create Activity types of table is emtpty
     await createActivityTypes();
+    await createAcademicPeriod();
 
     console.log("\n🎉 Database seed completed!");
   } catch (error) {

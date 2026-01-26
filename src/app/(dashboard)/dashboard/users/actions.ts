@@ -10,7 +10,13 @@ import { db } from "@/lib/db";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
 import type { UserRequest } from "@/lib/types/request";
-import type { User, UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
+import type {
+  User,
+  UserCreate,
+  UserEdit,
+  UserSelect,
+  UserWithAcademicDegree,
+} from "@/lib/types/users";
 
 export async function updateUser(userData: UserEdit, id: string) {
   const { success, data, error } = await withTryCatch<UserSelect>(
@@ -157,14 +163,14 @@ export async function listUsers({
 }: {
   pageParam: number;
 }): Promise<PaginationResponse<User>> {
-  const session = await isAuthenticated();
+  const { user } = await isAuthenticated();
 
   const { users, total } = await auth.api.listUsers({
     headers: await headers(),
     query: {
       filterField: "id",
       filterOperator: "ne",
-      filterValue: session.user.id,
+      filterValue: user.id,
       limit: PAGE_SIZE,
       offset: pageParam * PAGE_SIZE,
     },
@@ -238,7 +244,7 @@ export const listUserActivities = async ({
   return { data: participants, nextPage: pageParam + 1, totalRows: count };
 };
 
-export async function getUserById(id: string): Promise<User> {
+export async function getUserById(id: string): Promise<UserWithAcademicDegree> {
   const user = await db.user.findUnique({
     where: { id },
     select: {
@@ -247,14 +253,18 @@ export async function getUserById(id: string): Promise<User> {
       email: true,
       image: true,
       role: true,
-      academicGrade: true,
+      academicDegree: {
+        select: {
+          name: true,
+        },
+      },
       gender: true,
       rut: true,
       banned: true,
     },
   });
   if (!user) throw new Error("Usuario no encontrado");
-  return user as User;
+  return user as UserWithAcademicDegree;
 }
 
 export async function listUserRequest({

@@ -1,7 +1,7 @@
 "use client";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarIcon, Trash } from "lucide-react";
+import { CalendarIcon, CircleQuestionMark, Info, Trash } from "lucide-react";
 import { useEffect } from "react";
 import { Controller, useFieldArray, useForm, type FieldError as RHFFieldError } from "react-hook-form";
 import { toast } from "sonner";
@@ -50,9 +50,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   type ActivityCreateDTO,
   activityCreateSchema,
 } from "@/lib/types/activity";
+import { formatDate } from "@/lib/utils";
 import { listUsersAdmin } from "../../users/actions";
 import { createActivity, getActivityTypes } from "../actions";
 import { UserSelect } from "./user-select";
@@ -108,14 +114,14 @@ export default function CreateActivityDialog({
       (aType) => aType.id === activityType,
     );
     if (activityConfig) {
-      const initialParticipants = activityConfig.participantTypes.map<
-        ActivityCreateDTO["participants"][0]
-      >((p) => ({
-        id: "",
-        type: p.id,
-        hours: 0,
-        bloqueado: p.required,
-      }));
+      const initialParticipants = activityConfig.participantTypes
+        .filter((p) => p.required)
+        .map<ActivityCreateDTO["participants"][0]>((p) => ({
+          id: "",
+          type: p.id,
+          hours: 0,
+          bloqueado: p.required,
+        }));
 
       replaceParticipants(initialParticipants);
     }
@@ -157,22 +163,36 @@ export default function CreateActivityDialog({
               ))}
             </FormSelect>
           )}
-          <FieldSeparator />
           <Controller
             name="date"
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldContent>
-                  <FieldLabel>Fecha</FieldLabel>
+                  <FieldLabel className="flex items-center">
+                    Fecha{" "}
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <CircleQuestionMark size="13" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <div className="flex items-center font-normal gap-2">
+                          <Info size="12" color="yellow" />
+                          <p>
+                            Se puede seleccionar una fecha o un rango de fechas.
+                          </p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       {...field}
                       aria-invalid={fieldState.invalid}
                       value={
                         field.value.to
-                          ? `${field.value.from.toLocaleDateString("es-CL")} - ${field.value.to.toLocaleDateString("es-CL")}`
-                          : field.value.from.toLocaleDateString("es-CL")
+                          ? `${formatDate(field.value.from)} - ${formatDate(field.value.to)}`
+                          : formatDate(field.value.from)
                       }
                     />
                     <InputGroupAddon align="inline-end">
@@ -193,10 +213,19 @@ export default function CreateActivityDialog({
                                 });
                                 return;
                               }
-                              const from =
-                                value.from === undefined
-                                  ? new Date()
-                                  : value.from;
+
+                              if (
+                                field.value.to !== undefined &&
+                                value.to !== undefined &&
+                                field.value.to >= value.to
+                              ) {
+                                field.onChange({
+                                  from: value.to,
+                                  to: undefined,
+                                });
+                                return;
+                              }
+                              const from = value.from ?? new Date();
                               const to =
                                 value.to === undefined
                                   ? undefined
@@ -204,8 +233,9 @@ export default function CreateActivityDialog({
                                     from.toLocaleDateString("es-CL")
                                     ? undefined
                                     : value.to;
+
                               field.onChange({
-                                from,
+                                from: value.from,
                                 to,
                               });
                             }}

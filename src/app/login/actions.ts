@@ -1,4 +1,5 @@
 "use server";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { APIError } from "better-auth";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
@@ -7,7 +8,6 @@ import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import type { ForgotPassword } from "@/lib/types/login";
 import type { LoginData } from "./loginSchema";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
 const emailClient = new Resend(env.RESEND_API_KEY);
 

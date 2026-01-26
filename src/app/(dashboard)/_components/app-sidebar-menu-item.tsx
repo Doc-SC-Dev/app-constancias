@@ -17,14 +17,18 @@ export function AppSidebarMenuItem({ title, url, icon: Icon }: Props) {
       <SidebarMenuButton
         size="lg"
         isActive={
-          url === "/dashboard" ? pathName === url : pathName.includes(url)
+          url === "/dashboard"
+            ? pathName === url
+            : pathName.includes(url.split("?")[0])
         }
         className="rounded-none h-full hover:bg-accent/75 hover:text-accent-foreground"
         tooltip={title}
         onClick={() => router.push(url)}
       >
-        <Icon size={20} />
-        <span className="text-lg">{title}</span>
+        <div className="flex flex-1 container mx-auto gap-2 items-center">
+          <Icon size={20} />
+          <span className="text-lg">{title}</span>
+        </div>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
