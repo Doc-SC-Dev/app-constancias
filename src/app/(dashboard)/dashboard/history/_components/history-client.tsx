@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { HistoryEntry } from "@/lib/types/history";
 import type { User } from "@/lib/types/users";
 import CreateRequestDialog from "../../_components/create-request-dialog";
 import { getHistoryPaginated } from "../actions";

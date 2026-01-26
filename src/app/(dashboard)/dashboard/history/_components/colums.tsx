@@ -82,7 +82,6 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   {
     accessorKey: "name",
     header: "Nombre de Usuario",
-    meta: { className: "w-[180px]" },
     cell: ({ row }) => {
       const name = row.original.name;
       return <span className="flex flex-1 items-center ">{name}</span>;
@@ -92,7 +91,6 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   {
     accessorKey: "role",
     header: () => <span className="flex flex-1 justify-center">Rol</span>,
-    meta: { className: "w-[180px]" },
     cell: ({ row }) => {
       const role = row.original.role;
       return (
@@ -106,7 +104,6 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
     header: () => (
       <span className="flex flex-1 justify-center">Fecha Creación</span>
     ),
-    meta: { className: "w-[180px]" },
     cell: ({ row }) => {
       const date = row.original.createdAt;
       const formattedDate = date.toLocaleDateString("es-CL", {
@@ -125,14 +122,13 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   {
     accessorKey: "state",
     header: () => <span className="flex flex-1 justify-center">Estado</span>,
-    meta: { className: "w-[180px]" },
     cell: ({ row }) => <StateCell entry={row.original} isAdmin={isAdmin} />,
   },
 
   {
     id: "actions",
     header: () => <span className="flex flex-1 justify-center">Acción</span>,
-    meta: { className: "w-[120px]" },
+    meta: { className: "w-[200px]" },
     enableGlobalFilter: false,
     cell: ({ row }) => {
       const entry = row.original;
