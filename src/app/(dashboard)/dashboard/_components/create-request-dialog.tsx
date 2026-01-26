@@ -1,6 +1,6 @@
 "use client";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -33,7 +33,14 @@ import {
   getRequestsTypes,
 } from "../../action";
 
-export default function CreateRequestDialog({ user }: { user: User }) {
+export default function CreateRequestDialog({
+  user,
+  closeDialog,
+}: {
+  user: User;
+  closeDialog?: () => void;
+}) {
+  const queryClient = useQueryClient();
   const { data, error } = useQuery({
     queryKey: ["certificate-types"],
     queryFn: getRequestsTypes,
@@ -72,6 +79,9 @@ export default function CreateRequestDialog({ user }: { user: User }) {
     if (success) {
       toast.success(message);
       form.reset();
+      queryClient.invalidateQueries({ queryKey: ["list-history-standard"] });
+      queryClient.invalidateQueries({ queryKey: ["list-history-other"] });
+      closeDialog?.();
     } else {
       toast.error(message);
     }
@@ -93,15 +103,15 @@ export default function CreateRequestDialog({ user }: { user: User }) {
                 control={form.control}
                 name="userId"
                 label="Usuario"
-                description="Seleccione un usuario crear una solicitud en su nombre"
+                description="Seleccione el usuario al que desea crear una solictiud"
               >
                 {isLoading && !users && <Spinner />}
                 {users
                   ? users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name}
-                      </SelectItem>
-                    ))
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))
                   : ""}
               </FormSelect>
             )}

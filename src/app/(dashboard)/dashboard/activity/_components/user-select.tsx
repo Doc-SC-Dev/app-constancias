@@ -29,7 +29,8 @@ export function UserSelect({
   users,
   fieldName,
   control,
-}: UserSelectProps) {
+  hideError,
+}: UserSelectProps & { hideError?: boolean }) {
   const currentValues = useWatch({ control, name: fieldName });
   const selectedId = new Set(
     (
@@ -46,7 +47,11 @@ export function UserSelect({
       .filter(Boolean),
   );
   return (
-    <FormSelect control={control} name={`participants.${index}.id`}>
+    <FormSelect
+      control={control}
+      name={`participants.${index}.id`}
+      hideError={hideError}
+    >
       {users.map((user) => {
         const isDisabled = selectedId.has(user.id);
         return (

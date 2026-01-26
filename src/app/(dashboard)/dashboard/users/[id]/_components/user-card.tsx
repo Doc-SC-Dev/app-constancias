@@ -9,6 +9,7 @@ import type { PaginationResponse } from "@/lib/types/pagination";
 import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
 import type { UserRequest } from "@/lib/types/request";
 import type { User } from "@/lib/types/users";
+import { Textos } from "@/lib/utils";
 import { listUserActivities, listUserRequest } from "../../actions";
 import UserActivitiesTable from "./user-activity-table";
 import UserRequestTable from "./user-request-table";
@@ -61,7 +62,9 @@ export default async function UserCard({ user }: { user: User }) {
             <div className="flex flex-col gap-3">
               <span className="flex items-center space-x-10">
                 <CardTitle className="text-4xl">{user.name}</CardTitle>
-                <Badge variant="secondary">{user.role}</Badge>
+                <Badge variant="secondary">
+                  {Textos.Role[user.role || ""] || user.role}
+                </Badge>
               </span>
 
               <span className="flex items-center space-x-3">

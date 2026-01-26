@@ -35,31 +35,73 @@ const genderSchema = type.enumerated(...Object.values(Gender));
 
 export type GenderType = typeof genderSchema.infer;
 
-export const userCreateSchema = type({
-  name: "string > 1",
-  rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
-  email: "string.email",
-  role: roleSchema,
-  gender: genderSchema,
-  "studentId?": "string.numeric",
-  "admissionDate?": "Date",
-  "academicGrade?": academicGrade,
-}).narrow((val, ctx) => {
-  if (val.role === Roles.STUDENT && !val.admissionDate) {
+const nameSchema = type("string").narrow((s, ctx) => {
+  if (s.length < 2) {
+    return ctx.reject({
+      code: "predicate",
+      message: "El nombre debe tener al menos 2 caracteres",
+    });
+  }
+  return true;
+});
+
+const rutSchema = type("string").narrow((s, ctx) => {
+  if (!/^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/.test(s)) {
+    return ctx.reject({
+      code: "predicate",
+      message: "El RUT debe tener puntos y guion",
+    });
+  }
+  return true;
+});
+
+const emailSchema = type("string.email").narrow((s, ctx) => {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) {
+    return ctx.reject({
+      code: "predicate",
+      message: "Debe ser un correo electrónico válido",
+    });
+  }
+  return true;
+});
+
+const admissionDateSchema = type("Date").narrow((val, ctx) => {
+  if ( val === undefined) {
     return ctx.reject({
       code: "predicate",
       message: "La fecha de ingreso es requerida",
       path: ["admissionDate"],
     });
   }
-  if (val.role === Roles.STUDENT && !val.studentId) {
+  return true;
+});
+
+export const userCreateSchema = type({
+  name: nameSchema,
+  rut: rutSchema,
+  email: emailSchema,
+  role: roleSchema,
+  gender: genderSchema,
+  studentId: "string.numeric | undefined",
+  admissionDate: admissionDateSchema,
+  "academicGrade?": academicGrade,
+}).narrow((val, ctx) => {
+  if (val.role === Roles.STUDENT && val.admissionDate === undefined) {
+    return ctx.reject({
+      code: "predicate",
+      message: "La fecha de ingreso es requerida",
+      path: ["admissionDate"],
+    });
+  }
+
+  if (val.role === Roles.STUDENT && val.studentId === undefined) {
     return ctx.reject({
       code: "predicate",
       message: "La matricula es requerida",
       path: ["studentId"],
     });
   }
-  if (val.role !== Roles.STUDENT && !val.academicGrade) {
+  if (!val.academicGrade) {
     return ctx.reject({
       code: "predicate",
       message: "El grado académico es requerido",
@@ -68,6 +110,8 @@ export const userCreateSchema = type({
   }
   return true;
 });
+
+
 
 export type UserCreate = typeof userCreateSchema.infer;
 

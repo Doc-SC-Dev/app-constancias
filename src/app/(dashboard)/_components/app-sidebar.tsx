@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { User } from "@/lib/types/users";
+import { Textos } from "@/lib/utils";
 import { AppAvatar } from "./app-avatar";
 import { AppSidebarMenuItem } from "./app-sidebar-menu-item";
 
@@ -35,7 +36,7 @@ export function AppSideBar({
       permission: hasUser,
     },
     {
-      title: "Constancias",
+      title: "Solicitudes",
       url: "/dashboard/history",
       icon: History,
       permission: hasRequest,
@@ -69,7 +70,7 @@ export function AppSideBar({
                 {user.name}
               </span>
               <span className="text-primary-foreground text-xs font-normal text-start">
-                {user.role}
+                {Textos.Role[user.role as string] || user.role}
               </span>
             </div>
           </div>
@@ -93,6 +94,6 @@ export function AppSideBar({
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-    </Sidebar>
+    </Sidebar >
   );
 }
