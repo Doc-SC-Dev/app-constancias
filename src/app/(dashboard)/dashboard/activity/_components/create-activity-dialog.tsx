@@ -253,7 +253,7 @@ export default function CreateActivityDialog({
               </Button>
             </div>
             <FieldGroup>
-              {(form.formState.errors.participants as RHFFieldError | undefined)
+              {(form.formState.errors.participants?.root)
                 ?.message && (
                   <FieldError
                     errors={[
@@ -293,6 +293,7 @@ export default function CreateActivityDialog({
                         </TableCell>
                         <TableCell>
                           <FormSelect
+                            hideError={true}
                             control={form.control}
                             name={`participants.${index}.type`}
                             disabled={participant.bloqueado}

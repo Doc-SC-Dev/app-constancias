@@ -36,16 +36,6 @@ export const toActivityDTO = type.instanceOf(ActivityModel).pipe(
 
 export type ActivityDTO = typeof activityDTO.infer;
 
-const activityNameSchema = type("string").narrow((s, ctx) => {
-  if (s.length < 2) {
-    return ctx.reject({
-      code: "predicate",
-      message: "El nombre debe tener al menos 2 caracteres",
-    });
-  }
-  return true;
-});
-
 const participantIdSchema = type("string").narrow((s, ctx) => {
   if (s.length === 0) {
     return ctx.reject({
@@ -108,8 +98,17 @@ export type ActivityParticipant = typeof participantSchema.infer;
 export type ActivityEdit = typeof activityEditSchema.infer;
 
 export const activityCreateSchema = type({
-  name: activityNameSchema,
+  name: type("string").narrow((s, ctx) => {
+  if (s.length < 2) {
+    return ctx.reject({
+      code: "predicate",
+      message: "El nombre debe tener al menos 2 caracteres",
+    });
+  }
+  return true;
+}),
   date: type({ to: "Date | undefined ", from: "Date" }),
+
   type: type("string").narrow((value, ctx) =>
     value.length === 0
       ? ctx.reject({
