@@ -38,3 +38,16 @@ export const Textos = {
     READY: "Aprobada",
   } as Record<string, string>,
 };
+
+export function formatDate(date: Date) {
+  return date.toLocaleDateString("es-CL").replaceAll("-", "/");
+}
+
+export function formatTitle(title: string) {
+  // remove underscores if exits
+  const withoutUnserscore = title.replaceAll("_", " ");
+  return (
+    withoutUnserscore[0].toLocaleUpperCase() +
+    withoutUnserscore.slice(1).toLocaleLowerCase()
+  );
+}

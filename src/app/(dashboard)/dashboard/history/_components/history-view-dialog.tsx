@@ -1,12 +1,12 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { HistoryEntry } from "@/lib/types/history";
-import { Button } from "@/components/ui/button";
 
 type DialogContentProps = {
   data: HistoryEntry;
@@ -25,12 +25,16 @@ export default function HistoryViewDialog({
 
       <div className="flex flex-col gap-6 py-4">
         <div className="flex flex-col gap-2">
-          <span className="font-medium text-sm text-muted-foreground">Tipo de Constancia</span>
+          <span className="font-medium text-sm text-muted-foreground">
+            Tipo de Constancia
+          </span>
           <span>{request.certName}</span>
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="font-medium text-sm text-muted-foreground">Motivo</span>
+          <span className="font-medium text-sm text-muted-foreground">
+            Motivo
+          </span>
           <p className="text-sm text-foreground bg-gray-50 p-3 rounded-md border">
             {request.rejectionReason || "No se ha especificado un motivo."}
           </p>
@@ -38,9 +42,7 @@ export default function HistoryViewDialog({
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={closeDialog}>
-          Cerrar
-        </Button>
+        <Button onClick={closeDialog}>Cerrar</Button>
       </div>
     </DialogContent>
   );

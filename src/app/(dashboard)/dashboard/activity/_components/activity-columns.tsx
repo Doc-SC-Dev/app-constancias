@@ -2,23 +2,24 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import LinkActionButton from "@/components/link-action-button";
+import { TableCell } from "@/components/table-cell";
 import type { ActivityDTO } from "@/lib/types/activity";
+import { formatTitle } from "@/lib/utils";
 import DeleteDialog from "./delete-dialog";
 
 export const columns: ColumnDef<ActivityDTO>[] = [
   {
     accessorKey: "name",
     header: "Nombre",
-    enableGlobalFilter: false,
+    cell({ getValue }) {
+      return <TableCell>{formatTitle(getValue<string>())}</TableCell>;
+    },
   },
   {
     accessorKey: "activityType",
     header: "Tipo",
-    cell({ row }) {
-      const type = row.original.activityType;
-      return (
-        <span className="w-full">{type.replace(/_/g, " ").toLowerCase()}</span>
-      );
+    cell({ getValue }) {
+      return <TableCell>{formatTitle(getValue<string>())}</TableCell>;
     },
   },
   {
@@ -31,13 +32,13 @@ export const columns: ColumnDef<ActivityDTO>[] = [
       const to = row.original.endAt;
 
       return (
-        <span className="flex flex-1 justify-center">
+        <TableCell className="justify-center">
           {to
             ? from +
               " - " +
               new Date(to).toLocaleDateString("es-CL").replaceAll("-", "/")
             : from}
-        </span>
+        </TableCell>
       );
     },
   },
@@ -45,28 +46,31 @@ export const columns: ColumnDef<ActivityDTO>[] = [
   {
     accessorKey: "nParticipants",
     header: () => (
-      <span className="flex flex-1 justify-center">
+      <TableCell className="justify-center">
         Cantidad de participantes
-      </span>
+      </TableCell>
     ),
-    cell({ row }) {
-      const participants = row.getValue("nParticipants") as number;
-      return <span className="flex flex-1 justify-center">{participants}</span>;
+    cell({ getValue }) {
+      return (
+        <TableCell className="justify-center">{getValue<number>()}</TableCell>
+      );
     },
   },
   {
     id: "actions",
-    header: "Acción",
+    header: () => <TableCell className="justify-center">Acción</TableCell>,
     enableGlobalFilter: false,
     cell: ({ row }) => {
       const activity = row.original;
       return (
-        <LinkActionButton<ActivityDTO>
-          seeLink={`/dashboard/activity/${activity.id}`}
-          editLink={`/dashboard/activity/${activity.id}/edit`}
-          deleteDialog={DeleteDialog}
-          data={activity}
-        />
+        <TableCell className="justify-center">
+          <LinkActionButton<ActivityDTO>
+            seeLink={`/dashboard/activity/${activity.id}`}
+            editLink={`/dashboard/activity/${activity.id}/edit`}
+            deleteDialog={DeleteDialog}
+            data={activity}
+          />
+        </TableCell>
       );
     },
   },

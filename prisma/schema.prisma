@@ -26,28 +26,54 @@ enum Role {
   STUDENT
 }
 
+model AcademicDegree {
+  id        String          @id @default(uuid())
+  name      String          @unique
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  users     User[]
+  title     AcademicTitle[]
+
+  @@map("academic_degree")
+}
+
+model AcademicTitle {
+  id               String   @id @default(uuid())
+  academicDegreeId String
+  gender           Gender
+  abbrev           String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  degree AcademicDegree @relation(fields: [academicDegreeId], references: [id], onDelete: Cascade)
+
+  @@map("academic_title")
+}
+
 model User {
-  id            String         @id
-  rut           String         @unique
-  name          String
-  email         String         @unique
-  emailVerified Boolean        @default(false)
-  image         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @default(now()) @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  role          Role           @default(STUDENT)
-  banned        Boolean        @default(false)
-  banReason     String?
-  banExpires    DateTime?
-  student       Student?
-  participants  Participant[]
-  requests      Request[]
-  logs          Log[]
-  academicGrade AcademicGrade?
-  gender        Gender
-  otherRequests OtherRequest[]
+  id               String          @id
+  rut              String          @unique
+  name             String
+  email            String          @unique
+  emailVerified    Boolean         @default(false)
+  image            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @default(now()) @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  role             Role            @default(STUDENT)
+  banned           Boolean         @default(false)
+  banReason        String?
+  banExpires       DateTime?
+  student          Student?
+  isDirector       Boolean         @default(false)
+  participants     Participant[]
+  requests         Request[]
+  academicDegreeId String?
+  academicDegree   AcademicDegree? @relation(fields: [academicDegreeId], references: [id], onDelete: SetNull)
+  gender           Gender
+  otherRequests    OtherRequest[]
+  logs             Log[]
 
   @@map("user")
 }
@@ -101,12 +127,6 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
-}
-
-enum AcademicGrade {
-  DOCTOR
-  DOCTORA
-  MAGISTER
 }
 
 model Student {
@@ -212,7 +232,7 @@ model Certificate {
   id        String    @id @default(uuid())
   pdfLink   String
   name      String    @unique
-  roles     Role[]    @default([ADMINISTRATOR, SUPERADMIN])
+  roles     Role[]    @default([STUDENT, PROFESSOR])
   requests  Request[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -245,32 +265,31 @@ model Request {
   @@map("request")
 }
 
-enum Action {
-  CREATE
-  UPDATE
-  READ
-  DELETE
-  LIST
-}
-
-enum Resource {
-  USER
-  REQUEST
-  ACTIVITY
-  CERTIFICATE
-  PROFESSOR
-  STUDENT
-  PARTICIPANT
-}
-
 model Log {
-  id        String   @id @default(uuid())
-  userId    String
-  action    Action
-  resource  Resource
-  result    String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  id         String   @id @default(uuid())
+  userId     String?
+  userName   String
+  action     String
+  resource   String
+  resourceId String
+  oldValue   Json     @db.JsonB
+  newValue   Json     @db.JsonB
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("log")
+}
+
+model AcademicPeriod {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  startDate DateTime
+  endDate   DateTime
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+
+  @@map("academic_period")
 }

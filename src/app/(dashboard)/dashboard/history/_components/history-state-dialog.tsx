@@ -1,19 +1,19 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { type } from "arktype";
-
-import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { HistoryEntry } from "@/lib/types/history";
-import { toast } from "sonner";
-import { updateRequestState } from "../actions";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,14 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
+import type { HistoryEntry } from "@/lib/types/history";
 import { Certificates } from "@/lib/types/request";
 import { Textos } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useQueryClient } from "@tanstack/react-query";
+import { updateRequestState } from "../actions";
 
 type DialogContentProps = {
   data: HistoryEntry;
@@ -46,11 +44,17 @@ export default function HistoryStateDialog({
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const [currentState, setCurrentState] = useState<"PENDING" | "APPROVED" | "REJECTED">(
-    request.state === "PENDING" ? "APPROVED" : (request.state as "PENDING" | "APPROVED" | "REJECTED")
+  const [currentState, setCurrentState] = useState<
+    "PENDING" | "APPROVED" | "REJECTED"
+  >(
+    request.state === "PENDING"
+      ? "APPROVED"
+      : (request.state as "PENDING" | "APPROVED" | "REJECTED"),
   );
   const [link, setLink] = useState(request.link || "");
-  const [rejectionReason, setRejectionReason] = useState(request.rejectionReason || "");
+  const [rejectionReason, setRejectionReason] = useState(
+    request.rejectionReason || "",
+  );
 
   const handleUpdate = async () => {
     if (currentState === "APPROVED") {
@@ -72,13 +76,17 @@ export default function HistoryStateDialog({
         request.id,
         currentState,
         currentState === "APPROVED" ? link : undefined,
-        currentState === "REJECTED" ? rejectionReason : undefined
+        currentState === "REJECTED" ? rejectionReason : undefined,
       );
 
       if (success) {
         toast.success("Estado actualizado exitosamente");
-        await queryClient.invalidateQueries({ queryKey: ["list-history-standard"] });
-        await queryClient.invalidateQueries({ queryKey: ["list-history-other"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["list-history-standard"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["list-history-other"],
+        });
         startTransition(() => {
           router.refresh();
           closeDialog();
@@ -104,15 +112,21 @@ export default function HistoryStateDialog({
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4 items-center">
             <div className="flex flex-col gap-2">
-              <span className="font-medium text-sm text-muted-foreground">Tipo de Constancia</span>
+              <span className="font-medium text-sm text-muted-foreground">
+                Tipo de Constancia
+              </span>
               <span>{request.certName}</span>
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="state-select" className="text-muted-foreground">Estado</Label>
+              <Label htmlFor="state-select" className="text-muted-foreground">
+                Estado
+              </Label>
               <Select
                 value={currentState}
-                onValueChange={(val) => setCurrentState(val as "PENDING" | "APPROVED" | "REJECTED")}
+                onValueChange={(val) =>
+                  setCurrentState(val as "PENDING" | "APPROVED" | "REJECTED")
+                }
               >
                 <SelectTrigger id="state-select">
                   <SelectValue placeholder="Seleccione un estado" />
@@ -138,7 +152,9 @@ export default function HistoryStateDialog({
 
           {currentState === "APPROVED" && (
             <div className="flex flex-col gap-2">
-              <Label htmlFor="link-input" className="text-muted-foreground">Link de Descarga</Label>
+              <Label htmlFor="link-input" className="text-muted-foreground">
+                Link de Descarga
+              </Label>
               <Input
                 id="link-input"
                 value={link}
@@ -150,7 +166,12 @@ export default function HistoryStateDialog({
 
           {currentState === "REJECTED" && (
             <div className="flex flex-col gap-2">
-              <Label htmlFor="rejection-reason" className="text-muted-foreground">Motivo del Rechazo</Label>
+              <Label
+                htmlFor="rejection-reason"
+                className="text-muted-foreground"
+              >
+                Motivo del Rechazo
+              </Label>
               <Textarea
                 id="rejection-reason"
                 value={rejectionReason}

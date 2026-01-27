@@ -1,10 +1,5 @@
 import { type } from "arktype";
-import type {
-  AcademicGrade,
-  Gender,
-  RequestState,
-  Role,
-} from "@/generated/prisma";
+import type { Gender, RequestState, Role } from "@/generated/prisma";
 
 export const createRequestSchema = type({
   certificateName: "string",
@@ -30,7 +25,7 @@ export type RequestUserWithParticipants = {
   rut: string;
   role: Role;
   gender: Gender;
-  academicGrade: AcademicGrade | null;
+  academicDegree: { title: { abbrev: string }[] } | null;
   student: {
     studentId: number;
     admisionDate: Date;
@@ -46,7 +41,7 @@ export type RequestUserWithoutParticipant = {
   rut: string;
   role: Role;
   gender: Gender;
-  academicGrade: AcademicGrade | null;
+  academicDegree: { title: { abbrev: string }[] } | null;
   student: {
     studentId: number;
     admisionDate: Date;
@@ -62,7 +57,9 @@ export type RequestActivity = {
   participants: {
     user: {
       name: string;
-      academicGrade: AcademicGrade | null;
+      academicDegree: {
+        title: { abbrev: string }[];
+      } | null;
       gender: Gender;
     };
     hours: number;

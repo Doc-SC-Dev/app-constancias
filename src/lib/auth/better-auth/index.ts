@@ -31,7 +31,14 @@ export const auth = betterAuth({
         returned: true,
         unique: true,
       },
-      academicGrade: {
+      isDirector: {
+        type: "boolean",
+        input: false,
+        returned: false,
+        unique: false,
+        defaultValue: false,
+      },
+      academicDegreeId: {
         type: "string",
         input: true,
         returned: true,

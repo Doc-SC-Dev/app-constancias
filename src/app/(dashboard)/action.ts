@@ -8,7 +8,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
-import { AcademicGrade, Gender, Role } from "@/generated/prisma";
+import { Gender, Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
@@ -56,6 +56,21 @@ export const getRequestsTypes = async () => {
   return { activities, certificates };
 };
 
+export const getAcademicDegree = async () => {
+  const degree = await db.academicDegree.findMany({
+    include: {
+      title: {
+        select: {
+          gender: true,
+          abbrev: true,
+        },
+      },
+    },
+  });
+
+  return degree;
+};
+
 export const createRequest = async (data: {
   certificateName: string;
   activityId: string | undefined;
@@ -63,7 +78,7 @@ export const createRequest = async (data: {
   description?: string;
 }) => {
   const isStandard = data.certificateName !== Certificates.OTHER;
-
+  // TODO: corrigir error de tipo hay corregir el tipo para que acepte el title
   const {
     success,
     error,
@@ -103,7 +118,16 @@ export const createRequest = async (data: {
         id: true,
         user: {
           select: {
-            academicGrade: true,
+            academicDegree: {
+              select: {
+                title: {
+                  take: 1,
+                  select: {
+                    abbrev: true,
+                  },
+                },
+              },
+            },
             name: true,
             rut: true,
             gender: true,
@@ -146,7 +170,16 @@ export const createRequest = async (data: {
                 user: {
                   select: {
                     name: true,
-                    academicGrade: true,
+                    academicDegree: {
+                      select: {
+                        title: {
+                          take: 1,
+                          select: {
+                            abbrev: true,
+                          },
+                        },
+                      },
+                    },
                     gender: true,
                   },
                 },
@@ -213,7 +246,16 @@ export const downloadCertificate = async (requestId: string) => {
       id: true,
       user: {
         select: {
-          academicGrade: true,
+          academicDegree: {
+            select: {
+              title: {
+                take: 1,
+                select: {
+                  abbrev: true,
+                },
+              },
+            },
+          },
           name: true,
           rut: true,
           gender: true,
@@ -258,7 +300,16 @@ export const downloadCertificate = async (requestId: string) => {
               user: {
                 select: {
                   name: true,
-                  academicGrade: true,
+                  academicDegree: {
+                    select: {
+                      title: {
+                        take: 1,
+                        select: {
+                          abbrev: true,
+                        },
+                      },
+                    },
+                  },
                   gender: true,
                 },
               },
@@ -312,11 +363,11 @@ const getActivityTesisProfesorText = (
   activity: RequestActivity,
 ) => {
   const isMale = user.gender === Gender.MALE;
-  const isDoctor = user.academicGrade === AcademicGrade.DOCTOR;
+  const isDoctor = user.academicDegree?.title.at(0);
   const tesista = activity.participants.find((p) => p.type.name === "Tesista");
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
   <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
-Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? (isDoctor ? "el Dr. " : "el Sr.") : isDoctor ? "la Dra. " : "la Sra."} ${user.name}</strong>, participa como ${user.participants[0].type.name} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.gender === Gender.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
+Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? `el ${isDoctor}` : `la ${isDoctor}`} ${user.name}</strong>, participa como ${user.participants[0].type.name} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.gender === Gender.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
 </div>`;
 };
 
@@ -330,7 +381,7 @@ const getActivityTesisStudentText = (
   const guia = activity.participants.find(
     (p) => p.type.name === "Profesor guia",
   );
-  const isDoctor = guia?.user.academicGrade === AcademicGrade.DOCTOR;
+  const isDoctor = guia?.user.academicDegree?.title.at(0)?.abbrev;
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
 <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
 Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${!isMale ? "la estudiante, Sra." : "el estudiante, Sr."} 
@@ -347,7 +398,7 @@ const getStudentQualificationExamBody = (
   const { rut: userRut, student } = user;
   if (!student) throw new Error("Estudiante no ha sido encontrado");
   const { studentId } = student;
-  const adjetivo = user.gender === Gender.FEMALE ? "Sra. " : "Sr. ";
+  const adjetivo = user.academicDegree?.title.at(0)?.abbrev;
   const userName = adjetivo + user.name;
   const studentMOF = user.gender === Gender.FEMALE ? "alumna" : "alumno";
   const activityStartDate = activity.startAt

@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import type { UserWithRole } from "better-auth/plugins";
-import { AcademicGrade, Gender, Role } from "@/generated/prisma";
+import { Gender, Role } from "@/generated/prisma";
 import type { auth } from "../auth";
 import { Roles } from "../authorization/permissions";
 
@@ -19,6 +19,12 @@ export type UserWithActivities = User & {
   }[];
 };
 
+export type UserWithAcademicDegree = User & {
+  academicDegree: {
+    name: string;
+  };
+};
+
 const roleSchema = type.enumerated(...Object.values(Role));
 export const userEditSchema = type({
   name: "string >= 1",
@@ -28,8 +34,6 @@ export const userEditSchema = type({
 });
 
 export type UserEdit = typeof userEditSchema.infer;
-
-const academicGrade = type.enumerated(...Object.values(AcademicGrade));
 
 const genderSchema = type.enumerated(...Object.values(Gender));
 
@@ -66,7 +70,7 @@ const emailSchema = type("string.email").narrow((s, ctx) => {
 });
 
 const admissionDateSchema = type("Date").narrow((val, ctx) => {
-  if ( val === undefined) {
+  if (val === undefined) {
     return ctx.reject({
       code: "predicate",
       message: "La fecha de ingreso es requerida",
@@ -84,7 +88,7 @@ export const userCreateSchema = type({
   gender: genderSchema,
   studentId: "string.numeric | undefined",
   admissionDate: admissionDateSchema,
-  "academicGrade?": academicGrade,
+  academicGrade: "string",
 }).narrow((val, ctx) => {
   if (val.role === Roles.STUDENT && val.admissionDate === undefined) {
     return ctx.reject({
@@ -110,8 +114,6 @@ export const userCreateSchema = type({
   }
   return true;
 });
-
-
 
 export type UserCreate = typeof userCreateSchema.infer;
 

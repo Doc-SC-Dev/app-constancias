@@ -1,5 +1,6 @@
 "use server";
 
+import type { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import type { HistoryEntry } from "@/lib/types/history";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
@@ -71,7 +72,7 @@ export const updateRequestState = async (
   rejectionReason?: string,
 ) => {
   try {
-    const updateData: any = { state: newState };
+    const updateData: Prisma.RequestUpdateInput = { state: newState };
 
     if (link !== undefined || rejectionReason !== undefined) {
       const request = await db.request.findUnique({
