@@ -144,6 +144,7 @@ model Student {
 }
 
 model QualificationExamGrade {
+  id         String   @id @default(uuid())
   studentId  String
   activityId String
   grade      Float
@@ -152,7 +153,7 @@ model QualificationExamGrade {
   student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
-  @@id([studentId, activityId])
+  @@unique([studentId, activityId])
   @@map("qualification_exam_grade")
 }
 
