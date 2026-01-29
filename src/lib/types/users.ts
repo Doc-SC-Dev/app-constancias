@@ -28,7 +28,7 @@ export type UserWithAcademicDegree = User & {
 const roleSchema = type.enumerated(...Object.values(Role));
 export const userEditSchema = type({
   name: "string >= 1",
-  rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
+  rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9k]{1}$/,
   email: "string.email",
   role: roleSchema,
 });
@@ -50,7 +50,7 @@ const nameSchema = type("string").narrow((s, ctx) => {
 });
 
 const rutSchema = type("string").narrow((s, ctx) => {
-  if (!/^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/.test(s)) {
+  if (!/^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9k]{1}$/.test(s)) {
     return ctx.reject({
       code: "predicate",
       message: "El RUT debe tener puntos y guion",
@@ -59,25 +59,8 @@ const rutSchema = type("string").narrow((s, ctx) => {
   return true;
 });
 
-const emailSchema = type("string.email").narrow((s, ctx) => {
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) {
-    return ctx.reject({
-      code: "predicate",
-      message: "Debe ser un correo electrónico válido",
-    });
-  }
-  return true;
-});
-
-const admissionDateSchema = type("Date").narrow((val, ctx) => {
-  if (val === undefined) {
-    return ctx.reject({
-      code: "predicate",
-      message: "La fecha de ingreso es requerida",
-      path: ["admissionDate"],
-    });
-  }
-  return true;
+const emailSchema = type("string.email").configure({
+  message: "Debe ingresar un email valido",
 });
 
 export const userCreateSchema = type({
@@ -86,9 +69,20 @@ export const userCreateSchema = type({
   email: emailSchema,
   role: roleSchema,
   gender: genderSchema,
-  studentId: "string.numeric | undefined",
-  admissionDate: admissionDateSchema,
-  academicGrade: "string",
+  "studentId?": type("string.numeric").narrow((value, ctx) => {
+    if (value !== undefined && Number.isNaN(value)) {
+      console.log(value);
+      return ctx.reject({
+        code: "predicate",
+        message: "Matricula debe ser una cadena numerica bien formada",
+      });
+    }
+    return true;
+  }),
+  "admissionDate?": "Date",
+  academicGrade: type("string > 1").configure({
+    message: "El grado academico es un campo requerido",
+  }),
 }).narrow((val, ctx) => {
   if (val.role === Roles.STUDENT && val.admissionDate === undefined) {
     return ctx.reject({
@@ -105,13 +99,7 @@ export const userCreateSchema = type({
       path: ["studentId"],
     });
   }
-  if (!val.academicGrade) {
-    return ctx.reject({
-      code: "predicate",
-      message: "El grado académico es requerido",
-      path: ["academicGrade"],
-    });
-  }
+
   return true;
 });
 
