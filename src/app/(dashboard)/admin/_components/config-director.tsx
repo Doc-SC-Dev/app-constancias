@@ -1,10 +1,10 @@
 import { AlertTriangle, Edit } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/generated/prisma";
 import { db } from "@/lib/db";
+import { EditDirectorDialog } from "./edit-director-dialog";
 
 export default async function ConfigDirector() {
   const director = await db.user.findFirst({
@@ -36,10 +36,7 @@ function ConfigDirectorContent({ director }: { director: User }) {
         </div>
       </div>
       <div className="flex flex-1 justify-items-start">
-        <Button size="lg" variant="outline">
-          <Edit />
-          Cambiar
-        </Button>
+        <EditDirectorDialog userId={director.id} name={director.name} />
       </div>
     </div>
   );
@@ -67,7 +64,7 @@ export function ConfigDirectorLoading() {
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-6 w-[150] bg-gray-300" />
-          <Skeleton className="h-2 w-[150] bg-gray-300" />
+          <Skeleton className="h-4 w-[150] bg-gray-300" />
         </div>
       </div>
     </div>

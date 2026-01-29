@@ -25,21 +25,28 @@ const colums: ColumnDef<AcademicDegreeDto>[] = [
   },
   {
     accessorKey: "abbrevFem",
-    header: "Abreviacion Feminina",
+    header: () => (
+      <TableCell className="justify-center">Abreviacion Feminina</TableCell>
+    ),
     cell: ({ getValue }) => (
       <TableCell className="justify-center">{getValue<string>()}</TableCell>
     ),
   },
   {
     accessorKey: "abbrevMas",
-    header: "Abreviacion Masculina",
+    header: () => (
+      <TableCell className="justify-center">Abreviacion Masculina</TableCell>
+    ),
     cell: ({ getValue }) => (
       <TableCell className="justify-center">{getValue<string>()}</TableCell>
     ),
   },
   {
     accessorKey: "createdAt",
-    header: "Fecha de creación",
+    enableGlobalFilter: false,
+    header: () => (
+      <TableCell className="justify-center">Fecha de creación</TableCell>
+    ),
     cell: ({ getValue }) => (
       <TableCell className="justify-center">
         {formatDate(getValue<Date>())}
@@ -58,9 +65,6 @@ export default function ConfigGrades() {
       emptyTitle="No hay grados academicos definidos"
       emptyDescription="Para ver grados academicos comienze definiendo un grados academico."
       createDialog={CreateGradeDialog}
-      buttonLabel="Agregar grado académico"
-    >
-      {""}
-    </DataTable>
+    />
   );
 }
