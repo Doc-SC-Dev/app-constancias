@@ -14,14 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -37,9 +30,8 @@ import { cn } from "@/lib/utils";
 import { EmptyPage } from "./empty-page";
 import { Spinner } from "./ui/spinner";
 
-interface DataTableProps<TData> {
+export interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
-  children: ReactNode;
   placeholder: string;
   queryKey: string;
   queryFn: ({
@@ -48,8 +40,7 @@ interface DataTableProps<TData> {
     pageParam: number;
   }) => Promise<PaginationResponse<TData>>;
 
-  createDialog?: React.ComponentType<{ closeDialog: () => void }>;
-  buttonLabel?: string;
+  createDialog?: React.ComponentType;
   emptyTitle: string;
   emptyDescription?: string;
   onDialog?: boolean;
@@ -58,12 +49,10 @@ interface DataTableProps<TData> {
 
 export function DataTable<TData>({
   columns,
-  children,
   placeholder,
   queryKey,
   queryFn,
   createDialog: CreateDialog,
-  buttonLabel,
   emptyDescription,
   emptyTitle,
   onDialog = false,
@@ -164,7 +153,7 @@ export function DataTable<TData>({
       case "md":
         return 300;
       case "sm":
-        return 100;
+        return 200;
       default:
         return 600;
     }
@@ -175,7 +164,6 @@ export function DataTable<TData>({
       <EmptyPage
         title={emptyTitle}
         description={emptyDescription}
-        buttonLabel={buttonLabel}
         createDialog={CreateDialog}
       />
     );
@@ -194,24 +182,27 @@ export function DataTable<TData>({
               onChange={(e) => table.setGlobalFilter(String(e.target.value))}
             />
           </div>
-          {children}
+          {CreateDialog && <CreateDialog />}
         </div>
       )}
       <div
-        className={`container h-[${getHeight()}px] overflow-auto relative  rounded-md border`}
+        className="container rounded-md border relative"
+        style={{
+          height: `${getHeight()}px`,
+          overflow: "auto",
+        }}
         ref={tableContainerRef}
         onScroll={(e) => fetchMoreOnBottomReached(e.currentTarget)}
       >
         <Table className="grid">
           <TableHeader
+            className="sticky z-20 bg-background"
             style={{
               display: "grid",
+              width: "100%",
               position: "sticky",
               top: 0,
-              zIndex: 1,
-              width: "100%",
             }}
-            className="sticky"
           >
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="flex w-full gap-4">
