@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
+import { LazyCreateActivityDialog } from "@/components/dyamic-dialogs";
 import { auth, isAuthenticated } from "@/lib/auth";
 import type { ActivityDTO } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
@@ -49,20 +49,12 @@ export default async function ActivityPage() {
         <DataTable
           emptyTitle="No hay actividades"
           emptyDescription="No se creado ninguna Actividad, para iniciar debe crear una actividad"
-          buttonLabel="Crear actividad"
-          createDialog={CreateActivityDialog}
+          createDialog={createPermission ? LazyCreateActivityDialog : undefined}
           columns={columns}
           queryFn={getActivitiesPaginated}
           queryKey="list-activity"
           placeholder="Filtrar datos en columnas"
-        >
-          {createPermission.success && (
-            <ActionDialogManager
-              createDialog={CreateActivityDialog}
-              triggerLabel="Crear actividad"
-            />
-          )}
-        </DataTable>
+        />
       </div>
     </HydrationBoundary>
   );

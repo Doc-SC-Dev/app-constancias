@@ -5,12 +5,11 @@ import {
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
+import { LazyCreateUserDialog } from "@/components/dyamic-dialogs";
 import { auth, isAuthenticated } from "@/lib/auth";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { User } from "@/lib/types/users";
 import { columns } from "./_components/colums";
-import NewUserDialog from "./_components/newuser-dialog";
 import { listUsers } from "./actions";
 
 export default async function UsersPage() {
@@ -43,18 +42,12 @@ export default async function UsersPage() {
         <DataTable<User>
           emptyTitle="No hay usuarios"
           emptyDescription="No hay usuarios disponibles. Para iniciar debe crear un usuario"
-          buttonLabel="Crear usuario"
-          createDialog={NewUserDialog}
+          createDialog={LazyCreateUserDialog}
           columns={columns}
           queryKey="list-users"
           queryFn={listUsers}
           placeholder="Filtrar por Nombre, Role, Email y Rut"
-        >
-          <ActionDialogManager
-            createDialog={NewUserDialog}
-            triggerLabel="Crear usuario"
-          />
-        </DataTable>
+        />
       </div>
     </HydrationBoundary>
   );

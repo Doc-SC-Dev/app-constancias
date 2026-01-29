@@ -25,15 +25,16 @@ export default async function HomePage() {
   };
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: ["certificate-types"],
-    queryFn: getRequestsTypes,
-  });
-
-  await queryClient.prefetchQuery({
-    queryKey: ["get-all-academic-degree"],
-    queryFn: getAcademicDegree,
-  });
+  await Promise.all([
+    queryClient.prefetchQuery({
+      queryKey: ["certificate-types"],
+      queryFn: getRequestsTypes,
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["get-all-academic-degree"],
+      queryFn: getAcademicDegree,
+    }),
+  ]);
 
   return (
     <div className="h-full w-full flex flex-col gap-8">

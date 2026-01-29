@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { DataTable } from "@/components/data-table";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
+import { LazyCreateRequestDialog } from "@/components/dyamic-dialogs";
+import { LazyDataTable } from "@/components/dynamic-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { User } from "@/lib/types/users";
-import CreateRequestDialog from "../../_components/create-request-dialog";
 import { getHistoryPaginated } from "../actions";
 import { getColumns } from "./colums";
 
@@ -49,11 +48,10 @@ export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
         </TabsList>
 
         <TabsContent value="standard" className="flex-1 flex flex-col">
-          <DataTable
+          <LazyDataTable
             emptyDescription="No se han creado constancias. Para iniciar debe crear una constancia"
             emptyTitle="No hay constancias"
-            buttonLabel="Crear constancia"
-            createDialog={(props) => <CreateRequestDialog user={user} {...props} />}
+            createDialog={() => <LazyCreateRequestDialog user={user} />}
             queryKey="list-history-standard"
             queryFn={({ pageParam }) =>
               getHistoryPaginated({
@@ -69,21 +67,14 @@ export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
                 ? "Filtrar por Nombre, Rol, RUT y Constancia"
                 : "Filtrar por Nombre de Constancia"
             }
-          >
-            <ActionDialogManager
-              createDialog={(props) => (
-                <CreateRequestDialog user={user} {...props} />
-              )}
-              triggerLabel="Crear constancia"
-            />
-          </DataTable>
+          />
         </TabsContent>
 
         <TabsContent value="other" className="flex-1 flex flex-col">
-          <DataTable
+          <LazyDataTable
             emptyDescription="No se han creado otras solicitudes."
             emptyTitle="No hay solicitudes"
-            createDialog={(props) => <CreateRequestDialog user={user} {...props} />}
+            createDialog={() => <LazyCreateRequestDialog user={user} />}
             queryKey="list-history-other"
             queryFn={({ pageParam }) =>
               getHistoryPaginated({ pageParam, user, isAdmin, filter: "other" })
@@ -94,14 +85,7 @@ export function HistoryClient({ isAdmin, user }: HistoryClientProps) {
                 ? "Filtrar por Nombre, Rol, RUT y Constancia"
                 : "Filtrar por Nombre de Constancia"
             }
-          >
-            <ActionDialogManager
-              createDialog={(props) => (
-                <CreateRequestDialog user={user} {...props} />
-              )}
-              triggerLabel="Crear solicitud"
-            />
-          </DataTable>
+          />
         </TabsContent>
       </Tabs>
     </div>

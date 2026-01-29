@@ -5,14 +5,15 @@ import { DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import type { RequestState } from "@/generated/prisma";
 import type { UserRequest } from "@/lib/types/request";
-import { listUserRequest } from "../../actions";
 import { Textos } from "@/lib/utils";
+import { listUserRequest } from "../../actions";
 
 const getBadgeColor = (state: RequestState) => {
   switch (state) {
     case "PENDING":
       return { bg: "amber-100", fg: "amber-800" };
     case "APPROVED":
+    case "READY":
       return { bg: "green-100", fg: "green-800" };
     default:
       return { bg: "red-100", fg: "red-800" };
@@ -57,8 +58,6 @@ export default function UserRequestTable({ userId }: { userId: string }) {
       size="sm"
       emptyTitle="El usuario no a realizado peticiones aun"
       emptyDescription="Para poder ver las peticiones, primero espere a que el usuario realice una petición"
-    >
-      {""}
-    </DataTable>
+    />
   );
 }
