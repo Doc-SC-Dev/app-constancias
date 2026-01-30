@@ -34,7 +34,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Activity, ActivityUpdateType } from "@/lib/types/activity";
+import type { ActivityEntity } from "@/core/entities/activity.entity";
+import type { ActivityUpdateType } from "@/lib/types/activity";
 import { getActivityTypes, updateActivity } from "../../../actions";
 
 export default function ActivityEditForm({
@@ -43,7 +44,7 @@ export default function ActivityEditForm({
   backTo,
   type,
 }: {
-  data: Activity;
+  data: ActivityEntity;
   title: ReactNode;
   backTo: ReactNode;
   type: ReactNode;
@@ -66,8 +67,8 @@ export default function ActivityEditForm({
     defaultValues: {
       date: { from: data.startAt, to: data.endAt ? data.endAt : undefined },
       participants: data.participants.map((participant) => ({
-        id: participant.userId,
-        type: participant.typeId,
+        id: participant.id,
+        type: participant.rol,
         hours: participant.hours,
       })),
     },
@@ -87,7 +88,7 @@ export default function ActivityEditForm({
     const { date, participants } = updatedData;
     const { success, message } = await updateActivity(
       {
-        activityType: data.typeId,
+        activityType: data.type,
         name: data.name,
         participants,
         startAt: date.from,
@@ -251,7 +252,7 @@ export default function ActivityEditForm({
                           >
                             {isLoadingActivityTypes && <Spinner />}
                             {activityTypes
-                              ?.find((type) => type.id === data.typeId)
+                              ?.find((type) => type.id === data.type)
                               ?.participantTypes.map((participantType) => (
                                 <SelectItem
                                   value={participantType.id}

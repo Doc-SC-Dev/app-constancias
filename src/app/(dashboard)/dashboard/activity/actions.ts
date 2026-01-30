@@ -1,17 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { withTryCatch } from "@/app/action";
+import type { ActivityCreateDTO } from "@/core/dtos/activity/create-activity.dto";
+import { CreateActivityUseCase } from "@/core/use-cases/activity/create-activity.use-case";
+import { GetActivityUseCase } from "@/core/use-cases/activity/get-activity.use-case";
 import type { Role } from "@/generated/prisma";
+import { PrismaActivityRespository } from "@/infrastructure/repositories/prisma-activity.repository";
 import { isAuthenticated } from "@/lib/auth";
 import { isAdmin } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { dbWithAutdit } from "@/lib/db/prisma";
-import type {
-  ActivityCreateDTO,
-  ActivityDTO,
-  ActivityEdit,
-} from "@/lib/types/activity";
+import type { ActivityDTO, ActivityEdit } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { PAGE_SIZE } from "@/lib/types/pagination";
 import type { ActivityParticipantDTO } from "@/lib/types/paricipant-activity";
@@ -157,33 +156,14 @@ export const createActivity = async ({
 }: {
   activity: ActivityCreateDTO;
 }) => {
-  const { participants, type, date, ...rest } = activity;
-  const { error, success } = await withTryCatch(
-    dbWithAutdit().activity.create({
-      data: {
-        ...rest,
-        startAt: date.from,
-        endAt: date.to,
-        nParticipants: participants.length,
-        activityType: {
-          connect: {
-            id: type,
-          },
-        },
-        participants: {
-          createMany: {
-            data: participants.map((participant) => ({
-              userId: participant.id,
-              participantTypeId: participant.type,
-              hours: participant.hours,
-            })),
-          },
-        },
-      },
-    }),
-  );
-  if (success) revalidatePath("/dashboard/activity");
-  return { message: error, success };
+  const activityRepo = new PrismaActivityRespository();
+  const useCase = new CreateActivityUseCase(activityRepo);
+  const result = await useCase.execute(activity);
+  if (result.isSuccess) {
+    revalidatePath("/dashboard/activity");
+    return { isSuccess: result.isSuccess, value: result.getValue };
+  }
+  return { error: result.getError, isSuccess: result.isSuccess };
 };
 
 export const getActivityTypes = async () => {
@@ -242,54 +222,10 @@ export const getActivityParticipants = async ({
 };
 
 export const getActivityById = async (activityId: string) => {
-  const data = await db.activity.findUnique({
-    where: {
-      id: activityId,
-    },
-    select: {
-      id: true,
-      name: true,
-      startAt: true,
-      endAt: true,
-      activityType: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      participants: {
-        select: {
-          id: true,
-          hours: true,
-
-          type: {
-            select: {
-              name: true,
-              id: true,
-            },
-          },
-          user: {
-            select: {
-              name: true,
-              id: true,
-            },
-          },
-        },
-      },
-    },
-  });
-  if (!data) throw new Error("No existe la actividad con id ");
-  const { participants, activityType, ...rest } = data;
-  return {
-    ...rest,
-    participants: participants.map((p) => ({
-      name: p.user.name,
-      userId: p.user.id,
-      typeId: p.type.id,
-      type: p.type.name,
-      hours: p.hours,
-    })),
-    type: activityType.name,
-    typeId: activityType.id,
-  };
+  const activityRepo = new PrismaActivityRespository();
+  const useCase = new GetActivityUseCase(activityRepo);
+  const result = await useCase.execute(activityId);
+  if (result.isSuccess)
+    return { isSuccess: result.isSuccess, value: result.getValue };
+  return { isSuccess: result.isSuccess, error: result.getError };
 };
