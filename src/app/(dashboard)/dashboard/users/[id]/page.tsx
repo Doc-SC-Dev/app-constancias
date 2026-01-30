@@ -7,6 +7,6 @@ export default async function UserPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const user = await getUserById(id);
-  return <UserCard user={user} />;
+  const response = await getUserById(id);
+  if (response.isSuccess) return <UserCard user={response.value} />;
 }

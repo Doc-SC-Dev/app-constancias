@@ -4,19 +4,17 @@ import { APIError } from "better-auth";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { withTryCatch } from "@/app/action";
+import type { UserCreateDto } from "@/core/dtos/user/create-user.dto";
+import { CreateUserUseCase } from "@/core/use-cases/user/create-user.use-case";
+import { FindUserUseCase } from "@/core/use-cases/user/find-user.use-case";
+import { PrismaUserRepository } from "@/infrastructure/repositories/prisma-user.repository";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
 import type { UserRequest } from "@/lib/types/request";
-import type {
-  User,
-  UserCreate,
-  UserEdit,
-  UserSelect,
-  UserWithAcademicDegree,
-} from "@/lib/types/users";
+import type { User, UserEdit, UserSelect } from "@/lib/types/users";
 
 export async function updateUser(userData: UserEdit, id: string) {
   const { success, data, error } = await withTryCatch<UserSelect>(
@@ -46,58 +44,17 @@ export async function updateUser(userData: UserEdit, id: string) {
   };
 }
 
-export async function createUser(userData: UserCreate) {
-  const { studentId, rut, academicGrade, gender, role, ...newUserData } =
-    userData;
+export async function createUser(userData: UserCreateDto) {
+  const repo = new PrismaUserRepository();
+  const useCase = new CreateUserUseCase(repo);
+  const result = await useCase.execute(userData);
 
-  const password = userData.rut.replaceAll(".", "");
-  const { success, data, error } = await withTryCatch<UserSelect>(
-    db.$transaction<UserSelect>(async (tx) => {
-      // try to create user
-      const session = await auth.api.createUser({
-        headers: await headers(),
-        body: {
-          ...newUserData,
-          role,
-          password,
-          data: {
-            gender,
-            rut,
-            acadmicDegreeId: academicGrade,
-          },
-        },
-      });
-      if (!session) throw new Error("El usuario ya existe");
-
-      if (session.user.role === Roles.STUDENT && studentId) {
-        const student = await tx.student.create({
-          data: {
-            studentId: parseInt(studentId, 10),
-            isRegularStudent: false,
-            user: {
-              connect: {
-                id: session.user.id,
-              },
-            },
-          },
-        });
-        if (!student) throw new Error("Estudiante ya existe");
-      }
-      return session.user;
-    }),
-  );
-
-  if (success) {
-    revalidatePath("/dashboard/users");
-    return {
-      success: true,
-      message: `Usuario con nombre ${data.name} y rol ${data.role} creado exitosamente`,
-    };
+  if (result.isSuccess) {
+    revalidatePath("/dasbhoard/users");
+    return { isSuccess: result.isSuccess, value: result.getValue };
   }
-  return {
-    success: false,
-    message: error,
-  };
+
+  return { isSuccess: result.isSuccess, error: result.getError.message };
 }
 
 export async function ChangePassword({
@@ -244,27 +201,17 @@ export const listUserActivities = async ({
   return { data: participants, nextPage: pageParam + 1, totalRows: count };
 };
 
-export async function getUserById(id: string): Promise<UserWithAcademicDegree> {
-  const user = await db.user.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      image: true,
-      role: true,
-      academicDegree: {
-        select: {
-          name: true,
-        },
-      },
-      gender: true,
-      rut: true,
-      banned: true,
-    },
-  });
-  if (!user) throw new Error("Usuario no encontrado");
-  return user as UserWithAcademicDegree;
+export async function getUserById(id: string) {
+  const userRepo = new PrismaUserRepository();
+  const useCase = new FindUserUseCase(userRepo);
+
+  const result = await useCase.execute(id);
+
+  if (!result.isSuccess) {
+    return { error: result.getError.message, isSuccess: result.isSuccess };
+  }
+
+  return { value: result.getValue, isSuccess: result.isSuccess };
 }
 
 export async function listUserRequest({

@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { ArrowLeftIcon, MailIcon } from "lucide-react";
 import Link from "next/link";
+import type { UserEntity } from "@/app/core/entities/user.entity";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,18 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
 import type { UserRequest } from "@/lib/types/request";
-import type { UserWithAcademicDegree } from "@/lib/types/users";
 import { Textos } from "@/lib/utils";
 import { listUserActivities, listUserRequest } from "../../actions";
 import UserActivitiesTable from "./user-activity-table";
 import UserRequestTable from "./user-request-table";
 import UserStateToggle from "./user-state-toggle";
 
-export default async function UserCard({
-  user,
-}: {
-  user: UserWithAcademicDegree;
-}) {
+export default async function UserCard({ user }: { user: UserEntity }) {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchInfiniteQuery({

@@ -43,22 +43,25 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  type UserCreateDto,
+  userCreateSchema,
+} from "@/core/dtos/user/create-user.dto";
 import { Gender, Role } from "@/generated/prisma";
 import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
-import { type UserCreate, userCreateSchema } from "@/lib/types/users";
 import { Textos } from "@/lib/utils";
 import { createUser } from "../actions";
 
 export default function NewUserDialog() {
   const { data } = useSession();
   const [open, setOpen] = useState<boolean>(false);
-  const { data: academicDegree, isLoading: loadingDegree } = useQuery({
+  const { data: academicDegree } = useQuery({
     queryKey: ["get-all-academic-degree"],
     queryFn: getAcademicDegree,
   });
   const { handleSubmit, control, formState, reset, watch } =
-    useForm<UserCreate>({
+    useForm<UserCreateDto>({
       resolver: arktypeResolver(userCreateSchema),
       reValidateMode: "onChange",
       defaultValues: {
@@ -74,16 +77,16 @@ export default function NewUserDialog() {
       shouldUnregister: true,
     });
   const role = watch("role");
-  const onSubmit = async (user: UserCreate) => {
-    const { success, message } = await createUser(user);
-    if (!success) {
+  const onSubmit = async (user: UserCreateDto) => {
+    const { isSuccess, error, value } = await createUser(user);
+    if (!isSuccess) {
       toast.error("No se pudo crear el usuario", {
-        description: message,
+        description: error,
       });
     }
-    if (success) {
+    if (isSuccess && value) {
       toast.success("Se creó el usuario correctamente", {
-        description: message,
+        description: `Se creo un usuario con nombre ${value.name} `,
       });
       reset();
       setOpen(false);
