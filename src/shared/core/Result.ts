@@ -24,11 +24,4 @@ export class Result<T, E> {
     }
     return this.error;
   }
-  serialize() {
-    return {
-      isSuccess: this.isSuccess,
-      value: this.value,
-      error: this.error,
-    };
-  }
 }

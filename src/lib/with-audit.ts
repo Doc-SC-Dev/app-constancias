@@ -2,9 +2,9 @@ import type { Result } from "@/shared/core/Result";
 import { type AuditContext, auditStorage } from "./audit-storage";
 import { isAuthenticated } from "./auth";
 
-export async function withAudit<T>(
-  fn: () => Promise<ReturnType<Result<T, string>["serialize"]>>,
-): Promise<ReturnType<Result<T, string>["serialize"]>> {
+export async function withAudit<T, E>(
+  fn: () => Promise<Result<T, E>>,
+): Promise<Result<T, E>> {
   const { user, session } = await isAuthenticated();
   const context: AuditContext = {
     userId: user.id,
