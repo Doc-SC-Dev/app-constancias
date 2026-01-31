@@ -177,6 +177,7 @@ model ActivityType {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now()) @updatedAt
   activities       Activity[]
+  certificates     Certificate[]
 
   @@map("activity_type")
 }
@@ -202,12 +203,14 @@ model Activity {
 model ParticipantType {
   id             String        @id @default(uuid())
   name           String
+  roles          Role[]        @default([STUDENT, PROFESSOR])
   activityType   ActivityType? @relation(fields: [activityTypeId], references: [id])
   activityTypeId String?
   participants   Participant[]
   required       Boolean       @default(false)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @default(now()) @updatedAt
+  certificates   Certificate[]
 
   @@map("participant_type")
 }
@@ -230,13 +233,15 @@ model Participant {
 }
 
 model Certificate {
-  id        String    @id @default(uuid())
-  pdfLink   String
-  name      String    @unique
-  roles     Role[]    @default([STUDENT, PROFESSOR])
-  requests  Request[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
+  id               String            @id @default(uuid())
+  template         String            @default("")
+  pdfLink          String
+  name             String            @unique
+  requests         Request[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @default(now()) @updatedAt
+  participantTypes ParticipantType[]
+  activityTypes    ActivityType[]
 
   @@map("certificate")
 }
@@ -250,18 +255,19 @@ enum RequestState {
 }
 
 model Request {
-  id             String        @id @default(uuid())
-  userId         String
-  certificateId  String
-  state          RequestState
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
-  user           User          @relation(fields: [userId], references: [id])
-  certificate    Certificate   @relation(fields: [certificateId], references: [id])
-  activityId     String?
-  activity       Activity?     @relation(fields: [activityId], references: [id])
-  otherRequestId String?
-  otherRequest   OtherRequest? @relation(fields: [otherRequestId], references: [id])
+  id               String        @id @default(uuid())
+  userId           String
+  certificateId    String
+  state            RequestState
+  generatedContent String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now()) @updatedAt
+  user             User          @relation(fields: [userId], references: [id])
+  certificate      Certificate   @relation(fields: [certificateId], references: [id])
+  activityId       String?
+  activity         Activity?     @relation(fields: [activityId], references: [id])
+  otherRequestId   String?
+  otherRequest     OtherRequest? @relation(fields: [otherRequestId], references: [id])
 
   @@map("request")
 }
