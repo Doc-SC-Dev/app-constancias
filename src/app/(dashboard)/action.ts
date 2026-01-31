@@ -93,10 +93,10 @@ export const createRequest = async (data: {
         },
         activity: data.activityId
           ? {
-            connect: {
-              id: data.activityId,
-            },
-          }
+              connect: {
+                id: data.activityId,
+              },
+            }
           : {},
         certificate: {
           connect: {
@@ -105,12 +105,12 @@ export const createRequest = async (data: {
         },
         otherRequest: !isStandard
           ? {
-            create: {
-              name: data.certificateName,
-              description: data.description ?? "",
-              userId: data.userId,
-            },
-          }
+              create: {
+                name: data.certificateName,
+                description: data.description ?? "",
+                userId: data.userId,
+              },
+            }
           : undefined,
         state: !isStandard ? "PENDING" : "READY",
       },
@@ -268,17 +268,17 @@ export const downloadCertificate = async (requestId: string) => {
           },
           participants: response
             ? {
-              where: {
-                activityId: response.activityId ?? undefined,
-              },
-              select: {
-                type: {
-                  select: {
-                    name: true,
+                where: {
+                  activityId: response.activityId ?? undefined,
+                },
+                select: {
+                  type: {
+                    select: {
+                      name: true,
+                    },
                   },
                 },
-              },
-            }
+              }
             : false,
         },
       },
@@ -472,10 +472,10 @@ const createPdf = async (request: FullRequest) => {
     certificate.name === Certificates.ALUMNO_REGULAR
       ? getAlumnoRegularText(user)
       : getCertificateText(
-        user as RequestUserWithParticipants,
-        certificate,
-        activity,
-      );
+          user as RequestUserWithParticipants,
+          certificate,
+          activity,
+        );
   await page.addStyleTag({
     content: `
     @font-face {
