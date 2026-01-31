@@ -13,4 +13,5 @@ export type Certificate = {
   createdAt: Date;
   participantType: { id: string; name: string }[];
   activityType: { id: string; name: string }[];
+  roles: string[];
 };
