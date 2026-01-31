@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { dbWithAutdit } from "@/lib/db/prisma";
 import type { AcademicDegreeCreateDto } from "@/lib/types/acadmic-grades";
 import type { ActivityType } from "@/lib/types/activity";
+import type { CertificatePaginated } from "@/lib/types/certificate";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import { withAudit } from "@/lib/with-audit";
 import { Result } from "@/shared/core/Result";
@@ -206,4 +207,39 @@ async function createActivityType(
 
 export async function auditedCreateActivityType(data: CreateActivityType) {
   return await withAudit(() => createActivityType(data));
+}
+
+export async function getPaginatedCertificates({
+  pageParam,
+}: {
+  pageParam: number;
+}): Promise<PaginationResponse<CertificatePaginated>> {
+  const [count, certificates] = await db.$transaction([
+    db.certificate.count(),
+    db.certificate.findMany({
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            activityTypes: true,
+            participantTypes: true,
+          },
+        },
+        createdAt: true,
+      },
+      take: PAGE_SIZE,
+      skip: PAGE_SIZE * pageParam,
+    }),
+  ]);
+
+  return {
+    data: certificates.map<CertificatePaginated>((cert) => ({
+      ...cert,
+      activityTypes: cert._count.activityTypes,
+      participantsTypes: cert._count.participantTypes,
+    })),
+    totalRows: count,
+    nextPage: pageParam + 1,
+  };
 }
