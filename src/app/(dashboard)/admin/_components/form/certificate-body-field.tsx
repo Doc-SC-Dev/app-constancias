@@ -3,8 +3,14 @@ import { useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { Button } from "@/components/ui/button";
 
-export default function CertificateBodyField() {
-  const [value, setValue] = useState("");
+export default function CertificateBodyField({
+  initial,
+  canEdit,
+}: {
+  initial: string;
+  canEdit: boolean;
+}) {
+  const [value, setValue] = useState(initial);
   const inputRef = useRef(null);
   const certificateTags = [
     { id: "user.name", display: "Nombre del Usuario" },
@@ -27,7 +33,7 @@ export default function CertificateBodyField() {
     "&multiLine": {
       control: {
         fontFamily: "inherit",
-        border: "1px solid #e2e8f0",
+        border: canEdit ? "1px solid #e2e8f0" : "0px",
         minHeight: "120px",
       },
       highlighter: {
@@ -67,18 +73,16 @@ export default function CertificateBodyField() {
   };
 
   return (
-    <div className="h-full space-y-2">
-      <label htmlFor="mentions-body-input" className="text-sm font-medium">
-        Cuerpo del Certificado
-      </label>
+    <div className="h-full">
       <MentionsInput
         id="mentions-body-input"
         value={value}
         inputRef={inputRef}
+        contentEditable={canEdit}
         onChange={(e) => {
-          console.log(e.target.value);
           setValue(e.target.value);
         }}
+        readOnly={!canEdit}
         style={mentionStyle}
         placeholder="Escribe el contenido... usa {{ para insertar datos dinámicos"
         a11ySuggestionsListLabel={"Tags sugeridos"}
@@ -87,28 +91,32 @@ export default function CertificateBodyField() {
           trigger="{{"
           data={certificateTags}
           markup="{{[__display__](__id__)}}" // Cómo se guarda en el string final
-          displayTransform={(id, display) => `[${display}]`} // Cómo se ve en el editor
+          displayTransform={(_, display) => `[${display}]`} // Cómo se ve en el editor
           className="bg-blue-100 text-blue-700 rounded font-semibold"
           appendSpaceOnAdd={true}
         />
       </MentionsInput>
-      <div className="flex flex-1 gap-4">
-        {certificateTags.map((certicateTag) => (
-          <Button
-            key={certicateTag.id}
-            variant="default"
-            size="sm"
-            className="rounded-2xl"
-            onClick={() => insertTag(certicateTag)}
-          >
-            {certicateTag.display}
-          </Button>
-        ))}
-      </div>
-      <p className="text-xs text-muted-foreground">
-        El texto entre corchetes se reemplazará automáticamente al generar el
-        PDF.
-      </p>
+      {canEdit && (
+        <div className="flex flex-1 gap-4">
+          {certificateTags.map((certicateTag) => (
+            <Button
+              key={certicateTag.id}
+              variant="default"
+              size="sm"
+              className="rounded-2xl"
+              onClick={() => insertTag(certicateTag)}
+            >
+              {certicateTag.display}
+            </Button>
+          ))}
+        </div>
+      )}
+      {canEdit && (
+        <p className="text-xs text-muted-foreground">
+          El texto entre corchetes se reemplazará automáticamente al generar el
+          PDF.
+        </p>
+      )}
     </div>
   );
 }
