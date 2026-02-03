@@ -206,7 +206,7 @@ export const createRequest = async (data: {
     return {
       success: false,
       message:
-        error === "Algo salio mal"
+        error === "Algo salió mal"
           ? "Se deben completar todos los campos"
           : error,
     };
@@ -405,7 +405,7 @@ const getStudentQualificationExamBody = (
     .toLocaleDateString("es-CL")
     .replaceAll("-", "/");
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
-<strong>DRA. TOMARA OTZEN HERNÁDEZ</strong>, Director del Programa de Doctorado en 
+<strong>DRA. TAMARA OTZEN HERNÁNDEZ </strong>, Director del Programa de Doctorado en 
 Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${userName}, matrícula Nº ${studentId}, RUT ${userRut} es ${studentMOF} regular de nuestro programa y con fecha ${activityStartDate}, aprobó su examen de calificación con nota 6,9.
 </div>`;
 };
@@ -416,7 +416,7 @@ const getCertificateText = (
   activity: RequestActivity | null,
 ) => {
   // TODO: Implementar mensajes para el resto de certificados de forma estatica por ahora
-  if (!activity) throw new Error("Activida no encontrada");
+  if (!activity) throw new Error("Actividad no encontrada");
   switch (certificate.name) {
     case Certificates.PARTICIPACION:
       if (user.role === Roles.PROFESSOR)

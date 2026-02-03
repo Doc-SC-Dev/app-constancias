@@ -44,7 +44,7 @@ function ConfigPeriodContent({ period }: { period: AcademicPeriod }) {
       <div className="flex flex-1 justify-start">
         <Button variant="destructive" size="lg">
           <CircleX />
-          Cerrar periodo
+          Cerrar período
         </Button>
       </div>
     </div>
@@ -55,9 +55,9 @@ function ConfigPeriodError() {
   return (
     <Alert variant="default">
       <Info />
-      <AlertTitle>Periodos academicos unactivos</AlertTitle>
+      <AlertTitle>Períodos académicos inactivos</AlertTitle>
       <AlertDescription>
-        No existe un periodo academico que este activo
+        No existe un período académico que esté activo
       </AlertDescription>
     </Alert>
   );

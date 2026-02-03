@@ -103,7 +103,7 @@ export default function CreateRequestDialog({
                 control={form.control}
                 name="userId"
                 label="Usuario"
-                description="Seleccione el usuario al que desea crear una solictiud"
+                description="Seleccione el usuario al que desea crear una solicitud"
               >
                 {isLoading && !users && <Spinner />}
                 {users

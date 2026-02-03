@@ -36,13 +36,13 @@ export default function NewPasswordDialog({
     const { newPass, currentPass } = passData;
     const { success, message } = await ChangePassword({ newPass, currentPass });
     if (message) {
-      toast.error("Ocurrio un error intentando cambiar tu constraseña", {
+      toast.error("Ocurrió un error intentando cambiar tu constraseña", {
         description: message,
       });
       return;
     }
     if (success) {
-      toast.success("Se cambio exitosamente tu contraseña");
+      toast.success("Se cambió exitosamente tu contraseña");
       reset();
       closeDialog();
     }
@@ -50,7 +50,7 @@ export default function NewPasswordDialog({
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Cambio de constraseña</DialogTitle>
+        <DialogTitle>Cambio de contraseña</DialogTitle>
         <DialogDescription>
           Ingresa tu contraseña actual, y la nueva contraseña dos veces para
           cambiar tu contraseña
@@ -89,7 +89,7 @@ export default function NewPasswordDialog({
                 reset();
               }}
             >
-              Canelar
+              Cancelar
             </Button>
           </DialogClose>
           <Button type="submit" disabled={formState.isSubmitting}>

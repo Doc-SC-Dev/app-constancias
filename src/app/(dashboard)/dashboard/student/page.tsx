@@ -45,7 +45,7 @@ export default async function UsersPage() {
           columns={columns}
           queryKey="list-students"
           queryFn={listStudents}
-          placeholder="Filtrar por matricula, nombre o email"
+          placeholder="Filtrar por matrícula, nombre o email"
         >
           {""}
         </DataTable>

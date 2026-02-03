@@ -20,7 +20,7 @@ export default async function AdminPage() {
     },
     {
       value: "grades",
-      label: "Grados Academicos",
+      label: "Grados Académicos",
       component: <ConfigGrades />,
     },
     {

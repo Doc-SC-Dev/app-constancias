@@ -5,16 +5,12 @@ import { useState } from "react";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent, 
-  PopoverTrigger,
-} from "@/components/ui/popover";
+
 import type { HistoryEntry } from "@/lib/types/history";
 import { Certificates } from "@/lib/types/request";
 import { Textos } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { CircleHelp } from "lucide-react";
+
 import DescriptionViewDialog from "./description-view-dialog";
 import HistoryStateDialog from "./history-state-dialog";
 
@@ -81,28 +77,12 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
     meta: { className: "w-[300px]" },
     cell: ({ row }) => {
       const certName = row.original.certName;
-      const description = row.original.description;
+
 
       return (
         <span className="flex flex-1 items-center gap-2">
           {certName}
-          {description && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <CircleHelp className="size-4 cursor-pointer text-muted-foreground hover:text-foreground" />
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Descripción</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {description}
-                    </p>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          )}
+
         </span>
       );
     },
@@ -137,7 +117,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   {
     accessorKey: "createdAt",
     header: () => (
-      <span className="flex flex-1 justify-center">Fecha Creación</span>
+      <span className="flex flex-1 justify-center">Fecha de Creación</span>
     ),
     cell: ({ row }) => {
       const date = row.original.createdAt;

@@ -16,9 +16,9 @@ export default function UsersLoading() {
   const headers = [
     "Estado",
     "Nombre",
-    "Role",
+    "Rol",
     "Email",
-    "Matricula",
+    "Matrícula",
     "Acciones",
   ];
   return (
@@ -29,7 +29,7 @@ export default function UsersLoading() {
           <Input
             id="fuzzy-input"
             className="max-w-sm"
-            placeholder="Filtrar por nombre, email, rut, matricula o rol"
+            placeholder="Filtrar por nombre, Email, RUT, matrícula o rol"
           />
         </div>
         <Button>

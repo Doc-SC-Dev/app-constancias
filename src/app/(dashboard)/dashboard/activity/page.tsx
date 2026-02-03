@@ -48,7 +48,7 @@ export default async function ActivityPage() {
         <h3 className="text-2xl font-bold">Actividades</h3>
         <DataTable
           emptyTitle="No hay actividades"
-          emptyDescription="No se creado ninguna Actividad, para iniciar debe crear una actividad"
+          emptyDescription="No se ha creado ninguna Actividad, para iniciar debe crear una actividad"
           buttonLabel="Crear actividad"
           createDialog={CreateActivityDialog}
           columns={columns}

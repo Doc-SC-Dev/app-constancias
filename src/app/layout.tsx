@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "App Constancias Doctorado en ciencias medicas",
+  title: "App Constancias Doctorado en Ciencias Médicas",
   description: "",
 };
 
