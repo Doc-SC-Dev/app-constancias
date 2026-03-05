@@ -49,7 +49,7 @@ export default async function ActivityPage() {
         <DataTable
           emptyTitle="No hay actividades"
           emptyDescription="No se ha creado ninguna Actividad, para iniciar debe crear una actividad"
-          buttonLabel="Crear actividad"
+          buttonLabel="Crear Actividad"
           createDialog={CreateActivityDialog}
           columns={columns}
           queryFn={getActivitiesPaginated}
@@ -59,7 +59,7 @@ export default async function ActivityPage() {
           {createPermission.success && (
             <ActionDialogManager
               createDialog={CreateActivityDialog}
-              triggerLabel="Crear actividad"
+              triggerLabel="Crear Actividad"
             />
           )}
         </DataTable>

@@ -73,7 +73,7 @@ function StateCell({
 export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   {
     accessorKey: "certName",
-    header: "Tipo de Constancia",
+    header: "Tipo de Solicitud",
     meta: { className: "w-[300px]" },
     cell: ({ row }) => {
       const certName = row.original.certName;

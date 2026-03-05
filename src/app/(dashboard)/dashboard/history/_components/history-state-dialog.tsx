@@ -113,7 +113,7 @@ export default function HistoryStateDialog({
           <div className="grid grid-cols-2 gap-4 items-center">
             <div className="flex flex-col gap-2">
               <span className="font-medium text-sm text-muted-foreground">
-                Tipo de Constancia
+                Tipo de Solicitud
               </span>
               <span>{request.certName}</span>
             </div>

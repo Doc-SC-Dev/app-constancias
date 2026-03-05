@@ -24,6 +24,8 @@ import {
 } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+/* ----------- */
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -73,7 +75,9 @@ export function DataTable<TData>({
   const [globalFilter, setGlobalFilter] = useState<"">("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const { data, fetchNextPage, isFetching } = useInfiniteQuery({
+  /* ----------- */
+  const { data, fetchNextPage, isFetching, isLoading } = useInfiniteQuery({
+    /* ----------- */
     queryKey: [queryKey],
     queryFn: async ({ pageParam }) => await queryFn({ pageParam }),
     initialPageParam: 0,
@@ -146,7 +150,7 @@ export function DataTable<TData>({
 
   const columnWidths = useMemo(() => {
     const widths: Record<string, number> = {};
-    const measureColumns = ["name", "user", "email"]; 
+    const measureColumns = ["name", "user", "email"];
 
     memoColumns.forEach((col: any) => {
       if (measureColumns.includes(col.accessorKey)) {
@@ -265,10 +269,31 @@ export function DataTable<TData>({
           <TableBody
             className={`grid relative w-full`}
             style={{
-              height: `${rowVirtualizer.getTotalSize() ? rowVirtualizer.getTotalSize() : 100}px`,
+
+              /* ----------- */
+              height: isLoading ? "auto" : `${rowVirtualizer.getTotalSize() ? rowVirtualizer.getTotalSize() : 100}px`,
             }}
           >
-            {rowVirtualizer.getVirtualItems().length && !isFetching ? (
+            {isLoading ? (
+              [...new Array(10)].map((_, i) => (
+                <TableRow key={`loading-row-${i}`} className="flex w-full gap-4">
+                  {columns.map((col, idx) => {
+                    const metaClass = (col.meta as any)?.className;
+                    return (
+                      <TableCell
+                        key={`col-${idx}`}
+                        className={cn("flex", metaClass ? metaClass : "flex-1")}
+                      >
+                        <div className="flex justify-center w-full">
+                          <Skeleton className="h-4 w-full bg-muted" />
+                        </div>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))
+            ) : rowVirtualizer.getVirtualItems().length ? (
+              /* ----------- */
               rowVirtualizer.getVirtualItems().map((virtualRow) => {
                 const row = rows[virtualRow.index] as Row<TData>;
                 return (
@@ -317,7 +342,7 @@ export function DataTable<TData>({
             )}
           </TableBody>
         </Table>
-        {isFetching && (
+        {isFetching && !isLoading && (
           <span className="flex flex-1 justify-center items-center gap-4 pb-4">
             <Spinner /> Cargando...
           </span>

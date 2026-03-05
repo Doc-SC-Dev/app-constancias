@@ -43,7 +43,7 @@ export default async function UsersPage() {
         <DataTable<User>
           emptyTitle="No hay usuarios"
           emptyDescription="No hay usuarios disponibles. Para iniciar debe crear un usuario"
-          buttonLabel="Crear usuario"
+          buttonLabel="Crear Usuario"
           createDialog={NewUserDialog}
           columns={columns}
           queryKey="list-users"
@@ -52,7 +52,7 @@ export default async function UsersPage() {
         >
           <ActionDialogManager
             createDialog={NewUserDialog}
-            triggerLabel="Crear usuario"
+            triggerLabel="Crear Usuario"
           />
         </DataTable>
       </div>
