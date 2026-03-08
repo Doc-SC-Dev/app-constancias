@@ -21,6 +21,7 @@ import {
   type RequestUserWithParticipants,
 } from "@/lib/types/request";
 import { withTryCatch } from "../action";
+import { getOrUpdateActivePeriod } from "@/lib/period";
 
 export const logoutAction = async () => {
   console.log("on logout");
@@ -32,7 +33,7 @@ export const logoutAction = async () => {
 
 export const getRequestsTypes = async () => {
   const { user } = await isAuthenticated();
-  const [certificates, activities] = await Promise.all([
+  const [certificates, activities, activePeriod] = await Promise.all([
     db.certificate.findMany({
       select: {
         name: true,
@@ -52,8 +53,10 @@ export const getRequestsTypes = async () => {
         },
       },
     }),
+    getOrUpdateActivePeriod(),
   ]);
-  return { activities, certificates };
+  const isPeriodActive = activePeriod !== null;
+  return { activities, certificates, isPeriodActive, activePeriod };
 };
 
 export const getAcademicDegree = async () => {
@@ -77,6 +80,18 @@ export const createRequest = async (data: {
   userId: string;
   description?: string;
 }) => {
+  const { user } = await isAuthenticated();
+
+  if (!isAdmin(user.role as Role)) {
+    const activePeriod = await getOrUpdateActivePeriod();
+    if (!activePeriod) {
+      return {
+        success: false,
+        message: "En este momento la plataforma se encuentra inactiva, no es posible ingresar solicitudes",
+      };
+    }
+  }
+
   const isStandard = data.certificateName !== Certificates.OTHER;
   // TODO: corrigir error de tipo hay corregir el tipo para que acepte el title
   const {

@@ -6,46 +6,57 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { AcademicPeriod } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
+import { ClosePeriodDialog } from "./close-period-dialog";
 
 export default async function ConfigPeriod() {
-  const period = await db.academicPeriod.findFirst({
-    where: {
-      active: true,
-    },
+  const periodsDesc = await db.academicPeriod.findMany({
+    orderBy: { updatedAt: "desc" },
+    take: 2,
   });
 
-  if (!period) {
+  if (!periodsDesc || periodsDesc.length === 0) {
     return <ConfigPeriodError />;
   }
-  return <ConfigPeriodContent period={period} />;
+
+  const periods = periodsDesc.sort(
+    (a, b) => a.startDate.getTime() - b.startDate.getTime()
+  );
+
+  return <ConfigPeriodContent periods={periods} />;
 }
 
-function ConfigPeriodContent({ period }: { period: AcademicPeriod }) {
+function ConfigPeriodContent({ periods }: { periods: AcademicPeriod[] }) {
   return (
-    <div className="flex w-full items-center">
-      <div className="flex flex-4 gap-10 items-center">
-        <h3 className="text-6xl">{period.name}</h3>
-        <div className="flex flex-col gap-4 justify-center">
-          <Badge
-            className="text-sm bg-teal-50 text-teal-700 ring-teal-600/20"
-            variant="outline"
-          >
-            <strong>Inicio Solicitudes:</strong> {formatDate(period.startDate)}
-          </Badge>
-          <Badge
-            className="text-sm bg-rose-50 text-rose-700 ring-rose-600/20"
-            variant="outline"
-          >
-            <strong>Cierre Solicitudes:</strong>
-            {formatDate(period.endDate)}
-          </Badge>
-        </div>
+    <div className="flex w-full items-start justify-between">
+      <div className="flex flex-col gap-8 w-full">
+        {periods.map((period, index) => (
+          <div key={period.id} className="flex flex-col gap-2">
+            <h4 className="text-xl font-semibold text-muted-foreground">
+              {index === 0 ? "Primer Periodo" : "Segundo Periodo"}
+            </h4>
+            <div className="flex flex-4 gap-10 items-center">
+              <h3 className="text-6xl">{period.name}</h3>
+              <div className="flex flex-col gap-4 justify-center">
+                <Badge
+                  className="text-sm bg-teal-50 text-teal-700 ring-teal-600/20"
+                  variant="outline"
+                >
+                  <strong>Inicio Solicitudes:</strong> {formatDate(period.startDate)}
+                </Badge>
+                <Badge
+                  className="text-sm bg-rose-50 text-rose-700 ring-rose-600/20"
+                  variant="outline"
+                >
+                  <strong>Cierre Solicitudes:</strong>
+                  {formatDate(period.endDate)}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-      <div className="flex flex-1 justify-start">
-        <Button variant="destructive" size="lg">
-          <CircleX />
-          Cerrar período
-        </Button>
+      <div className="flex flex-1 justify-end items-start mt-8">
+        <ClosePeriodDialog periods={periods} />
       </div>
     </div>
   );
