@@ -1,4 +1,5 @@
 "use client";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
@@ -6,7 +7,6 @@ import {
   LazyCreateRequestDialog,
   LazyCreateUserDialog,
 } from "@/components/dyamic-dialogs";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -54,7 +54,7 @@ export function DashboardCard({
           {title}
           <Button variant="link" asChild>
             <Link href={url} className="text-md">
-              Ir
+              <ChevronRight />
             </Link>
           </Button>
         </CardTitle>
