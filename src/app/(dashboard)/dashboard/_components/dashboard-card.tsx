@@ -1,7 +1,12 @@
 "use client";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
+import {
+  LazyCreateActivityDialog,
+  LazyCreateRequestDialog,
+  LazyCreateUserDialog,
+} from "@/components/dyamic-dialogs";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,9 +17,6 @@ import {
 } from "@/components/ui/card";
 import { menus } from "@/lib/types/menus";
 import type { User } from "@/lib/types/users";
-import CreateActivityDialog from "../activity/_components/create-activity-dialog";
-import NewUserDialog from "../users/_components/newuser-dialog";
-import CreateRequestDialog from "./create-request-dialog";
 
 interface DashboardCardProps {
   title: string;
@@ -35,11 +37,11 @@ export function DashboardCard({
       case menus.students.name:
         return <></>;
       case menus.history.name:
-        return <CreateRequestDialog user={user} />;
+        return <LazyCreateRequestDialog user={user} />;
       case menus.activities.name:
-        return <CreateActivityDialog closeDialog={() => {}} />;
+        return <LazyCreateActivityDialog />;
       case menus.users.name:
-        return <NewUserDialog />;
+        return <LazyCreateUserDialog />;
       default:
         return <></>;
     }
@@ -52,7 +54,7 @@ export function DashboardCard({
           {title}
           <Button variant="link" asChild>
             <Link href={url} className="text-md">
-              Ir
+              <ChevronRight />
             </Link>
           </Button>
         </CardTitle>
@@ -61,12 +63,7 @@ export function DashboardCard({
         </CardDescription>
       </CardHeader>
       <CardFooter className="flex items-end justify-center">
-        <ActionDialogManager
-          createDialog={selectDialog}
-          triggerLabel={`Crear ${title}`}
-          variant="ghost"
-          className="text-sm"
-        />
+        {selectDialog()}
       </CardFooter>
     </Card>
   );

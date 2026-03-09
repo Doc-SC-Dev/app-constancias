@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Textos } from "@/lib/utils";
 import type { User } from "@/lib/types/users";
 import logoImg from "../../../../public/assets/images/logo-horizontal-blanco.png";
 import { AppAvatar } from "./app-avatar";
@@ -18,7 +19,7 @@ export function AppNavBar({ user }: NavBarProps) {
       <div className="flex gap-4 items-center w-1/2">
         <Image
           src={logoImg}
-          alt="Logo doctorado en ciencias medicas"
+          alt="Logo Doctorado en Ciencias Médicas"
           loading="eager"
           priority
           height={60}
@@ -33,7 +34,7 @@ export function AppNavBar({ user }: NavBarProps) {
               {user.name}
             </span>
             <span className="text-primary-foreground text-xs font-normal text-right">
-              {user.role}
+              {Textos.Role[user.role as string] || user.role}
             </span>
           </div>
           <AppAvatar />

@@ -22,7 +22,7 @@ const sendEmail = async (
     return { success: true, message: "Correo enviado exitosamente" };
   } catch (error) {
     console.error(error);
-    return { success: false, message: "Error en el envio del correo" };
+    return { success: false, message: "Error en el envío del correo" };
   }
 };
 

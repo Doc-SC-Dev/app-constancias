@@ -16,25 +16,27 @@ export default function UsersLoading() {
   const headers = [
     "Estado",
     "Nombre",
-    "Role",
+    "Rol",
     "Email",
-    "Matricula",
+    "Matrícula",
     "Acciones",
   ];
   return (
-    <>
-      <div className="flex items-center py-4 align-middle justify-between">
+    <div className="container h-full mx-auto flex flex-col gap-4">
+      <h2 className="text-2xl font-bold">Usuarios</h2>
+      <div className="flex items-center justify-between">
         <div className="grid w-full max-w-sm items-center gap-3">
           <Label htmlFor="fuzzy-input">Filtrar</Label>
           <Input
             id="fuzzy-input"
             className="max-w-sm"
-            placeholder="Filtrar por nombre, email, rut, matricula o rol"
+            placeholder="Filtrar por nombre, Email, RUT, matrícula o rol"
+            disabled
           />
         </div>
-        <Button>
-          <Plus />
-          Crear usuario
+        <Button disabled>
+          Crear Usuario
+          <Plus className="ml-2 h-4 w-4" />
         </Button>
       </div>
       <div className="overflow-hidden rounded-md border">
@@ -59,6 +61,6 @@ export default function UsersLoading() {
           </TableBody>
         </Table>
       </div>
-    </>
+    </div>
   );
 }

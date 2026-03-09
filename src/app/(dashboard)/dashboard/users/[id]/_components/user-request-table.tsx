@@ -5,6 +5,7 @@ import { DataTable } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import type { RequestState } from "@/generated/prisma";
 import type { UserRequest } from "@/lib/types/request";
+import { Textos } from "@/lib/utils";
 import { listUserRequest } from "../../actions";
 
 const getBadgeColor = (state: RequestState) => {
@@ -12,11 +13,8 @@ const getBadgeColor = (state: RequestState) => {
     case "PENDING":
       return { bg: "amber-100", fg: "amber-800" };
     case "APPROVED":
-      return { bg: "green-100", fg: "green-800" };
     case "READY":
-      return { bg: "blue-100", fg: "blue-800" };
-    case "CANCELED":
-      return { bg: "red-100", fg: "red-800" };
+      return { bg: "green-100", fg: "green-800" };
     default:
       return { bg: "red-100", fg: "red-800" };
   }
@@ -38,7 +36,7 @@ const columns: ColumnDef<UserRequest>[] = [
           className={`text-${colors.fg} bg-${colors.bg} border-${colors.fg}`}
         >
           <Dot />
-          {data.getValue<string>()}
+          {Textos.State[data.getValue<string>()] || data.getValue<string>()}
         </Badge>
       );
     },
@@ -58,10 +56,8 @@ export default function UserRequestTable({ userId }: { userId: string }) {
       queryKey="list-user-request"
       placeholder="Filtrar Peticiones"
       size="sm"
-      emptyTitle="El usuario no a realizado peticiones aun"
+      emptyTitle="El usuario no ha realizado peticiones aún"
       emptyDescription="Para poder ver las peticiones, primero espere a que el usuario realice una petición"
-    >
-      {""}
-    </DataTable>
+    />
   );
 }

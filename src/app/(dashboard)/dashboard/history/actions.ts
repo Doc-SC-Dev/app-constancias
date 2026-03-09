@@ -1,5 +1,6 @@
 "use server";
 
+import type { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import type { HistoryEntry } from "@/lib/types/history";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
@@ -11,7 +12,7 @@ export const getHistoryPaginated = async ({
   isAdmin,
   filter,
 }: {
-  pageParam: number;
+  pageParam: number; 
   user: User;
   isAdmin: boolean;
   filter?: "standard" | "other";
@@ -59,6 +60,7 @@ export const getHistoryPaginated = async ({
     updatedAt: request.updatedAt,
     link: request.otherRequest?.link || undefined,
     rejectionReason: request.otherRequest?.rejectionReason || undefined,
+    description: request.otherRequest?.description || undefined,
   }));
   return { data: historyData, nextPage: pageParam + 1, totalRows: count };
 };
@@ -70,7 +72,7 @@ export const updateRequestState = async (
   rejectionReason?: string,
 ) => {
   try {
-    const updateData: any = { state: newState };
+    const updateData: Prisma.RequestUpdateInput = { state: newState };
 
     if (link !== undefined || rejectionReason !== undefined) {
       const request = await db.request.findUnique({

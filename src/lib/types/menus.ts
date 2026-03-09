@@ -39,7 +39,7 @@ export const menus: Record<dashboards, Menu> = {
     permissions: { user: ["list"] },
   },
   history: {
-    name: "Constancias",
+    name: "Solicitudes",
     icon: "history",
     url: "/dashboard/history",
     description:
@@ -51,7 +51,7 @@ export const menus: Record<dashboards, Menu> = {
     icon: "activity",
     url: "/dashboard/activity",
     description:
-      "Dashboard de administración de actividades tales como proyectos de investigación, tesis o catedras.",
+      "Dashboard de administración de actividades tales como proyectos de investigación, tesis o cátedras.",
     permissions: { activity: ["list"] },
   },
 };

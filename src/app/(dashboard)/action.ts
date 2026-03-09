@@ -8,19 +8,20 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
-import { AcademicGrade, Gender, Role } from "@/generated/prisma";
+import { Gender, Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
+import type { ActivityType } from "@/lib/types/activity";
 import {
   Certificates,
   type FullRequest,
   type RequestActivity,
   type RequestCertificate,
-  type RequestUserWithoutParticipant,
-  type RequestUserWithParticipants,
+  type RequestUser,
 } from "@/lib/types/request";
 import { withTryCatch } from "../action";
+import { getOrUpdateActivePeriod } from "@/lib/period";
 
 export const logoutAction = async () => {
   console.log("on logout");
@@ -32,7 +33,7 @@ export const logoutAction = async () => {
 
 export const getRequestsTypes = async () => {
   const { user } = await isAuthenticated();
-  const [certificates, activities] = await Promise.all([
+  const [certificates, activities, activePeriod] = await Promise.all([
     db.certificate.findMany({
       select: {
         name: true,
@@ -52,8 +53,25 @@ export const getRequestsTypes = async () => {
         },
       },
     }),
+    getOrUpdateActivePeriod(),
   ]);
-  return { activities, certificates };
+  const isPeriodActive = activePeriod !== null;
+  return { activities, certificates, isPeriodActive, activePeriod };
+};
+
+export const getAcademicDegree = async () => {
+  const degree = await db.academicDegree.findMany({
+    include: {
+      title: {
+        select: {
+          gender: true,
+          abbrev: true,
+        },
+      },
+    },
+  });
+
+  return degree;
 };
 
 export const createRequest = async (data: {
@@ -62,8 +80,20 @@ export const createRequest = async (data: {
   userId: string;
   description?: string;
 }) => {
-  const isStandard = data.certificateName !== Certificates.OTHER;
+  const { user } = await isAuthenticated();
 
+  if (!isAdmin(user.role as Role)) {
+    const activePeriod = await getOrUpdateActivePeriod();
+    if (!activePeriod) {
+      return {
+        success: false,
+        message: "En este momento la plataforma se encuentra inactiva, no es posible ingresar solicitudes",
+      };
+    }
+  }
+
+  const isStandard = data.certificateName !== Certificates.OTHER;
+  // TODO: corrigir error de tipo hay corregir el tipo para que acepte el title
   const {
     success,
     error,
@@ -103,7 +133,16 @@ export const createRequest = async (data: {
         id: true,
         user: {
           select: {
-            academicGrade: true,
+            academicDegree: {
+              select: {
+                title: {
+                  take: 1,
+                  select: {
+                    abbrev: true,
+                  },
+                },
+              },
+            },
             name: true,
             rut: true,
             gender: true,
@@ -117,6 +156,7 @@ export const createRequest = async (data: {
             participants: {
               where: {
                 activityId: data.activityId,
+                userId: data.userId,
               },
               select: {
                 type: {
@@ -146,7 +186,16 @@ export const createRequest = async (data: {
                 user: {
                   select: {
                     name: true,
-                    academicGrade: true,
+                    academicDegree: {
+                      select: {
+                        title: {
+                          take: 1,
+                          select: {
+                            abbrev: true,
+                          },
+                        },
+                      },
+                    },
                     gender: true,
                   },
                 },
@@ -169,7 +218,14 @@ export const createRequest = async (data: {
     }),
   );
 
-  if (!success) return { success: false, message: error };
+  if (!success)
+    return {
+      success: false,
+      message:
+        error === "Algo salió mal"
+          ? "Se deben completar todos los campos"
+          : error,
+    };
 
   if (isStandard) {
     const pdf = await createPdf(request);
@@ -206,7 +262,16 @@ export const downloadCertificate = async (requestId: string) => {
       id: true,
       user: {
         select: {
-          academicGrade: true,
+          academicDegree: {
+            select: {
+              title: {
+                take: 1,
+                select: {
+                  abbrev: true,
+                },
+              },
+            },
+          },
           name: true,
           rut: true,
           gender: true,
@@ -251,7 +316,16 @@ export const downloadCertificate = async (requestId: string) => {
               user: {
                 select: {
                   name: true,
-                  academicGrade: true,
+                  academicDegree: {
+                    select: {
+                      title: {
+                        take: 1,
+                        select: {
+                          abbrev: true,
+                        },
+                      },
+                    },
+                  },
                   gender: true,
                 },
               },
@@ -288,7 +362,7 @@ export const downloadCertificate = async (requestId: string) => {
   };
 };
 
-const getAlumnoRegularText = (user: RequestUserWithoutParticipant) => {
+const getAlumnoRegularText = (user: RequestUser) => {
   const { student } = user;
   if (!student) throw new Error("Alumno no encontrado");
   return `
@@ -301,20 +375,22 @@ es alumno regular de nuestro programa, desde el año ${student.admisionDate.getF
 };
 
 const getActivityTesisProfesorText = (
-  user: RequestUserWithParticipants,
+  user: RequestUser,
   activity: RequestActivity,
 ) => {
   const isMale = user.gender === Gender.MALE;
-  const isDoctor = user.academicGrade === AcademicGrade.DOCTOR;
+  const isDoctor = user.academicDegree?.title.at(0);
   const tesista = activity.participants.find((p) => p.type.name === "Tesista");
+  const participantLabel = user.participants?.at(0)?.type.name;
+  if (!participantLabel) throw new Error("Participante no encontrado");
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
   <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
-Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? (isDoctor ? "el Dr. " : "el Sr.") : isDoctor ? "la Dra. " : "la Sra."} ${user.name}</strong>, participa como ${user.participants[0].type.name} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.gender === Gender.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
+Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? `el ${isDoctor}` : `la ${isDoctor}`} ${user.name}</strong>, participa como ${participantLabel} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.gender === Gender.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
 </div>`;
 };
 
 const getActivityTesisStudentText = (
-  user: RequestUserWithParticipants,
+  user: RequestUser,
   activity: RequestActivity,
 ) => {
   const { student } = user;
@@ -323,7 +399,7 @@ const getActivityTesisStudentText = (
   const guia = activity.participants.find(
     (p) => p.type.name === "Profesor guia",
   );
-  const isDoctor = guia?.user.academicGrade === AcademicGrade.DOCTOR;
+  const isDoctor = guia?.user.academicDegree?.title.at(0)?.abbrev;
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
 <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
 Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${!isMale ? "la estudiante, Sra." : "el estudiante, Sr."} 
@@ -334,31 +410,31 @@ ${guia?.user.name}, desde ${activity.startAt.getUTCMonth()} del ${activity.start
 };
 
 const getStudentQualificationExamBody = (
-  user: RequestUserWithParticipants,
+  user: RequestUser,
   activity: RequestActivity,
 ) => {
   const { rut: userRut, student } = user;
   if (!student) throw new Error("Estudiante no ha sido encontrado");
   const { studentId } = student;
-  const adjetivo = user.gender === Gender.FEMALE ? "Sra. " : "Sr. ";
+  const adjetivo = user.academicDegree?.title.at(0)?.abbrev;
   const userName = adjetivo + user.name;
   const studentMOF = user.gender === Gender.FEMALE ? "alumna" : "alumno";
   const activityStartDate = activity.startAt
     .toLocaleDateString("es-CL")
     .replaceAll("-", "/");
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
-<strong>DRA. TOMARA OTZEN HERNÁDEZ</strong>, Director del Programa de Doctorado en 
+<strong>DRA. TAMARA OTZEN HERNÁNDEZ </strong>, Director del Programa de Doctorado en 
 Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${userName}, matrícula Nº ${studentId}, RUT ${userRut} es ${studentMOF} regular de nuestro programa y con fecha ${activityStartDate}, aprobó su examen de calificación con nota 6,9.
 </div>`;
 };
 // TODO: Implementar mensajes de forma dinamica desde la DB
 const getCertificateText = (
-  user: RequestUserWithParticipants,
+  user: RequestUser,
   certificate: RequestCertificate,
   activity: RequestActivity | null,
 ) => {
   // TODO: Implementar mensajes para el resto de certificados de forma estatica por ahora
-  if (!activity) throw new Error("Activida no encontrada");
+  if (!activity) throw new Error("Actividad no encontrada");
   switch (certificate.name) {
     case Certificates.PARTICIPACION:
       if (user.role === Roles.PROFESSOR)
@@ -413,11 +489,7 @@ const createPdf = async (request: FullRequest) => {
   const text =
     certificate.name === Certificates.ALUMNO_REGULAR
       ? getAlumnoRegularText(user)
-      : getCertificateText(
-          user as RequestUserWithParticipants,
-          certificate,
-          activity,
-        );
+      : getCertificateText(user, certificate, activity);
   await page.addStyleTag({
     content: `
     @font-face {
@@ -487,4 +559,24 @@ export const getNotAdminUsers = async () => {
   });
 
   return user;
+};
+
+export const getActivityTypes = async (): Promise<ActivityType[]> => {
+  const activityTypes = await db.activityType.findMany({
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+      _count: {
+        select: {
+          participantTypes: true,
+        },
+      },
+    },
+  });
+
+  return activityTypes.map<ActivityType>((activityType) => ({
+    ...activityType,
+    nParticipantsTypes: activityType._count.participantTypes,
+  }));
 };

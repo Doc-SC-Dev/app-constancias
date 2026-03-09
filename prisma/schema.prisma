@@ -1,71 +1,75 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-datasource db {
-  provider = "postgresql"
-}
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
+datasource db {
+  provider = "postgresql"
 }
 
-enum Role {
-  SUPERADMIN
-  ADMINISTRATOR
-  PROFESSOR
-  STUDENT
+model AcademicDegree {
+  id        String          @id @default(uuid())
+  name      String          @unique
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  title     AcademicTitle[]
+  users     User[]
+
+  @@map("academic_degree")
+}
+
+model AcademicTitle {
+  id               String         @id @default(uuid())
+  academicDegreeId String
+  gender           Gender
+  abbrev           String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  degree           AcademicDegree @relation(fields: [academicDegreeId], references: [id], onDelete: Cascade)
+
+  @@map("academic_title")
 }
 
 model User {
-  id            String         @id
-  rut           String         @unique
-  name          String
-  email         String         @unique
-  emailVerified Boolean        @default(false)
-  image         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @default(now()) @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  role          Role           @default(STUDENT)
-  banned        Boolean        @default(false)
-  banReason     String?
-  banExpires    DateTime?
-  student       Student?
-  participants  Participant[]
-  requests      Request[]
-  logs          Log[]
-  academicGrade AcademicGrade?
-  gender        Gender
-  otherRequests OtherRequest[]
+  id               String          @id
+  rut              String          @unique
+  name             String
+  email            String          @unique
+  emailVerified    Boolean         @default(false)
+  image            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @default(now()) @updatedAt
+  role             Role            @default(STUDENT)
+  banned           Boolean         @default(false)
+  banReason        String?
+  banExpires       DateTime?
+  gender           Gender
+  isDirector       Boolean         @default(false)
+  academicDegreeId String?
+  accounts         Account[]
+  logs             Log[]
+  otherRequests    OtherRequest[]
+  participants     Participant[]
+  requests         Request[]
+  sessions         Session[]
+  student          Student?
+  academicDegree   AcademicDegree? @relation(fields: [academicDegreeId], references: [id])
 
   @@map("user")
 }
 
 model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
   impersonatedBy String?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
@@ -75,7 +79,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -85,6 +88,7 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([accountId, providerId])
   @@index([userId])
@@ -103,12 +107,6 @@ model Verification {
   @@map("verification")
 }
 
-enum AcademicGrade {
-  DOCTOR
-  DOCTORA
-  MAGISTER
-}
-
 model Student {
   id                      String                   @id @default(uuid())
   studentId               Int                      @unique
@@ -117,22 +115,23 @@ model Student {
   admisionDate            DateTime                 @default(now())
   updatedAt               DateTime                 @default(now()) @updatedAt
   createdAt               DateTime                 @default(now())
-  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   qualificationExamGrades QualificationExamGrade[]
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("student")
 }
 
 model QualificationExamGrade {
+  id         String   @id @default(uuid())
   studentId  String
   activityId String
   grade      Float
   updatedAt  DateTime @updatedAt
   createdAt  DateTime @default(now())
-  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
-  @@id([studentId, activityId])
+  @@unique([studentId, activityId])
   @@map("qualification_exam_grade")
 }
 
@@ -150,12 +149,13 @@ model OtherRequest {
 }
 
 model ActivityType {
-  id               String            @id @default(uuid())
-  name             String            @unique
+  id               String                @id @default(uuid())
+  name             String                @unique
   participantTypes ParticipantType[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @default(now()) @updatedAt
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @default(now()) @updatedAt
   activities       Activity[]
+  template         CertificateTemplate[]
 
   @@map("activity_type")
 }
@@ -172,21 +172,23 @@ model Activity {
   updatedAt               DateTime                 @default(now()) @updatedAt
   activityType            ActivityType             @relation(fields: [activityTypeId], references: [id])
   participants            Participant[]
-  requests                Request[]
   qualificationExamGrades QualificationExamGrade[]
+  requests                Request[]
 
   @@map("activity")
 }
 
 model ParticipantType {
-  id             String        @id @default(uuid())
+  id             String                @id @default(uuid())
   name           String
-  activityType   ActivityType? @relation(fields: [activityTypeId], references: [id])
+  roles          Role[]                @default([STUDENT, PROFESSOR])
+  activityType   ActivityType?         @relation(fields: [activityTypeId], references: [id])
   activityTypeId String?
   participants   Participant[]
-  required       Boolean       @default(false)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
+  required       Boolean               @default(false)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @default(now()) @updatedAt
+  template       CertificateTemplate[]
 
   @@map("participant_type")
 }
@@ -195,29 +197,106 @@ model Participant {
   id                String          @id @default(uuid())
   activityId        String
   userId            String
-  type              ParticipantType @relation(fields: [participantTypeId], references: [id])
   hours             Int
   startAt           DateTime?
   endAt             DateTime?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @default(now()) @updatedAt
-  activity          Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  user              User            @relation(fields: [userId], references: [id])
   participantTypeId String
+  activity          Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  type              ParticipantType @relation(fields: [participantTypeId], references: [id])
+  user              User            @relation(fields: [userId], references: [id])
 
   @@map("participant")
 }
 
 model Certificate {
-  id        String    @id @default(uuid())
-  pdfLink   String
-  name      String    @unique
-  roles     Role[]    @default([ADMINISTRATOR, SUPERADMIN])
+  id        String                @id @default(uuid())
+  name      String                @unique
+  roles     Role[]                @default([PROFESSOR, STUDENT])
   requests  Request[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @default(now()) @updatedAt
+  template  CertificateTemplate[]
 
   @@map("certificate")
+}
+
+model Request {
+  id               String        @id @default(uuid())
+  userId           String
+  certificateId    String
+  state            RequestState
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now()) @updatedAt
+  activityId       String?
+  otherRequestId   String?
+  generatedContent String?
+  activity         Activity?     @relation(fields: [activityId], references: [id])
+  certificate      Certificate   @relation(fields: [certificateId], references: [id])
+  otherRequest     OtherRequest? @relation(fields: [otherRequestId], references: [id])
+  user             User          @relation(fields: [userId], references: [id])
+
+  @@map("request")
+}
+
+model Log {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  userName   String
+  newValue   Json
+  oldValue   Json
+  resourceId String
+  userId     String?
+  action     String
+  resource   String
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@map("log")
+}
+
+model AcademicPeriod {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  startDate DateTime
+  endDate   DateTime
+  active    Boolean  @default(true)
+  isCurrent Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+
+  @@map("academic_period")
+}
+
+model CertificateTemplate {
+  id                String   @id @default(uuid())
+  certificateId     String
+  role              Role?
+  activityTypeId    String?
+  participantTypeId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  template          String
+
+  certificate     Certificate      @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  participantType ParticipantType? @relation(fields: [participantTypeId], references: [id], onDelete: Cascade)
+  activityType    ActivityType?    @relation(fields: [activityTypeId], references: [id], onDelete: Cascade)
+
+  @@map("certificate_template")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Role {
+  SUPERADMIN
+  ADMINISTRATOR
+  PROFESSOR
+  STUDENT
 }
 
 enum RequestState {
@@ -226,51 +305,4 @@ enum RequestState {
   APPROVED
   CANCELED
   READY
-}
-
-model Request {
-  id             String        @id @default(uuid())
-  userId         String
-  certificateId  String
-  state          RequestState
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
-  user           User          @relation(fields: [userId], references: [id])
-  certificate    Certificate   @relation(fields: [certificateId], references: [id])
-  activityId     String?
-  activity       Activity?     @relation(fields: [activityId], references: [id])
-  otherRequestId String?
-  otherRequest   OtherRequest? @relation(fields: [otherRequestId], references: [id])
-
-  @@map("request")
-}
-
-enum Action {
-  CREATE
-  UPDATE
-  READ
-  DELETE
-  LIST
-}
-
-enum Resource {
-  USER
-  REQUEST
-  ACTIVITY
-  CERTIFICATE
-  PROFESSOR
-  STUDENT
-  PARTICIPANT
-}
-
-model Log {
-  id        String   @id @default(uuid())
-  userId    String
-  action    Action
-  resource  Resource
-  result    String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-
-  @@map("log")
 }

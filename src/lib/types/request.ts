@@ -1,10 +1,5 @@
 import { type } from "arktype";
-import type {
-  AcademicGrade,
-  Gender,
-  RequestState,
-  Role,
-} from "@/generated/prisma";
+import type { Gender, RequestState, Role } from "@/generated/prisma";
 
 export const createRequestSchema = type({
   certificateName: "string",
@@ -18,39 +13,28 @@ export type CreateRequest = typeof createRequestSchema.infer;
 export type { Request } from "@/generated/prisma";
 
 export enum Certificates {
-  ALUMNO_REGULAR = "Constancia de alumno regular",
-  PARTICIPACION = "Constancia de participación",
-  EXAMEN_CALIFICACION = "Constancia de examen de calificación",
-  COLABORACION = "Constancia de colaboración",
-  OTHER = "Otra Constancia",
+  ALUMNO_REGULAR = "Constancia de Alumno Regular",
+  PARTICIPACION = "Constancia de Participación",
+  EXAMEN_CALIFICACION = "Constancia de Examen de Calificación",
+  COLABORACION = "Constancia de Colaboración",
+  OTHER = "Solicitud Especial",
 }
 
-export type RequestUserWithParticipants = {
+export type RequestUser = {
   name: string;
   rut: string;
   role: Role;
   gender: Gender;
-  academicGrade: AcademicGrade | null;
+  academicDegree: { title: { abbrev: string }[] } | null;
   student: {
     studentId: number;
     admisionDate: Date;
   } | null;
-  participants: {
+  participants?: {
     type: {
       name: string;
     };
   }[];
-};
-export type RequestUserWithoutParticipant = {
-  name: string;
-  rut: string;
-  role: Role;
-  gender: Gender;
-  academicGrade: AcademicGrade | null;
-  student: {
-    studentId: number;
-    admisionDate: Date;
-  } | null;
 };
 export type RequestActivity = {
   name: string;
@@ -62,7 +46,9 @@ export type RequestActivity = {
   participants: {
     user: {
       name: string;
-      academicGrade: AcademicGrade | null;
+      academicDegree: {
+        title: { abbrev: string }[];
+      } | null;
       gender: Gender;
     };
     hours: number;
@@ -77,7 +63,7 @@ export type RequestCertificate = {
 };
 export type FullRequest = {
   id: string;
-  user: RequestUserWithParticipants | RequestUserWithoutParticipant;
+  user: RequestUser;
   activity: RequestActivity | null;
   certificate: RequestCertificate;
 };

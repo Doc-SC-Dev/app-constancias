@@ -14,7 +14,7 @@ export const columns: ColumnDef<UserActivityDTO>[] = [
   {
     accessorFn: (row) => row.activityType,
     id: "activityType",
-    header: "Tipo Actividad",
+    header: "Tipo de Actividad",
     cell: ({ getValue }) => {
       const val = getValue<string>();
       return val.replace(/_/g, " ");

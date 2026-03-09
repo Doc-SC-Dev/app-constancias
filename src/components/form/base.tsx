@@ -22,6 +22,7 @@ type FormControlProps<
   label?: ReactNode;
   description?: ReactNode;
   control: ControllerProps<TFieldValues, TName, TTransformedValues>["control"];
+  hideError?: boolean;
 };
 
 type FormBaseProps<
@@ -64,6 +65,7 @@ export function FormBase<
   description,
   controlFirst,
   horizontal,
+  hideError,
 }: FormBaseProps<TFieldValues, TName, TTransformedValues>) {
   return (
     <Controller
@@ -83,7 +85,7 @@ export function FormBase<
           id: `field-${field.name}`,
           "aria-invalid": fieldState.invalid,
         });
-        const errorElem = fieldState.invalid && (
+        const errorElem = fieldState.invalid && !hideError && (
           <FieldError errors={[fieldState.error]} />
         );
 

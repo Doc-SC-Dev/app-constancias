@@ -5,12 +5,15 @@ import { useState } from "react";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+
 import type { HistoryEntry } from "@/lib/types/history";
 import { Certificates } from "@/lib/types/request";
+import { Textos } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+
+import DescriptionViewDialog from "./description-view-dialog";
 import HistoryStateDialog from "./history-state-dialog";
 
-// Helper component for the state cell to manage dialog state
 function StateCell({
   entry,
   isAdmin,
@@ -25,18 +28,17 @@ function StateCell({
   let badgeClass =
     "bg-green-100 text-green-800 border-green-200 hover:bg-green-100";
   let dotClass = "bg-green-500";
-  let label = "Aprobada";
 
   if (state === "REJECTED") {
     badgeClass = "bg-red-100 text-red-800 border-red-200 hover:bg-red-100";
     dotClass = "bg-red-500";
-    label = "Rechazada";
   } else if (state === "PENDING") {
     badgeClass =
       "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100";
     dotClass = "bg-yellow-500";
-    label = "En proceso";
   }
+
+  const label = Textos.State[state] || state;
 
   const badge = (
     <Badge
@@ -71,18 +73,24 @@ function StateCell({
 export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   {
     accessorKey: "certName",
-    header: "Tipo de Constancia",
+    header: "Tipo de Solicitud",
     meta: { className: "w-[300px]" },
     cell: ({ row }) => {
       const certName = row.original.certName;
-      return <span className="flex flex-1 items-center">{certName}</span>;
+
+
+      return (
+        <span className="flex flex-1 items-center gap-2">
+          {certName}
+
+        </span>
+      );
     },
   },
 
   {
     accessorKey: "name",
     header: "Nombre de Usuario",
-    meta: { className: "w-[180px]" },
     cell: ({ row }) => {
       const name = row.original.name;
       return <span className="flex flex-1 items-center ">{name}</span>;
@@ -92,11 +100,16 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   {
     accessorKey: "role",
     header: () => <span className="flex flex-1 justify-center">Rol</span>,
-    meta: { className: "w-[180px]" },
     cell: ({ row }) => {
       const role = row.original.role;
       return (
-        <span className="flex flex-1 items-center justify-center">{role}</span>
+        <span className="flex flex-1 items-center justify-center">
+          <Badge
+            variant={role === "administrator" ? "destructive" : "outline"}
+          >
+            {Textos.Role[role as string] || role}
+          </Badge>
+        </span>
       );
     },
   },
@@ -104,9 +117,8 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   {
     accessorKey: "createdAt",
     header: () => (
-      <span className="flex flex-1 justify-center">Fecha Creación</span>
+      <span className="flex flex-1 justify-center">Fecha de Creación</span>
     ),
-    meta: { className: "w-[180px]" },
     cell: ({ row }) => {
       const date = row.original.createdAt;
       const formattedDate = date.toLocaleDateString("es-CL", {
@@ -125,20 +137,20 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   {
     accessorKey: "state",
     header: () => <span className="flex flex-1 justify-center">Estado</span>,
-    meta: { className: "w-[180px]" },
     cell: ({ row }) => <StateCell entry={row.original} isAdmin={isAdmin} />,
   },
 
   {
     id: "actions",
     header: () => <span className="flex flex-1 justify-center">Acción</span>,
-    meta: { className: "w-[120px]" },
+    meta: { className: "w-[200px]" },
     enableGlobalFilter: false,
     cell: ({ row }) => {
       const entry = row.original;
       const isDownloadDisabled =
         entry.state === "PENDING" || entry.state === "REJECTED";
       const canViewReason = entry.state === "REJECTED";
+      const isOther = entry.certName === Certificates.OTHER;
 
       return (
         <div className="flex flex-1 items-center justify-center">
@@ -147,6 +159,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
             isHistory={true}
             isDownloadDisabled={isDownloadDisabled}
             canViewReason={canViewReason}
+            viewDialog={isOther ? DescriptionViewDialog : undefined}
           />
         </div>
       );

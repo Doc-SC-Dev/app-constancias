@@ -54,7 +54,7 @@ export const columns: ColumnDef<Student>[] = [
   },
   {
     accessorKey: "studentId",
-    header: () => <p className="flex flex-1 justify-center">Matricula</p>,
+    header: () => <p className="flex flex-1 justify-center">Matrícula</p>,
     cell({ getValue }) {
       return (
         <div className="flex flex-1 items-center justify-center">

@@ -5,25 +5,30 @@ import {
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
+import { LazyCreateActivityDialog } from "@/components/dyamic-dialogs";
 import { auth, isAuthenticated } from "@/lib/auth";
 import type { ActivityDTO } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { columns } from "./_components/activity-columns";
-import CreateActivityDialog from "./_components/create-activity-dialog";
 import { getActivitiesPaginated } from "./actions";
 
 export default async function ActivityPage() {
   const session = await isAuthenticated();
-  const permission = await auth.api.userHasPermission({
+  const listPermission = await auth.api.userHasPermission({
     body: {
       userId: session.user.id,
       permissions: { activity: ["list"] },
     },
   });
-  if (!permission.success) {
+  if (!listPermission.success) {
     redirect("/dashboard");
   }
+  const createPermission = await auth.api.userHasPermission({
+    body: {
+      userId: session.user.id,
+      permissions: { activity: ["create"] },
+    },
+  });
 
   const queryClient = new QueryClient();
 
@@ -38,21 +43,18 @@ export default async function ActivityPage() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <DataTable
-        emptyTitle="No hay actividades"
-        emptyDescription="No se creado ninguna Actividad, para iniciar debe crear una actividad"
-        buttonLabel="Crear actividad"
-        createDialog={CreateActivityDialog}
-        columns={columns}
-        queryFn={getActivitiesPaginated}
-        queryKey="list-activity"
-        placeholder="Filtrar datos en columnas"
-      >
-        <ActionDialogManager
-          createDialog={CreateActivityDialog}
-          triggerLabel="Crear actividad"
+      <div className="container mx-auto space-y-4">
+        <h3 className="text-2xl font-bold">Actividades</h3>
+        <DataTable
+          emptyTitle="No hay actividades"
+          createDialog={createPermission ? LazyCreateActivityDialog : undefined}
+          emptyDescription="No se ha creado ninguna Actividad, para iniciar debe crear una actividad"
+          columns={columns}
+          queryFn={getActivitiesPaginated}
+          queryKey="list-activity"
+          placeholder="Filtrar datos en columnas"
         />
-      </DataTable>
+      </div>
     </HydrationBoundary>
   );
 }

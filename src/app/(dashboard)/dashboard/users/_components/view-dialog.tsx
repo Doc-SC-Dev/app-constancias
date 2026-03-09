@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { User } from "@/lib/types/users";
+import { Textos } from "@/lib/utils";
 import UserActivitiesTable from "./user-activities-table";
 
 type DialogContentProps = {
@@ -26,7 +27,7 @@ export default function ViewDialog({ data: user }: DialogContentProps) {
             <span className="text-sm/normal text-muted-foreground">
               {user.email}
             </span>
-            <Badge variant="secondary">{user.role}</Badge>
+            <Badge variant="secondary">{Textos.Role[user.role || ""] || user.role}</Badge>
           </div>
         </div>
       </DialogHeader>

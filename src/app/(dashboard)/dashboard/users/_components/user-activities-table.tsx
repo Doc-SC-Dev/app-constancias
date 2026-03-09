@@ -19,9 +19,7 @@ export default function UserActivitiesTable({
         placeholder="Filtrar por actividad..."
         emptyTitle="No hay actividades"
         emptyDescription="El usuario no tiene ninguna actividad registrada"
-      >
-        {""}
-      </DataTable>
+      />
     </div>
   );
 }

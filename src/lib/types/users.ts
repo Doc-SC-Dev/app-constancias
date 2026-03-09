@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import type { UserWithRole } from "better-auth/plugins";
-import { AcademicGrade, Gender, Role } from "@/generated/prisma";
+import { Gender, Role } from "@/generated/prisma";
 import type { auth } from "../auth";
 import { Roles } from "../authorization/permissions";
 
@@ -19,53 +19,87 @@ export type UserWithActivities = User & {
   }[];
 };
 
+export type UserWithAcademicDegree = User & {
+  academicDegree: {
+    name: string;
+  };
+};
+
 const roleSchema = type.enumerated(...Object.values(Role));
 export const userEditSchema = type({
   name: "string >= 1",
-  rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
+  rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9k]{1}$/,
   email: "string.email",
   role: roleSchema,
 });
 
 export type UserEdit = typeof userEditSchema.infer;
 
-const academicGrade = type.enumerated(...Object.values(AcademicGrade));
-
 const genderSchema = type.enumerated(...Object.values(Gender));
 
 export type GenderType = typeof genderSchema.infer;
 
+const nameSchema = type("string").narrow((s, ctx) => {
+  if (s.length < 2) {
+    return ctx.reject({
+      code: "predicate",
+      message: "El nombre debe tener al menos 2 caracteres",
+    });
+  }
+  return true;
+});
+
+const rutSchema = type("string").narrow((s, ctx) => {
+  if (!/^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9k]{1}$/.test(s)) {
+    return ctx.reject({
+      code: "predicate",
+      message: "El RUT debe tener puntos y guion",
+    });
+  }
+  return true;
+});
+
+const emailSchema = type("string.email").configure({
+  message: "Debe ingresar un email valido",
+});
+
 export const userCreateSchema = type({
-  name: "string > 1",
-  rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9]{1}$/,
-  email: "string.email",
+  name: nameSchema,
+  rut: rutSchema,
+  email: emailSchema,
   role: roleSchema,
   gender: genderSchema,
-  "studentId?": "string.numeric",
+  "studentId?": type("string.numeric").narrow((value, ctx) => {
+    if (value !== undefined && Number.isNaN(value)) {
+      console.log(value);
+      return ctx.reject({
+        code: "predicate",
+        message: "Matricula debe ser una cadena numerica bien formada",
+      });
+    }
+    return true;
+  }),
   "admissionDate?": "Date",
-  "academicGrade?": academicGrade,
+  academicGrade: type("string > 1").configure({
+    message: "El grado academico es un campo requerido",
+  }),
 }).narrow((val, ctx) => {
-  if (val.role === Roles.STUDENT && !val.admissionDate) {
+  if (val.role === Roles.STUDENT && val.admissionDate === undefined) {
     return ctx.reject({
       code: "predicate",
       message: "La fecha de ingreso es requerida",
       path: ["admissionDate"],
     });
   }
-  if (val.role === Roles.STUDENT && !val.studentId) {
+
+  if (val.role === Roles.STUDENT && val.studentId === undefined) {
     return ctx.reject({
       code: "predicate",
-      message: "La matricula es requerida",
+      message: "La matrícula es requerida",
       path: ["studentId"],
     });
   }
-  if (val.role !== Roles.STUDENT && !val.academicGrade) {
-    return ctx.reject({
-      code: "predicate",
-      message: "El grado académico es requerido",
-      path: ["academicGrade"],
-    });
-  }
+
   return true;
 });
 

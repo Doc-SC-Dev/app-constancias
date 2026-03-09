@@ -81,7 +81,7 @@ export default function ActivityEditForm({
     control: form.control,
     name: "participants",
   });
-  // TODO: implementar edicion de las actividades
+  // TODO: implementar edición de las actividades
   const [open, setOpen] = useState(false);
   const onSubmit = async (updatedData: ActivityUpdateType) => {
     const { date, participants } = updatedData;
@@ -129,7 +129,7 @@ export default function ActivityEditForm({
               render={({ field, fieldState }) => (
                 <Field {...field} orientation="horizontal">
                   <span className="font-medium text-sm text-muted-foreground">
-                    Periodo
+                    Período
                   </span>
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>

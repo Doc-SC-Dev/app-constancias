@@ -1,7 +1,4 @@
-import { FolderMinus, Plus } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { FolderMinus } from "lucide-react";
 import {
   Empty,
   EmptyContent,
@@ -14,14 +11,12 @@ import {
 type Props = {
   title: string;
   description?: string;
-  buttonLabel?: string;
-  createDialog?: React.ComponentType<{ closeDialog: () => void }>;
+  createDialog?: React.ComponentType;
 };
 export function EmptyPage({
   title,
   description,
   createDialog: CreateDialog,
-  buttonLabel,
 }: Props) {
   return (
     <div className="h-full flex items-center">
@@ -35,17 +30,7 @@ export function EmptyPage({
         </EmptyHeader>
         {CreateDialog && (
           <EmptyContent>
-            <div className="flex gap-2">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus />
-                    {buttonLabel}
-                  </Button>
-                </DialogTrigger>
-                <CreateDialog closeDialog={() => {}} />
-              </Dialog>
-            </div>
+            <div className="flex gap-2">{CreateDialog && <CreateDialog />}</div>
           </EmptyContent>
         )}
       </Empty>

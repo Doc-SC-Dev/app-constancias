@@ -10,7 +10,13 @@ import { db } from "@/lib/db";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import type { UserActivityDTO } from "@/lib/types/paricipant-activity";
 import type { UserRequest } from "@/lib/types/request";
-import type { User, UserCreate, UserEdit, UserSelect } from "@/lib/types/users";
+import type {
+  User,
+  UserCreate,
+  UserEdit,
+  UserSelect,
+  UserWithAcademicDegree,
+} from "@/lib/types/users";
 
 export async function updateUser(userData: UserEdit, id: string) {
   const { success, data, error } = await withTryCatch<UserSelect>(
@@ -31,12 +37,12 @@ export async function updateUser(userData: UserEdit, id: string) {
   } else if (error === "UNAUTHORIZED") {
     return {
       success: false,
-      message: "No estas autorizado para actualizar usuarios",
+      message: "No estás autorizado para actualizar usuarios",
     };
   }
   return {
     success: false,
-    message: "Algo salio mal al intentar actualizar el usuario",
+    message: "Algo salió mal al intentar actualizar el usuario",
   };
 }
 
@@ -57,12 +63,12 @@ export async function createUser(userData: UserCreate) {
           data: {
             gender,
             rut,
-            academicGrade: academicGrade ?? "",
+            acadmicDegreeId: academicGrade,
           },
         },
       });
       if (!session) throw new Error("El usuario ya existe");
-      // try to create student (if user role === student)
+
       if (session.user.role === Roles.STUDENT && studentId) {
         const student = await tx.student.create({
           data: {
@@ -144,7 +150,7 @@ export async function deleteUser({ userId }: { userId: string }) {
       if (error.status === "UNAUTHORIZED")
         return {
           success: false,
-          message: "No estas autorizado para eliminar usuarios",
+          message: "No estás autorizado para eliminar usuarios",
         };
       return { success: false, message: error.status };
     }
@@ -157,14 +163,14 @@ export async function listUsers({
 }: {
   pageParam: number;
 }): Promise<PaginationResponse<User>> {
-  const session = await isAuthenticated();
+  const { user } = await isAuthenticated();
 
   const { users, total } = await auth.api.listUsers({
     headers: await headers(),
     query: {
       filterField: "id",
       filterOperator: "ne",
-      filterValue: session.user.id,
+      filterValue: user.id,
       limit: PAGE_SIZE,
       offset: pageParam * PAGE_SIZE,
     },
@@ -238,7 +244,7 @@ export const listUserActivities = async ({
   return { data: participants, nextPage: pageParam + 1, totalRows: count };
 };
 
-export async function getUserById(id: string): Promise<User> {
+export async function getUserById(id: string): Promise<UserWithAcademicDegree> {
   const user = await db.user.findUnique({
     where: { id },
     select: {
@@ -247,14 +253,18 @@ export async function getUserById(id: string): Promise<User> {
       email: true,
       image: true,
       role: true,
-      academicGrade: true,
+      academicDegree: {
+        select: {
+          name: true,
+        },
+      },
       gender: true,
       rut: true,
       banned: true,
     },
   });
   if (!user) throw new Error("Usuario no encontrado");
-  return user as User;
+  return user as UserWithAcademicDegree;
 }
 
 export async function listUserRequest({
@@ -297,7 +307,7 @@ export async function listUserRequest({
 export const userStateChange = async (id: string, banned: boolean) => {
   const { user } = await isAuthenticated();
   if (!isAdmin((user.role ?? Roles.STUDENT) as Roles))
-    throw new Error("No estas authorizado para realizar esta acción");
+    throw new Error("No estás autorizado para realizar esta acción");
   const auxHeaders = await headers();
   if (!banned) {
     await auth.api.banUser({
