@@ -10,7 +10,6 @@ import { auth, isAuthenticated } from "@/lib/auth";
 import type { ActivityDTO } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { columns } from "./_components/activity-columns";
-import CreateActivityDialog from "./_components/create-activity-dialog";
 import { getActivitiesPaginated } from "./actions";
 
 export default async function ActivityPage() {
@@ -48,8 +47,8 @@ export default async function ActivityPage() {
         <h3 className="text-2xl font-bold">Actividades</h3>
         <DataTable
           emptyTitle="No hay actividades"
-          emptyDescription="No se creado ninguna Actividad, para iniciar debe crear una actividad"
           createDialog={createPermission ? LazyCreateActivityDialog : undefined}
+          emptyDescription="No se ha creado ninguna Actividad, para iniciar debe crear una actividad"
           columns={columns}
           queryFn={getActivitiesPaginated}
           queryKey="list-activity"

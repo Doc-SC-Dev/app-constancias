@@ -101,7 +101,7 @@ export default function NewUserDialog() {
         <DialogHeader className="mb-4 w-full px-6 pt-6">
           <DialogTitle>Crear nuevo usuario</DialogTitle>
           <DialogDescription>
-            Ingresar datos para crear un nuevo usuario
+            Ingrese los datos para crear un nuevo usuario
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -111,16 +111,16 @@ export default function NewUserDialog() {
                 label="Nombre"
                 control={control}
                 name="name"
-                description="Ingresar el nombre completo del nuevo usuario"
+                description="Ingrese el nombre completo del nuevo usuario"
               />
               <FormInput
                 label="Email"
                 control={control}
                 name="email"
-                description="Ingresar el correo que tendrá asociado la cuenta del nuevo usuario"
+                description="Ingrese el correo que será asociado a la cuenta del nuevo usuario"
               />
               <FormInput
-                label="Rut"
+                label="RUT"
                 control={control}
                 name="rut"
                 description="La contraseña del nuevo usuario será su RUT sin puntos y con guión"
@@ -179,7 +179,7 @@ export default function NewUserDialog() {
                     label="Matrícula"
                     control={control}
                     name="studentId"
-                    description="Ingresar el número de matrícula del nuevo estudiante"
+                    description="Ingrese el número de matrícula del nuevo estudiante"
                   />
 
                   <Controller

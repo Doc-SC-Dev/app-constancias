@@ -15,7 +15,7 @@ export default function LogoutDialog() {
   const form = useForm();
   return (
     <DialogContent className="w-sm">
-      <DialogTitle>¿Estas seguro?</DialogTitle>
+      <DialogTitle>¿Estás seguro?</DialogTitle>
       <DialogDescription>
         Por seguridad, todos tus datos temporales se limpiarán y deberás volver
         a iniciar sesión para continuar.

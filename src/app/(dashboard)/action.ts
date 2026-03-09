@@ -21,6 +21,7 @@ import {
   type RequestUser,
 } from "@/lib/types/request";
 import { withTryCatch } from "../action";
+import { getOrUpdateActivePeriod } from "@/lib/period";
 
 export const logoutAction = async () => {
   console.log("on logout");
@@ -32,7 +33,7 @@ export const logoutAction = async () => {
 
 export const getRequestsTypes = async () => {
   const { user } = await isAuthenticated();
-  const [certificates, activities] = await Promise.all([
+  const [certificates, activities, activePeriod] = await Promise.all([
     db.certificate.findMany({
       select: {
         name: true,
@@ -52,8 +53,10 @@ export const getRequestsTypes = async () => {
         },
       },
     }),
+    getOrUpdateActivePeriod(),
   ]);
-  return { activities, certificates };
+  const isPeriodActive = activePeriod !== null;
+  return { activities, certificates, isPeriodActive, activePeriod };
 };
 
 export const getAcademicDegree = async () => {
@@ -77,6 +80,18 @@ export const createRequest = async (data: {
   userId: string;
   description?: string;
 }) => {
+  const { user } = await isAuthenticated();
+
+  if (!isAdmin(user.role as Role)) {
+    const activePeriod = await getOrUpdateActivePeriod();
+    if (!activePeriod) {
+      return {
+        success: false,
+        message: "En este momento la plataforma se encuentra inactiva, no es posible ingresar solicitudes",
+      };
+    }
+  }
+
   const isStandard = data.certificateName !== Certificates.OTHER;
   // TODO: corrigir error de tipo hay corregir el tipo para que acepte el title
   const {
@@ -207,7 +222,7 @@ export const createRequest = async (data: {
     return {
       success: false,
       message:
-        error === "Algo salio mal"
+        error === "Algo salió mal"
           ? "Se deben completar todos los campos"
           : error,
     };
@@ -408,7 +423,7 @@ const getStudentQualificationExamBody = (
     .toLocaleDateString("es-CL")
     .replaceAll("-", "/");
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
-<strong>DRA. TOMARA OTZEN HERNÁDEZ</strong>, Director del Programa de Doctorado en 
+<strong>DRA. TAMARA OTZEN HERNÁNDEZ </strong>, Director del Programa de Doctorado en 
 Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${userName}, matrícula Nº ${studentId}, RUT ${userRut} es ${studentMOF} regular de nuestro programa y con fecha ${activityStartDate}, aprobó su examen de calificación con nota 6,9.
 </div>`;
 };
@@ -419,7 +434,7 @@ const getCertificateText = (
   activity: RequestActivity | null,
 ) => {
   // TODO: Implementar mensajes para el resto de certificados de forma estatica por ahora
-  if (!activity) throw new Error("Activida no encontrada");
+  if (!activity) throw new Error("Actividad no encontrada");
   switch (certificate.name) {
     case Certificates.PARTICIPACION:
       if (user.role === Roles.PROFESSOR)

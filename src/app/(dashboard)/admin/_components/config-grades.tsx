@@ -26,7 +26,7 @@ const colums: ColumnDef<AcademicDegreeDto>[] = [
   {
     accessorKey: "abbrevFem",
     header: () => (
-      <TableCell className="justify-center">Abreviacion Feminina</TableCell>
+      <TableCell className="justify-center">Abreviación Femenina</TableCell>
     ),
     cell: ({ getValue }) => (
       <TableCell className="justify-center">{getValue<string>()}</TableCell>
@@ -35,7 +35,7 @@ const colums: ColumnDef<AcademicDegreeDto>[] = [
   {
     accessorKey: "abbrevMas",
     header: () => (
-      <TableCell className="justify-center">Abreviacion Masculina</TableCell>
+      <TableCell className="justify-center">Abreviación Masculina</TableCell>
     ),
     cell: ({ getValue }) => (
       <TableCell className="justify-center">{getValue<string>()}</TableCell>
@@ -61,9 +61,9 @@ export default function ConfigGrades() {
       columns={colums}
       queryKey="get-all-academic-degree-paginated"
       queryFn={getPaginatedAcademicDegree}
-      placeholder="Filtrar grados academicos"
-      emptyTitle="No hay grados academicos definidos"
-      emptyDescription="Para ver grados academicos comienze definiendo un grados academico."
+      placeholder="Filtrar grados académicos"
+      emptyTitle="No hay grados académicos definidos"
+      emptyDescription="Para ver grados académicos comience definiendo un grado académico."
       createDialog={CreateGradeDialog}
     />
   );

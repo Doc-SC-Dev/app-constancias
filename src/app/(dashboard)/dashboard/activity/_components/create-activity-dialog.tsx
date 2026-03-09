@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { FormInput } from "@/components/form/FormInput";
 import { FormSelect } from "@/components/form/FormSelect";
 import { FormNumberInput } from "@/components/form/form-number-input";
+import { TableError } from "@/components/form/table-error";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -280,7 +281,7 @@ export default function CreateActivityDialog() {
                     Participantes
                   </FieldLegend>
                   <FieldDescription>
-                    Ingresar los particpantes de la actividad y su rol
+                    Ingresar los participantes de la actividad y su rol
                   </FieldDescription>
                 </FieldContent>
                 <Button
@@ -300,11 +301,7 @@ export default function CreateActivityDialog() {
                 </Button>
               </div>
               <FieldGroup>
-                {(
-                  form.formState.errors.participants as
-                    | RHFFieldError
-                    | undefined
-                )?.message && (
+                {form.formState.errors.participants?.root?.message && (
                   <FieldError
                     errors={[
                       {
@@ -315,6 +312,9 @@ export default function CreateActivityDialog() {
                     ]}
                   />
                 )}
+                <TableError
+                  errors={form.formState.errors.participants as any}
+                />
                 {participants.length > 0 && (
                   <Table>
                     <TableHeader>
@@ -342,6 +342,7 @@ export default function CreateActivityDialog() {
                           </TableCell>
                           <TableCell>
                             <FormSelect
+                              hideError={true}
                               control={form.control}
                               name={`participants.${index}.type`}
                               disabled={participant.bloqueado}

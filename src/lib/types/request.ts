@@ -13,10 +13,10 @@ export type CreateRequest = typeof createRequestSchema.infer;
 export type { Request } from "@/generated/prisma";
 
 export enum Certificates {
-  ALUMNO_REGULAR = "Constancia de alumno regular",
-  PARTICIPACION = "Constancia de participación",
-  EXAMEN_CALIFICACION = "Constancia de examen de calificación",
-  COLABORACION = "Constancia de colaboración",
+  ALUMNO_REGULAR = "Constancia de Alumno Regular",
+  PARTICIPACION = "Constancia de Participación",
+  EXAMEN_CALIFICACION = "Constancia de Examen de Calificación",
+  COLABORACION = "Constancia de Colaboración",
   OTHER = "Solicitud Especial",
 }
 

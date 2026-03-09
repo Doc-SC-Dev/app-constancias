@@ -87,6 +87,7 @@ export default function ActionButton({
         onClick={isDisabled ? undefined : action.onClick}
         disabled={isDisabled}
         className={cn(
+          "h-8",
           action.type === "delete"
             ? "text-destructive hover:text-destructive"
             : "",

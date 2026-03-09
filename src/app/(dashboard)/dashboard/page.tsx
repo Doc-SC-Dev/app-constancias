@@ -20,7 +20,7 @@ export default async function HomePage() {
   const permissions: Record<string, boolean> = {
     Usuarios: adminPrevilige,
     Estudiantes: adminPrevilige,
-    Constancias: true,
+    Solicitudes: true,
     Actividades: adminPrevilige || user.role === Roles.PROFESSOR,
   };
   const queryClient = new QueryClient();
@@ -39,7 +39,7 @@ export default async function HomePage() {
   return (
     <div className="h-full container mx-auto flex flex-col gap-8">
       <div className="flex items-center">
-        <h1 className="text-2xl font-bold">Accesos Rápido</h1>
+        <h1 className="text-2xl font-bold">Acceso Rápido</h1>
       </div>
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         <HydrationBoundary state={dehydrate(queryClient)}>

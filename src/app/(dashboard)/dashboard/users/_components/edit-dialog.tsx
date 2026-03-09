@@ -70,7 +70,7 @@ export default function EditDialog({
               </SelectItem>
             ))}
           </FormSelect>
-          <FormInput label="Rut" control={control} name="rut" />
+          <FormInput label="RUT" control={control} name="rut" />
         </FieldGroup>
         <DialogFooter>
           <Field orientation="horizontal" className="justify-end">

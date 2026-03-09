@@ -95,7 +95,7 @@ export const userCreateSchema = type({
   if (val.role === Roles.STUDENT && val.studentId === undefined) {
     return ctx.reject({
       code: "predicate",
-      message: "La matricula es requerida",
+      message: "La matrícula es requerida",
       path: ["studentId"],
     });
   }

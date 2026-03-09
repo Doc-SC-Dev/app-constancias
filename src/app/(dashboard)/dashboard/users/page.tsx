@@ -46,7 +46,7 @@ export default async function UsersPage() {
           columns={columns}
           queryKey="list-users"
           queryFn={listUsers}
-          placeholder="Filtrar por Nombre, Role, Email y Rut"
+          placeholder="Filtrar por Nombre, Rol, Email y RUT"
         />
       </div>
     </HydrationBoundary>

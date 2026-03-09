@@ -17,6 +17,8 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+/* ----------- */
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -62,7 +64,9 @@ export function DataTable<TData>({
   const [globalFilter, setGlobalFilter] = useState<"">("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const { data, fetchNextPage, isFetching } = useInfiniteQuery({
+  /* ----------- */
+  const { data, fetchNextPage, isFetching, isLoading } = useInfiniteQuery({
+    /* ----------- */
     queryKey: [queryKey],
     queryFn: async ({ pageParam }) => await queryFn({ pageParam }),
     initialPageParam: 0,
@@ -133,6 +137,28 @@ export function DataTable<TData>({
 
   const { rows } = table.getRowModel();
 
+  const columnWidths = useMemo(() => {
+    const widths: Record<string, number> = {};
+    const measureColumns = ["name", "user", "email"];
+
+    memoColumns.forEach((col: any) => {
+      if (measureColumns.includes(col.accessorKey)) {
+        let maxLen = 0;
+        flatData.forEach((row: any) => {
+          const val = row[col.accessorKey];
+          if (typeof val === "string") {
+            maxLen = Math.max(maxLen, val.length);
+          }
+        });
+        const estimated = Math.max(150, Math.min(maxLen * 8 + 48, 400));
+        if (estimated > 150) {
+          widths[col.accessorKey] = estimated;
+        }
+      }
+    });
+    return widths;
+  }, [flatData, memoColumns]);
+
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     estimateSize: () => 33, //estimate row height for accurate scrollbar dragging
@@ -140,7 +166,7 @@ export function DataTable<TData>({
     //measure dynamic row height, except in firefox because it measures table border height incorrectly
     measureElement:
       typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
+        navigator.userAgent.indexOf("Firefox") === -1
         ? (element) => element?.getBoundingClientRect().height
         : undefined,
     overscan: 5,
@@ -207,20 +233,24 @@ export function DataTable<TData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="flex w-full gap-4">
                 {headerGroup.headers.map((header) => {
+                  const colKey = (header.column.columnDef as any).accessorKey;
+                  const dynamicWidth = columnWidths[colKey];
+
                   return (
                     <TableHead
                       key={header.id}
                       className={cn(
                         "flex items-center",
-                        header.column.columnDef.meta?.className ?? "flex-1",
+                        header.column.columnDef.meta?.className ?? (dynamicWidth ? "flex-none" : "flex-1"),
                       )}
+                      style={dynamicWidth ? { width: `${dynamicWidth}px` } : undefined}
                     >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}
@@ -230,10 +260,31 @@ export function DataTable<TData>({
           <TableBody
             className={`grid relative w-full`}
             style={{
-              height: `${rowVirtualizer.getTotalSize() ? rowVirtualizer.getTotalSize() : 100}px`,
+
+              /* ----------- */
+              height: isLoading ? "auto" : `${rowVirtualizer.getTotalSize() ? rowVirtualizer.getTotalSize() : 100}px`,
             }}
           >
-            {rowVirtualizer.getVirtualItems().length && !isFetching ? (
+            {isLoading ? (
+              [...new Array(10)].map((_, i) => (
+                <TableRow key={`loading-row-${i}`} className="flex w-full gap-4">
+                  {columns.map((col, idx) => {
+                    const metaClass = (col.meta as any)?.className;
+                    return (
+                      <TableCell
+                        key={`col-${idx}`}
+                        className={cn("flex", metaClass ? metaClass : "flex-1")}
+                      >
+                        <div className="flex justify-center w-full">
+                          <Skeleton className="h-4 w-full bg-muted" />
+                        </div>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))
+            ) : rowVirtualizer.getVirtualItems().length ? (
+              /* ----------- */
               rowVirtualizer.getVirtualItems().map((virtualRow) => {
                 const row = rows[virtualRow.index] as Row<TData>;
                 return (
@@ -247,21 +298,26 @@ export function DataTable<TData>({
                       transform: `translateY(${virtualRow.start}px)`,
                     }}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={cn(
-                          "flex",
-                          cell.column.columnDef.meta?.className ?? "flex-1",
-                        )}
-                        style={{}}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
+                    {row.getVisibleCells().map((cell) => {
+                      const colKey = (cell.column.columnDef as any).accessorKey;
+                      const dynamicWidth = columnWidths[colKey];
+
+                      return (
+                        <TableCell
+                          key={cell.id}
+                          className={cn(
+                            "flex",
+                            cell.column.columnDef.meta?.className ?? (dynamicWidth ? "flex-none" : "flex-1"),
+                          )}
+                          style={dynamicWidth ? { width: `${dynamicWidth}px` } : undefined}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 );
               })
@@ -277,7 +333,7 @@ export function DataTable<TData>({
             )}
           </TableBody>
         </Table>
-        {isFetching && (
+        {isFetching && !isLoading && (
           <span className="flex flex-1 justify-center items-center gap-4 pb-4">
             <Spinner /> Cargando...
           </span>

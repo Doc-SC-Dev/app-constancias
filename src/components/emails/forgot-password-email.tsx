@@ -62,8 +62,7 @@ export function ForgotPasswordEmail({ name, url }: ForgotPasswordEmailProps) {
           <Text>{`Hola, ${name}:`}</Text>
           <Text>
             Hemos recibido una solicitud para restablecer la contraseña de tu
-            cuenta en Aplicación de Constancias del Doctorado en ciencias
-            medicas.
+            cuenta en Aplicación de Constancias del Doctorado en Ciencias Médicas.
           </Text>
         </Section>
         <Section>
@@ -96,21 +95,21 @@ export function ForgotPasswordEmail({ name, url }: ForgotPasswordEmailProps) {
           <Link href={url}>{url}</Link>
           <Text>
             Atentamente, El equipo de Aplicación de Constancias del Doctorado en
-            ciencias medicas
+            Ciencias Médicas
           </Text>
         </Section>
         <Section>
           <Column colSpan={4}>
             <Img
-              alt="Logo Doctorado en ciencias medicas"
+              alt="Logo Doctorado en Ciencias Médicas"
               height="42"
               src="/assets/images/logo-horizontal-blanco.png"
             />
             <Text className="my-[8px] font-semibold text-[16px] text-gray-900 leading-[24px]">
-              Doctorado en ciencias medicas
+              Doctorado en Ciencias Médicas
             </Text>
             <Text className="mt-[4px] mb-[0px] text-[16px] text-gray-500 leading-[24px]">
-              Aplicación de constancias
+              Aplicación de Constancias
             </Text>
           </Column>
           <Column align="left" className="table-cell align-bottom">

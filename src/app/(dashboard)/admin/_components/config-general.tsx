@@ -10,7 +10,7 @@ export default function ConfigGeneral() {
       <Suspense fallback={<ConfigDirectorLoading />}>
         <ConfigDirector />
       </Suspense>
-      <h1 className="text-2xl">Periodo Academico</h1>
+      <h1 className="text-2xl">Periodos Académicos</h1>
       <Suspense fallback={<ConfigPeriodLoading />}>
         <ConfigPeriod />
       </Suspense>

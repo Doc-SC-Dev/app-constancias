@@ -19,7 +19,7 @@ export function AppNavBar({ user }: NavBarProps) {
       <div className="flex gap-4 items-center w-1/2">
         <Image
           src={logoImg}
-          alt="Logo doctorado en ciencias medicas"
+          alt="Logo Doctorado en Ciencias Médicas"
           loading="eager"
           priority
           height={60}
