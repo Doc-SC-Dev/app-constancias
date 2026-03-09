@@ -1,7 +1,6 @@
-import { CircleX, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { AcademicPeriod } from "@/generated/prisma";
 import { db } from "@/lib/db";
@@ -10,7 +9,7 @@ import { ClosePeriodDialog } from "./close-period-dialog";
 
 export default async function ConfigPeriod() {
   const periodsDesc = await db.academicPeriod.findMany({
-    orderBy: { updatedAt: "desc" },
+    orderBy: { startDate: "desc" },
     take: 2,
   });
 
@@ -19,7 +18,7 @@ export default async function ConfigPeriod() {
   }
 
   const periods = periodsDesc.sort(
-    (a, b) => a.startDate.getTime() - b.startDate.getTime()
+    (a, b) => a.startDate.getTime() - b.startDate.getTime(),
   );
 
   return <ConfigPeriodContent periods={periods} />;
@@ -28,7 +27,7 @@ export default async function ConfigPeriod() {
 function ConfigPeriodContent({ periods }: { periods: AcademicPeriod[] }) {
   return (
     <div className="flex w-full items-start justify-between">
-      <div className="flex flex-col gap-8 w-full">
+      <div className="flex-4 flex-col gap-8 w-full">
         {periods.map((period, index) => (
           <div key={period.id} className="flex flex-col gap-2">
             <h4 className="text-xl font-semibold text-muted-foreground">
@@ -41,7 +40,8 @@ function ConfigPeriodContent({ periods }: { periods: AcademicPeriod[] }) {
                   className="text-sm bg-teal-50 text-teal-700 ring-teal-600/20"
                   variant="outline"
                 >
-                  <strong>Inicio Solicitudes:</strong> {formatDate(period.startDate)}
+                  <strong>Inicio Solicitudes:</strong>{" "}
+                  {formatDate(period.startDate)}
                 </Badge>
                 <Badge
                   className="text-sm bg-rose-50 text-rose-700 ring-rose-600/20"
@@ -55,7 +55,7 @@ function ConfigPeriodContent({ periods }: { periods: AcademicPeriod[] }) {
           </div>
         ))}
       </div>
-      <div className="flex flex-1 justify-end items-start mt-8">
+      <div className="flex flex-1 justify-items-start items-center my-auto">
         <ClosePeriodDialog periods={periods} />
       </div>
     </div>

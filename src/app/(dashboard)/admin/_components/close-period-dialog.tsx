@@ -2,7 +2,7 @@
 
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -14,25 +14,31 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Spinner } from "@/components/ui/spinner";
 import type { AcademicPeriod } from "@/generated/prisma";
 import { formatDate } from "@/lib/utils";
 import { updateAcademicPeriods } from "../actions";
-import { toast } from "sonner";
-import { Spinner } from "@/components/ui/spinner";
 
 export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
   const [open, setOpen] = useState(false);
-  const [currStartDate, setCurrStartDate] = useState<Date | undefined>(periods[0]?.startDate);
-  const [currEndDate, setCurrEndDate] = useState<Date | undefined>(periods[0]?.endDate);
-  const [nextStartDate, setNextStartDate] = useState<Date | undefined>(periods[1]?.startDate);
-  const [nextEndDate, setNextEndDate] = useState<Date | undefined>(periods[1]?.endDate);
+  const [currStartDate, setCurrStartDate] = useState<Date | undefined>(
+    periods[0]?.startDate,
+  );
+  const [currEndDate, setCurrEndDate] = useState<Date | undefined>(
+    periods[0]?.endDate,
+  );
+  const [nextStartDate, setNextStartDate] = useState<Date | undefined>(
+    periods[1]?.startDate,
+  );
+  const [nextEndDate, setNextEndDate] = useState<Date | undefined>(
+    periods[1]?.endDate,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -52,24 +58,30 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
     }
 
     if (currStartDate >= currEndDate) {
-      toast.error("La fecha de fin del primer periodo debe ser posterior a la fecha de inicio.");
+      toast.error(
+        "La fecha de fin del primer periodo debe ser posterior a la fecha de inicio.",
+      );
       return;
     }
 
     if (nextStartDate >= nextEndDate) {
-      toast.error("La fecha de inicio del segundo periodo debe ser anterior a su cierre.");
+      toast.error(
+        "La fecha de inicio del segundo periodo debe ser anterior a su cierre.",
+      );
       return;
     }
 
     if (currEndDate >= nextStartDate) {
-      toast.error("El segundo periodo debe iniciar al menos un día después del cierre del primero.");
+      toast.error(
+        "El segundo periodo debe iniciar al menos un día después del cierre del primero.",
+      );
       return;
     }
 
     setIsSubmitting(true);
     const result = await updateAcademicPeriods([
       { startDate: currStartDate, endDate: currEndDate },
-      { startDate: nextStartDate, endDate: nextEndDate }
+      { startDate: nextStartDate, endDate: nextEndDate },
     ]);
     setIsSubmitting(false);
 
@@ -99,7 +111,9 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
 
         <div className="grid gap-6 py-4">
           <div className="space-y-4">
-            <h4 className="text-md font-semibold leading-none">Primer Periodo</h4>
+            <h4 className="text-md font-semibold leading-none">
+              Primer Periodo
+            </h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>Fecha de Inicio</Label>
@@ -107,11 +121,16 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
-                      className={`justify-start text-left font-normal ${!currStartDate && "text-muted-foreground"
-                        }`}
+                      className={`justify-start text-left font-normal ${
+                        !currStartDate && "text-muted-foreground"
+                      }`}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {currStartDate ? formatDate(currStartDate) : <span>Seleccionar</span>}
+                      {currStartDate ? (
+                        formatDate(currStartDate)
+                      ) : (
+                        <span>Seleccionar</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -119,7 +138,7 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
                       mode="single"
                       selected={currStartDate}
                       onSelect={setCurrStartDate}
-                      initialFocus
+                      autoFocus
                     />
                   </PopoverContent>
                 </Popover>
@@ -130,11 +149,16 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
-                      className={`justify-start text-left font-normal ${!currEndDate && "text-muted-foreground"
-                        }`}
+                      className={`justify-start text-left font-normal ${
+                        !currEndDate && "text-muted-foreground"
+                      }`}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {currEndDate ? formatDate(currEndDate) : <span>Seleccionar</span>}
+                      {currEndDate ? (
+                        formatDate(currEndDate)
+                      ) : (
+                        <span>Seleccionar</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -142,7 +166,7 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
                       mode="single"
                       selected={currEndDate}
                       onSelect={setCurrEndDate}
-                      initialFocus
+                      autoFocus
                     />
                   </PopoverContent>
                 </Popover>
@@ -151,7 +175,9 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-md font-semibold leading-none">Segundo Periodo</h4>
+            <h4 className="text-md font-semibold leading-none">
+              Segundo Periodo
+            </h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>Fecha de Inicio</Label>
@@ -159,11 +185,16 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
-                      className={`justify-start text-left font-normal ${!nextStartDate && "text-muted-foreground"
-                        }`}
+                      className={`justify-start text-left font-normal ${
+                        !nextStartDate && "text-muted-foreground"
+                      }`}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {nextStartDate ? formatDate(nextStartDate) : <span>Seleccionar</span>}
+                      {nextStartDate ? (
+                        formatDate(nextStartDate)
+                      ) : (
+                        <span>Seleccionar</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -171,7 +202,7 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
                       mode="single"
                       selected={nextStartDate}
                       onSelect={setNextStartDate}
-                      initialFocus
+                      autoFocus
                     />
                   </PopoverContent>
                 </Popover>
@@ -183,11 +214,16 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
-                      className={`justify-start text-left font-normal ${!nextEndDate && "text-muted-foreground"
-                        }`}
+                      className={`justify-start text-left font-normal ${
+                        !nextEndDate && "text-muted-foreground"
+                      }`}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {nextEndDate ? formatDate(nextEndDate) : <span>Seleccionar</span>}
+                      {nextEndDate ? (
+                        formatDate(nextEndDate)
+                      ) : (
+                        <span>Seleccionar</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -195,7 +231,7 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
                       mode="single"
                       selected={nextEndDate}
                       onSelect={setNextEndDate}
-                      initialFocus
+                      autoFocus
                     />
                   </PopoverContent>
                 </Popover>

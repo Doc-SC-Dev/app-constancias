@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { Gender, Prisma, type Role } from "@/generated/prisma";
-import { auth, isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth";
 import { isAdmin } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { dbWithAutdit } from "@/lib/db/prisma";
