@@ -113,9 +113,7 @@ export const certificateEditSchema = type({
     roles: type({
       name: type("'PROFESSOR' | 'STUDENT'"),
       template: type("string").moreThanLength(0),
-      templateId: type("string")
-        .moreThanLength(0)
-        .configure("El id del template es obligatorio"),
+      templateId: type("string"),
     })
       .array()
       .atLeastLength(1)
@@ -129,9 +127,7 @@ export const certificateEditSchema = type({
         id: type("string").moreThanLength(0),
         name: type("string").moreThanLength(0),
         template: type("string").moreThanLength(0),
-        templateId: type("string")
-          .moreThanLength(0)
-          .configure("El id del template es obligatorio"),
+        templateId: type("string"),
       })
         .array()
         .atLeastLength(1),
@@ -148,9 +144,7 @@ export const certificateEditSchema = type({
         id: type("string").moreThanLength(0),
         name: type("string").moreThanLength(0),
         template: type("string").moreThanLength(0),
-        templateId: type("string")
-          .moreThanLength(0)
-          .configure("El id del template es obligatorio"),
+        templateId: type("string"),
       })
         .array()
         .moreThanLength(0),

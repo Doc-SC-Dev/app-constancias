@@ -51,7 +51,7 @@ const columns: ColumnDef<CertificatePaginated>[] = [
           <LinkActionButton
             seeLink={`/admin/certificate/${cert.id}`}
             data={cert}
-            editLink={`/adming/certificate/${cert.id}/edit`}
+            editLink={`/admin/certificate/${cert.id}/edit`}
           />
         </TableCell>
       );

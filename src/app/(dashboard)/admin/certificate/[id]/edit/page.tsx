@@ -1,11 +1,7 @@
-import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -39,40 +35,27 @@ function EditCertificatePageContent({
   certificate: Certificate;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-4">
-      <h1 className="text-6xl">Edición de certificado</h1>
-      <section className="flex flex-1 justify-between">
-        <Button variant="link" asChild>
-          <Link href={`/admin/certificate/${certificate.id}`} prefetch>
-            <ChevronLeft />
-            Cancelar
-          </Link>
-        </Button>
-      </section>
-      <Card>
-        <CardHeader>
-          <CardTitle>Editar certficado {certificate.name}</CardTitle>
-          <CardDescription></CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EditCertificateForm data={certificate}>
-            <SelectTemplateLocation />
-            <SelectRole />
-            <SelectActivityType />
-            <SelectParticipantTypes />
-            <h4 className="text-lg font-semibold">Plantillas</h4>
-            <RoleTemplateManager />
-            <ActivityTemplateManager />
-            <ParticipantTemplateManager />
-          </EditCertificateForm>
-        </CardContent>
-        <CardFooter className="justify-end gap-4">
-          <Button variant="outline">Restaurar</Button>
-          <Button type="submit" form="form-edit-certificate">
-            Guardar
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <h1 className="text-4xl font-bold">
+            Editar certficado {certificate.name}
+          </h1>
+        </CardTitle>
+        <CardDescription></CardDescription>
+      </CardHeader>
+      <CardContent>
+        <EditCertificateForm data={certificate}>
+          <SelectTemplateLocation />
+          <SelectRole />
+          <SelectActivityType />
+          <SelectParticipantTypes />
+          <h4 className="text-xl font-semibold">Plantillas</h4>
+          <RoleTemplateManager />
+          <ActivityTemplateManager />
+          <ParticipantTemplateManager />
+        </EditCertificateForm>
+      </CardContent>
+    </Card>
   );
 }
