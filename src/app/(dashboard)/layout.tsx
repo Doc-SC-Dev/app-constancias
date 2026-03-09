@@ -6,7 +6,7 @@ import { auth, isAuthenticated } from "@/lib/auth";
 import { AppSideBar } from "./_components/app-sidebar";
 
 export const metadata: Metadata = {
-  title: "App Constancias Doctorado en ciencias medicas",
+  title: "App Constancias Doctorado en Ciencias Médicas",
   description: "",
 };
 

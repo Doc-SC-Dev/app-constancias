@@ -50,9 +50,9 @@ function ConfigDirectorError() {
     <div className="flex items-center">
       <Alert variant="default" className=" w-1/2">
         <AlertTriangle className="fill-amber-400" />
-        <AlertTitle>No se a configurado un director</AlertTitle>
+        <AlertTitle>No se ha configurado un director</AlertTitle>
         <AlertDescription>
-          Seleccione a un usuario para configurarlo como Directo del programa
+          Seleccione a un usuario para configurarlo como Director del programa
         </AlertDescription>
       </Alert>
     </div>

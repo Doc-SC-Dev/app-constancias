@@ -37,12 +37,12 @@ export async function updateUser(userData: UserEdit, id: string) {
   } else if (error === "UNAUTHORIZED") {
     return {
       success: false,
-      message: "No estas autorizado para actualizar usuarios",
+      message: "No estás autorizado para actualizar usuarios",
     };
   }
   return {
     success: false,
-    message: "Algo salio mal al intentar actualizar el usuario",
+    message: "Algo salió mal al intentar actualizar el usuario",
   };
 }
 
@@ -150,7 +150,7 @@ export async function deleteUser({ userId }: { userId: string }) {
       if (error.status === "UNAUTHORIZED")
         return {
           success: false,
-          message: "No estas autorizado para eliminar usuarios",
+          message: "No estás autorizado para eliminar usuarios",
         };
       return { success: false, message: error.status };
     }
@@ -307,7 +307,7 @@ export async function listUserRequest({
 export const userStateChange = async (id: string, banned: boolean) => {
   const { user } = await isAuthenticated();
   if (!isAdmin((user.role ?? Roles.STUDENT) as Roles))
-    throw new Error("No estas authorizado para realizar esta acción");
+    throw new Error("No estás autorizado para realizar esta acción");
   const auxHeaders = await headers();
   if (!banned) {
     await auth.api.banUser({

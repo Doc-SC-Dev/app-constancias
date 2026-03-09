@@ -59,6 +59,7 @@ import {
   activityCreateSchema,
 } from "@/lib/types/activity";
 import { formatDate } from "@/lib/utils";
+import { TableError } from "@/components/form/table-error";
 import { listUsersAdmin } from "../../users/actions";
 import { createActivity, getActivityTypes } from "../actions";
 import { UserSelect } from "./user-select";
@@ -263,7 +264,7 @@ export default function CreateActivityDialog({
                   Participantes
                 </FieldLegend>
                 <FieldDescription>
-                  Ingresar los particpantes de la actividad y su rol
+                  Ingresar los participantes de la actividad y su rol
                 </FieldDescription>
               </FieldContent>
               <Button
@@ -296,6 +297,7 @@ export default function CreateActivityDialog({
                     ]}
                   />
                 )}
+              <TableError errors={form.formState.errors.participants as any} />
               {participants.length > 0 && (
                 <Table>
                   <TableHeader>

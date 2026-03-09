@@ -1,16 +1,14 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import type { Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { isAdmin } from "@/lib/authorization/permissions";
-import type { HistoryEntry } from "@/lib/types/history";
-import type { PaginationResponse } from "@/lib/types/pagination";
 import { HistoryClient } from "./_components/history-client";
-import { getHistoryPaginated } from "./actions";
+import { HistoryTableSkeleton } from "./_components/history-table-skeleton";
+import {
+  OtherTableWrapper,
+  StandardTableWrapper,
+} from "./_components/history-tables";
 
 export default async function HistoryPage() {
   const { user } = await isAuthenticated();
@@ -29,30 +27,24 @@ export default async function HistoryPage() {
   }
 
   const userRole = user.role as Role;
-
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchInfiniteQuery({
-    queryKey: ["list-history-standard"],
-    queryFn: ({ pageParam }) =>
-      getHistoryPaginated({
-        pageParam,
-        user: user,
-        isAdmin: isAdmin(userRole),
-        filter: "standard",
-      }),
-    initialPageParam: 0,
-    getNextPageParam: (
-      _lastPage: PaginationResponse<HistoryEntry>,
-      groups: PaginationResponse<HistoryEntry>[],
-    ) => groups.length,
-  });
+  const adminMode = isAdmin(userRole);
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container h-full mx-auto">
-        <HistoryClient isAdmin={isAdmin(userRole)} user={user} />
-      </div>
-    </HydrationBoundary>
+    <div className="container h-full mx-auto">
+      <HistoryClient
+        isAdmin={adminMode}
+        user={user}
+        standardTable={
+          <Suspense fallback={<HistoryTableSkeleton />}>
+            <StandardTableWrapper user={user} isAdmin={adminMode} />
+          </Suspense>
+        }
+        otherTable={
+          <Suspense fallback={<HistoryTableSkeleton />}>
+            <OtherTableWrapper user={user} isAdmin={adminMode} />
+          </Suspense>
+        }
+      />
+    </div>
   );
 }

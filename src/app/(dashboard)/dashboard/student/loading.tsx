@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,48 +12,48 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default function UsersLoading() {
+export default function Loading() {
   const headers = [
     "Estado",
-    "Nombre",
-    "Rol",
-    "Email",
     "Matrícula",
-    "Acciones",
+    "Nombre",
+    "Email",
+    "Año de admisión",
   ];
+
   return (
     <div className="container h-full mx-auto flex flex-col gap-4">
-      <h2 className="text-2xl font-bold">Usuarios</h2>
+      <h2 className="text-2xl font-bold">Estudiantes</h2>
       <div className="flex items-center justify-between">
         <div className="grid w-full max-w-sm items-center gap-3">
-          <Label htmlFor="fuzzy-input">Filtrar</Label>
+          <Label htmlFor="loading-filter">Filtrar</Label>
           <Input
-            id="fuzzy-input"
+            id="loading-filter"
             className="max-w-sm"
-            placeholder="Filtrar por nombre, Email, RUT, matrícula o rol"
+            placeholder="Filtrar por matrícula, nombre o email"
             disabled
           />
         </div>
-        <Button disabled>
-          Crear Usuario
-          <Plus className="ml-2 h-4 w-4" />
-        </Button>
+
       </div>
+
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              {headers.map((header) => {
-                return <TableHead key={header}>{header}</TableHead>;
-              })}
+              {headers.map((header) => (
+                <TableHead key={header} className="text-center">
+                  {header}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[...new Array(10).fill(null).map((_, i) => i + 1)].map((row) => (
-              <TableRow key={`loading-row-${row}`}>
-                {headers.map((cell) => (
-                  <TableCell key={`tc-s-${cell}-${row}`}>
-                    <Skeleton className="h-4 bg-muted" />
+            {[...new Array(10)].map((_, i) => (
+              <TableRow key={`loading-row-${i}`}>
+                {headers.map((cell, idx) => (
+                  <TableCell key={`tc-s-${idx}-${i}`}>
+                    <Skeleton className="h-4 w-full bg-muted" />
                   </TableCell>
                 ))}
               </TableRow>

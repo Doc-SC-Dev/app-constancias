@@ -55,7 +55,7 @@ export default function UserRequestTable({ userId }: { userId: string }) {
       queryKey="list-user-request"
       placeholder="Filtrar Peticiones"
       size="sm"
-      emptyTitle="El usuario no a realizado peticiones aun"
+      emptyTitle="El usuario no ha realizado peticiones aún"
       emptyDescription="Para poder ver las peticiones, primero espere a que el usuario realice una petición"
     >
       {""}

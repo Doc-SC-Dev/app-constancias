@@ -25,7 +25,7 @@ export default function DescriptionViewDialog({
 
       <div className="flex flex-col gap-6 py-4">
         <div className="flex flex-col gap-2">
-          <span className="font-medium text-sm text-muted-foreground">Tipo de Constancia</span>
+          <span className="font-medium text-sm text-muted-foreground">Tipo de Solicitud</span>
           <span>{request.certName}</span>
         </div>
 

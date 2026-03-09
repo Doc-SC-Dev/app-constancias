@@ -96,6 +96,15 @@ export default function CreateRequestDialog({
       </DialogHeader>
 
       <form onSubmit={form.handleSubmit(onSubmit)}>
+        {data?.isPeriodActive === false && !isAdmin(user.role as Role) && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircleIcon />
+            <AlertTitle>Plataforma inactiva</AlertTitle>
+            <AlertDescription>
+              En este momento la plataforma se encuentra inactiva, no es posible ingresar solicitudes.
+            </AlertDescription>
+          </Alert>
+        )}
         {data && (
           <FieldGroup>
             {isAdmin(user.role as Role) && (
@@ -103,7 +112,7 @@ export default function CreateRequestDialog({
                 control={form.control}
                 name="userId"
                 label="Usuario"
-                description="Seleccione el usuario al que desea crear una solictiud"
+                description="Seleccione el usuario al que desea crear una solicitud"
               >
                 {isLoading && !users && <Spinner />}
                 {users
@@ -184,7 +193,13 @@ export default function CreateRequestDialog({
           <DialogClose asChild onClick={() => form.reset()}>
             <Button variant="ghost">Cancelar</Button>
           </DialogClose>
-          <Button type="submit">
+          <Button
+            type="submit"
+            disabled={
+              (!isAdmin(user.role as Role) && data?.isPeriodActive === false) ||
+              form.formState.isSubmitting
+            }
+          >
             {form.formState.isSubmitting && <Spinner />}
             Crear
           </Button>
