@@ -171,13 +171,13 @@ model OtherRequest {
 }
 
 model ActivityType {
-  id               String            @id @default(uuid())
-  name             String            @unique
+  id               String                @id @default(uuid())
+  name             String                @unique
   participantTypes ParticipantType[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @default(now()) @updatedAt
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @default(now()) @updatedAt
   activities       Activity[]
-  certificates     Certificate[]
+  template         CertificateTemplate[]
 
   @@map("activity_type")
 }
@@ -201,16 +201,16 @@ model Activity {
 }
 
 model ParticipantType {
-  id             String        @id @default(uuid())
+  id             String                @id @default(uuid())
   name           String
-  roles          Role[]        @default([STUDENT, PROFESSOR])
-  activityType   ActivityType? @relation(fields: [activityTypeId], references: [id])
+  roles          Role[]                @default([STUDENT, PROFESSOR])
+  activityType   ActivityType?         @relation(fields: [activityTypeId], references: [id])
   activityTypeId String?
   participants   Participant[]
-  required       Boolean       @default(false)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
-  certificates   Certificate[]
+  required       Boolean               @default(false)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @default(now()) @updatedAt
+  template       CertificateTemplate[]
 
   @@map("participant_type")
 }
@@ -233,16 +233,13 @@ model Participant {
 }
 
 model Certificate {
-  id               String            @id @default(uuid())
-  template         String            @default("")
-  pdfLink          String
-  name             String            @unique
-  roles            Role[]            @default([PROFESSOR, STUDENT])
-  requests         Request[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @default(now()) @updatedAt
-  participantTypes ParticipantType[]
-  activityTypes    ActivityType[]
+  id        String                @id @default(uuid())
+  name      String                @unique
+  roles     Role[]                @default([PROFESSOR, STUDENT])
+  requests  Request[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @default(now()) @updatedAt
+  template  CertificateTemplate[]
 
   @@map("certificate")
 }
@@ -300,4 +297,21 @@ model AcademicPeriod {
   createdBy String
 
   @@map("academic_period")
+}
+
+model CertificateTemplate {
+  id                String   @id @default(uuid())
+  certificateId     String
+  role              Role?
+  activityTypeId    String?
+  participantTypeId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  template          String
+
+  certificate     Certificate      @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  participantType ParticipantType? @relation(fields: [participantTypeId], references: [id], onDelete: Cascade)
+  activityType    ActivityType?    @relation(fields: [activityTypeId], references: [id], onDelete: Cascade)
+
+  @@map("certificate_template")
 }

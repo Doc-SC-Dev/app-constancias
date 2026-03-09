@@ -6,7 +6,10 @@ import { db } from "@/lib/db";
 import { dbWithAutdit } from "@/lib/db/prisma";
 import type { AcademicDegreeCreateDto } from "@/lib/types/acadmic-grades";
 import type { ActivityType } from "@/lib/types/activity";
-import type { CertificatePaginated } from "@/lib/types/certificate";
+import type {
+  CertificatePaginated,
+  ListParticipantType,
+} from "@/lib/types/certificate";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import { withAudit } from "@/lib/with-audit";
 import { Result } from "@/shared/core/Result";
@@ -106,7 +109,7 @@ export const changeDirectorAction = async ({
 }: {
   userId: string;
   oldDirector: string;
-}): Promise<ReturnType<Result<{ name: string }, Error>["serialize"]>> => {
+}): Promise<ReturnType<Result<{ name: string }, string>["serialize"]>> => {
   try {
     const newDirector = await db.$transaction(async (tx) => {
       await tx.user.update({
@@ -131,9 +134,9 @@ export const changeDirectorAction = async ({
       return newDirector;
     });
     revalidatePath("/admin?tab=general");
-    return Result.ok<{ name: string }, undefined>(newDirector).serialize();
-  } catch (error) {
-    return Result.fail<undefined, Error>(error as Error).serialize();
+    return Result.ok(newDirector).serialize();
+  } catch (_) {
+    return Result.fail("Error interno cambiando el director.").serialize();
   }
 };
 
@@ -222,8 +225,7 @@ export async function getPaginatedCertificates({
         name: true,
         _count: {
           select: {
-            activityTypes: true,
-            participantTypes: true,
+            template: true,
           },
         },
         createdAt: true,
@@ -236,10 +238,27 @@ export async function getPaginatedCertificates({
   return {
     data: certificates.map<CertificatePaginated>((cert) => ({
       ...cert,
-      activityTypes: cert._count.activityTypes,
-      participantsTypes: cert._count.participantTypes,
+      templates: cert._count.template,
     })),
     totalRows: count,
     nextPage: pageParam + 1,
   };
+}
+
+export async function getParticipantTypes(
+  id: string[],
+): Promise<ListParticipantType[]> {
+  if (!id.length) return [];
+  const participantTypes = await db.participantType.findMany({
+    where: {
+      activityTypeId: {
+        in: Array.from(new Set(id)),
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+  return participantTypes;
 }

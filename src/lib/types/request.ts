@@ -20,7 +20,7 @@ export enum Certificates {
   OTHER = "Solicitud Especial",
 }
 
-export type RequestUserWithParticipants = {
+export type RequestUser = {
   name: string;
   rut: string;
   role: Role;
@@ -30,22 +30,11 @@ export type RequestUserWithParticipants = {
     studentId: number;
     admisionDate: Date;
   } | null;
-  participants: {
+  participants?: {
     type: {
       name: string;
     };
   }[];
-};
-export type RequestUserWithoutParticipant = {
-  name: string;
-  rut: string;
-  role: Role;
-  gender: Gender;
-  academicDegree: { title: { abbrev: string }[] } | null;
-  student: {
-    studentId: number;
-    admisionDate: Date;
-  } | null;
 };
 export type RequestActivity = {
   name: string;
@@ -74,7 +63,7 @@ export type RequestCertificate = {
 };
 export type FullRequest = {
   id: string;
-  user: RequestUserWithParticipants | RequestUserWithoutParticipant;
+  user: RequestUser;
   activity: RequestActivity | null;
   certificate: RequestCertificate;
 };

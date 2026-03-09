@@ -7,30 +7,14 @@ import { TableCell } from "@/components/table-cell";
 import type { CertificatePaginated } from "@/lib/types/certificate";
 import { formatDate } from "@/lib/utils";
 import { getPaginatedCertificates } from "../../actions";
+import CreateCertificateDialog from "../dialogs/create-certificate-dialog";
 
 const columns: ColumnDef<CertificatePaginated>[] = [
   { accessorKey: "name", header: "Nombre" },
   {
-    accessorKey: "activityTypes",
+    accessorKey: "templates",
     header() {
-      return (
-        <TableCell className="justify-center">Tipos de actividades</TableCell>
-      );
-    },
-    cell(props) {
-      return (
-        <TableCell className="justify-center">
-          {props.getValue<number>()}
-        </TableCell>
-      );
-    },
-  },
-  {
-    accessorKey: "participantsTypes",
-    header() {
-      return (
-        <TableCell className="justify-center">Tipos de participantes</TableCell>
-      );
+      return <TableCell className="justify-center">Plantillas</TableCell>;
     },
     cell(props) {
       return (
@@ -84,6 +68,7 @@ export default function CertificateDT() {
       emptyTitle="No se ha creado ningun certificado"
       emptyDescription="Cree un nuevo certificado para verlo en esta vista"
       placeholder="Filtrar certificados"
+      createDialog={CreateCertificateDialog}
     />
   );
 }

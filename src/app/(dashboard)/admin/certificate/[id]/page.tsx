@@ -1,12 +1,22 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Edit, Trash } from "lucide-react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Certificate } from "@/lib/types/certificate";
 import { formatDate, Textos } from "@/lib/utils";
-import CertificateBodyField from "../../_components/form/certificate-body-field";
 import { findCertificateById } from "./actions";
 
 export default async function CertificateDetailPage({
@@ -29,71 +39,107 @@ const CertificateDetailPageContent = ({
 }) => {
   return (
     <div className="container mx-auto">
-      <Button variant="ghost" asChild>
-        <Link href="/admin?tab=certificates">
-          <ArrowLeft />
-        </Link>
-      </Button>
+      <section
+        id={`section-action-button-${certificate.id}`}
+        className="w-full flex justify-between gap mb-4"
+      >
+        <Button variant="ghost" asChild>
+          <Link href="/admin?tab=certificates">
+            <ArrowLeft />
+          </Link>
+        </Button>
+        <div className="flex gap-4">
+          <Button variant="link" asChild>
+            <Link href={`/admin/certificate/${certificate.id}/edit`}>
+              <Edit />
+              Editar
+            </Link>
+          </Button>
+          <Button variant="destructive">
+            <Trash />
+            Eliminar
+          </Button>
+        </div>
+      </section>
       <Card>
         <CardHeader>
           <CardTitle>
             <h2 className="text-4xl font-bold">{certificate.name}</h2>
           </CardTitle>
+          <CardDescription>
+            <div className="flex gap-4 items-center">
+              <p className="text-md">Fecha de creación:</p>
+              <p className="text-md font-semibold">
+                {formatDate(certificate.createdAt)}
+              </p>
+            </div>
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex gap-4 items-center">
-            <p className="text-md">Fecha de creación:</p>
-            <p className="text-md font-semibold">
-              {formatDate(certificate.createdAt)}
-            </p>
-          </div>
-
-          <div className="flex gap-4 items-center">
-            <p className="text-md">Roles permitidos</p>
-            {certificate.roles.map((rol) => (
-              <Badge variant="outline" key={rol}>
-                {Textos.Role[rol]}
-              </Badge>
-            ))}
-          </div>
-
           <section id="template-section" className="space-y-4">
-            <h3 className="text-xl font-semibold">Template</h3>
-            <CertificateBodyField
-              initial={certificate.template}
-              canEdit={false}
-            />
+            <h3 className="text-2xl font-semibold">Plantillas</h3>
+            {certificate.variant === "role" && (
+              <>
+                <h3 className="text-xl font-semibold">Roles</h3>
+                <Accordion type="single" collapsible>
+                  {certificate.template.map((temp) => (
+                    <AccordionItem
+                      value={`accordion-item-role-${temp.id}`}
+                      key={`accordion-item-${temp.id}`}
+                    >
+                      <AccordionTrigger>
+                        {Textos.Role[temp.role]}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <p>{temp.template}</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </>
+            )}
+
+            {certificate.variant === "activity" && (
+              <>
+                <h3 className="text-xl font-semibold">Tipos de actividad</h3>
+                <Accordion type="single" collapsible>
+                  {certificate.template.map((temp) => (
+                    <AccordionItem
+                      value={`accordion-item-activity-${temp.id}`}
+                      key={`accordion-item-${temp.id}`}
+                    >
+                      <AccordionTrigger>
+                        {temp.activityType.name}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <p>{temp.template}</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </>
+            )}
+            {certificate.variant === "participant" && (
+              <>
+                <h3 className="text-xl font-semibold">Tipos de participante</h3>
+                <Accordion type="single" collapsible>
+                  {certificate.template.map((temp) => (
+                    <AccordionItem
+                      value={`accordion-item-participant-${temp.id}`}
+                      key={`accordion-item-participant-${temp.id} `}
+                    >
+                      <AccordionTrigger>
+                        {`${temp.participantType.name} (${temp.participantType.activityType.name})`}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <p>{temp.template}</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </>
+            )}
           </section>
-          {certificate.activityType.length > 0 && (
-            <section
-              id="activity-type-section"
-              className=" flex flex-col gap-4"
-            >
-              <h3 className="text-xl font-semibold">Tipos de actividades</h3>
-              <div className="flex gap-4">
-                {certificate.activityType.map((act) => (
-                  <Badge variant="secondary" key={act.id}>
-                    {act.name}
-                  </Badge>
-                ))}
-              </div>
-            </section>
-          )}
-          {certificate.participantType.length > 0 && (
-            <section
-              id="participant-type-section"
-              className="flex flex-col gap-4"
-            >
-              <h3 className="text-xl font-semibold">Tipos de participantes</h3>
-              <div className="flex gap-4">
-                {certificate.participantType.map((part) => (
-                  <Badge variant="secondary" key={part.id}>
-                    {part.name}
-                  </Badge>
-                ))}
-              </div>
-            </section>
-          )}
         </CardContent>
       </Card>
     </div>
