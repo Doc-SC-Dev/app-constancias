@@ -43,7 +43,7 @@ export default function ChangeDirectorForm({ userId }: { userId: string }) {
         queryKey: ["get-non-director-users"],
       });
     } else if (error) {
-      toast.error("Ocurrio un error", { description: error?.message });
+      toast.error("Ocurrio un error", { description: error });
     }
   };
   return (

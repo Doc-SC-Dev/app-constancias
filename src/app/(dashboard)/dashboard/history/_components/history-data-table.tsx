@@ -14,7 +14,11 @@ interface HistoryDataTableProps {
   filter: "standard" | "other";
 }
 
-export function HistoryDataTable({ user, isAdmin, filter }: HistoryDataTableProps) {
+export function HistoryDataTable({
+  user,
+  isAdmin,
+  filter,
+}: HistoryDataTableProps) {
   const filteredColumns = useMemo(() => {
     const allColumns = getColumns(isAdmin);
 
@@ -39,7 +43,6 @@ export function HistoryDataTable({ user, isAdmin, filter }: HistoryDataTableProp
           : "No se han creado otras solicitudes."
       }
       emptyTitle={isStandard ? "No hay Solicitudes" : "No hay solicitudes"}
-      buttonLabel={isStandard ? "Crear Solicitud" : undefined}
       createDialog={(props) => <CreateRequestDialog user={user} {...props} />}
       queryKey={`list-history-${filter}`}
       queryFn={({ pageParam }) =>
@@ -56,13 +59,6 @@ export function HistoryDataTable({ user, isAdmin, filter }: HistoryDataTableProp
           ? "Filtrar por Nombre, Rol, RUT y Solicitud"
           : "Filtrar por Nombre de Solicitud"
       }
-    >
-      <ActionDialogManager
-        createDialog={(props) => (
-          <CreateRequestDialog user={user} {...props} />
-        )}
-        triggerLabel={isStandard ? "Crear Solicitud" : "Crear solicitud"}
-      />
-    </DataTable>
+    ></DataTable>
   );
 }

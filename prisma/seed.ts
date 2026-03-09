@@ -278,22 +278,18 @@ const createCertificates = async () => {
       data: [
         {
           name: "Constancia de participación",
-          pdfLink: "",
           roles: ["STUDENT", "PROFESSOR"],
         },
         {
           name: "Constancia de alumno regular",
-          pdfLink: "",
           roles: ["STUDENT"],
         },
         {
           name: "Constancia de examen de calificación",
-          pdfLink: "",
           roles: ["PROFESSOR", "STUDENT"],
         },
         {
           name: "Constancia de colaboración",
-          pdfLink: "",
           roles: ["PROFESSOR"],
         },
       ],
@@ -422,7 +418,6 @@ async function main() {
       await db.certificate.create({
         data: {
           name: testCertName,
-          pdfLink: "",
           roles: ["PROFESSOR", "STUDENT"],
         },
       });
