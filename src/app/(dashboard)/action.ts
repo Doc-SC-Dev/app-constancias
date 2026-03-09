@@ -12,6 +12,7 @@ import { Gender, Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
+import { getOrUpdateActivePeriod } from "@/lib/period";
 import type { ActivityType } from "@/lib/types/activity";
 import {
   Certificates,
@@ -21,7 +22,6 @@ import {
   type RequestUser,
 } from "@/lib/types/request";
 import { withTryCatch } from "../action";
-import { getOrUpdateActivePeriod } from "@/lib/period";
 
 export const logoutAction = async () => {
   console.log("on logout");
@@ -87,7 +87,8 @@ export const createRequest = async (data: {
     if (!activePeriod) {
       return {
         success: false,
-        message: "En este momento la plataforma se encuentra inactiva, no es posible ingresar solicitudes",
+        message:
+          "En este momento la plataforma se encuentra inactiva, no es posible ingresar solicitudes",
       };
     }
   }
@@ -282,10 +283,10 @@ export const downloadCertificate = async (requestId: string) => {
               studentId: true,
             },
           },
-          participants: response
+          participants: response?.activityId
             ? {
                 where: {
-                  activityId: response.activityId ?? undefined,
+                  activityId: response.activityId,
                 },
                 select: {
                   type: {
@@ -295,7 +296,7 @@ export const downloadCertificate = async (requestId: string) => {
                   },
                 },
               }
-            : false,
+            : { select: { type: { select: { name: true } } } },
         },
       },
       activity: {
