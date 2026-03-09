@@ -24,7 +24,7 @@ import {
   type AcademicDegreeCreateDto,
   AcademicDegreeCreateSchema,
 } from "@/lib/types/acadmic-grades";
-import { auditedCreateAcadmicDegree } from "../actions";
+import { auditedCreateAcadmicDegree } from "../../actions";
 
 export default function CreateGradeDialog() {
   const queryClient = useQueryClient();

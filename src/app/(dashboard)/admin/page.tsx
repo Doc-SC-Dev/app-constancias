@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Role } from "@/generated/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { isAdmin } from "@/lib/authorization/permissions";
@@ -21,7 +23,11 @@ export default async function AdminPage() {
     {
       value: "grades",
       label: "Grados Academicos",
-      component: <ConfigGrades />,
+      component: (
+        <Suspense fallback={<Skeleton className="h-full w-full" />}>
+          <ConfigGrades />
+        </Suspense>
+      ),
     },
     {
       value: "activityTypes",

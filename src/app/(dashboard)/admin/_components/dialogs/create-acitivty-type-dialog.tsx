@@ -14,7 +14,7 @@ export default function CreateActivityTypeDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button>
           <Plus />
           Crear tipo de actividad
         </Button>

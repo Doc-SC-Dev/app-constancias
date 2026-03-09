@@ -1,10 +1,10 @@
-import { AlertTriangle, Edit } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/generated/prisma";
 import { db } from "@/lib/db";
-import { EditDirectorDialog } from "./edit-director-dialog";
+import { EditDirectorDialog } from "./dialogs/edit-director-dialog";
 
 export default async function ConfigDirector() {
   const director = await db.user.findFirst({

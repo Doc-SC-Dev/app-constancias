@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import ChangeDirectorForm from "./form/change-director-form";
+import ChangeDirectorForm from "../form/change-director-form";
 
 export function EditDirectorDialog({
   userId,

@@ -5,7 +5,7 @@ import { DataTable } from "@/components/data-table";
 import { TableCell } from "@/components/table-cell";
 import { formatDate } from "@/lib/utils";
 import { getPaginatedAcademicDegree } from "../actions";
-import CreateGradeDialog from "./create-grade-dialog";
+import CreateGradeDialog from "./dialogs/create-grade-dialog";
 
 export type AcademicDegreeDto = {
   id: string;
