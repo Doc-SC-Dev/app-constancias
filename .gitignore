@@ -42,3 +42,8 @@ next-env.d.ts
 
 /src/generated/prisma
 public/assets/templates/template.odg
+
+# cursor
+
+.cursor/**/*
+.agent/**/*
