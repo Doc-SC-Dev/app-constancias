@@ -64,7 +64,7 @@ export default function CreateCertificateForm({
   };
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} id="from-create-certificate">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <ScrollArea className="w-full pr-4 h-[550px] mx-0">
           <FieldGroup className="gap-4 h-full">
             <FormInput
@@ -88,7 +88,7 @@ export default function CreateCertificateForm({
           >
             Cancelar
           </Button>
-          <Button type="submit" form="form-create-certificate">
+          <Button type="submit">
             {form.formState.isSubmitting ? (
               <>
                 <Spinner />
