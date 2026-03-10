@@ -1,9 +1,9 @@
 # Dockerfile para Next.js 15 con pnpm y Prisma
 # Etapa 1: Dependencias
-FROM node:25-slim AS deps
+FROM node:24.14.0-slim AS deps
 
 RUN apt-get update -y && apt-get install -y openssl
-RUN npm install -g pnpm@latest-10
+RUN npm install -g pnpm@10.31.0
 WORKDIR /app
 
 # Copiar archivos de dependencias
@@ -14,19 +14,17 @@ COPY prisma ./prisma/
 RUN pnpm install --frozen-lockfile
 
 # Etapa 2: Builder
-FROM node:25-slim AS builder
+FROM node:24.14.0-slim AS builder
 
-RUN npm install -g pnpm@latest-10
+RUN apt-get update -y && apt-get install -y openssl
+RUN npm install -g pnpm@10.31.0
 WORKDIR /app
 
 # Copiar dependencias instaladas
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ENV NEXT_TELEMETRY_DISABLED=1
-
 # Variables de entorno para build
-ENV NODE_ENV=production
 ARG DATABASE_URL
 ARG BETTER_AUTH_SECRET
 ARG BETTER_AUTH_TRUST_HOST
@@ -34,35 +32,29 @@ ARG BETTER_AUTH_URL
 ARG FROM_EMAIL
 ARG RESEND_API_KEY
 
-ENV DATABASE_URL=$DATABASE_URL
-ENV BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET
-ENV BETTER_AUTH_TRUST_HOST=$BETTER_AUTH_TRUST_HOST
-ENV BETTER_AUTH_URL=$BETTER_AUTH_URL
-ENV FROM_EMAIL=$FROM_EMAIL
-ENV RESEND_API_KEY=$RESEND_API_KEY
-# Generar cliente de Prisma
-RUN pnpm prisma generate
-
-# Install Chrome
-RUN 
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
 # Construir aplicación
-RUN pnpm build
+# Generar cliente de Prisma
+RUN export DATABASE_URL=${DATABASE_URL} && export RESEND_API_KEY=${RESEND_API_KEY} && pnpm prisma generate && pnpm build
 
 # Etapa 3: Runner
-FROM node:25-slim AS runner
+FROM node:24.14.0-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Install Chrome
+# Google Chrome solo está disponible para amd64.
+# Si necesitas soporte ARM64, considera migrar a Chromium.
 RUN apt-get update \
   && apt-get install -y wget gnupg \
   && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
   && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
   && apt-get update \
-  && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+  && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 openssl \
   --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 

@@ -17,6 +17,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }} # Make sure to add the secrets in your repository in -> Settings -> Secrets (Actions) -> New repository secret
           password: ${{ secrets.DOCKERHUB_TOKEN }} # Make sure to add the secrets in your repository in -> Settings -> Secrets (Actions) -> New repository secret
 
+      - name: Set up slug
+        id: slug
+        run: echo "sha7=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
@@ -24,13 +28,9 @@ jobs:
           file: ./Dockerfile
           push: true
           build-args: |
-            DATABASE_URL=${{vars.DATABASE_URL}}
-            BETTER_AUTH_SECRET=${{secrets.BETTER_AUTH_SECRET}}
-            BETTER_AUTH_URL=${{vars.BETTER_AUTH_URL}}
-            BETTER_AUTH_TRUST_HOST=${{vars.BETTER_AUTH_TRUST_HOST}}
-            RESEND_API_KEY=${{secrets.RESEND_API_KEY}}
-            FROM_EMAIL=${{vars.FROM_EMAIL}}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
           # Make sure to replace with your own namespace and repository
           tags: |
             devwild/app-constancias:latest
+            devwild/app-constancias:${{ steps.slug.outputs.sha7 }}
           platforms: linux/amd64
