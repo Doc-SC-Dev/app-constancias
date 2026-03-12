@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
+import { generateCertificateAction } from "@/features/requests/actions/generate-certificate.action";
 import { Gender, Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { isAdmin, Roles } from "@/lib/authorization/permissions";
@@ -31,30 +32,47 @@ export const logoutAction = async () => {
   redirect("/login");
 };
 
-export const getRequestsTypes = async () => {
-  const { user } = await isAuthenticated();
-  const [certificates, activities, activePeriod] = await Promise.all([
+export const getRequestsTypes = async ({ userId }: { userId: string }) => {
+  await isAuthenticated();
+  const [certificates, activities, activePeriod, user] = await Promise.all([
     db.certificate.findMany({
       select: {
         name: true,
         id: true,
         roles: true,
+        template: {
+          select: {
+            role: true,
+            activityTypeId: true,
+            participantTypeId: true,
+          },
+        },
       },
     }),
     db.activity.findMany({
       select: {
         name: true,
         id: true,
+        activityTypeId: true,
         participants: {
-          where: isAdmin(user.role as Role) ? {} : { userId: user.id },
+          where: { userId },
           select: {
             userId: true,
+            id: true,
+            participantTypeId: true,
           },
         },
       },
     }),
     getOrUpdateActivePeriod(),
+    db.user.findUnique({ where: { id: userId }, select: { role: true } }),
   ]);
+  // filtrado de certificados por rol de usuario
+  const filterCertificates = certificates.filter(
+    (cert) =>
+      cert.template.find((temp) => temp.role === user?.role || !temp.role) !==
+      undefined,
+  );
   const isPeriodActive = activePeriod !== null;
   return { activities, certificates, isPeriodActive, activePeriod };
 };
@@ -229,7 +247,9 @@ export const createRequest = async (data: {
     };
 
   if (isStandard) {
-    const pdf = await createPdf(request);
+    const pdf = await generateCertificateAction({
+      requestId: request.id,
+    });
     revalidatePath("/dashboard/history");
     return {
       success: true,
@@ -355,11 +375,11 @@ export const downloadCertificate = async (requestId: string) => {
     };
   }
 
-  const pdf = await createPdf(request);
+  const pdf = await generateCertificateAction({ requestId: request.id });
 
   return {
     success: true,
-    data: pdf,
+    data: pdf.value?.pdfBase64,
   };
 };
 
