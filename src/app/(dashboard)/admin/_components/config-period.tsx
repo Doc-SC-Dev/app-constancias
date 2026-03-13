@@ -10,7 +10,7 @@ import { ClosePeriodDialog } from "./close-period-dialog";
 
 export default async function ConfigPeriod() {
   const periodsDesc = await db.academicPeriod.findMany({
-    orderBy: { updatedAt: "desc" },
+    orderBy: { startDate: "desc" },
     take: 2,
   });
 

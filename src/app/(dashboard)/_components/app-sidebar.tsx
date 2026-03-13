@@ -6,6 +6,7 @@ import {
   Settings,
   User as UserIcon,
   Users,
+  FileText,
 } from "lucide-react";
 import {
   Sidebar,
@@ -61,6 +62,12 @@ export function AppSideBar({
       title: "Actividades",
       url: "/dashboard/activity",
       icon: Activity,
+      permission: hasActivities,
+    },
+    {
+      title: "Exámenes",
+      url: "/dashboard/exams",
+      icon: FileText,
       permission: hasActivities,
     },
   ];

@@ -22,6 +22,7 @@ export default async function HomePage() {
     Estudiantes: adminPrevilige,
     Solicitudes: true,
     Actividades: adminPrevilige || user.role === Roles.PROFESSOR,
+    Exámenes: adminPrevilige || user.role === Roles.PROFESSOR,
   };
   const queryClient = new QueryClient();
 

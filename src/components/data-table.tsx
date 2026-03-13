@@ -41,7 +41,7 @@ import { Spinner } from "./ui/spinner";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
-  children: ReactNode;
+  children?: ReactNode;
   placeholder: string;
   queryKey: string;
   queryFn: ({
