@@ -128,6 +128,24 @@ export async function updateExamGrade({
   }
 
   try {
+    const activity = await db.activity.findUnique({
+      where: { id: activityId },
+      select: { startAt: true },
+    });
+
+    if (activity) {
+      const editableFrom = new Date(activity.startAt);
+      editableFrom.setDate(editableFrom.getDate() + 1);
+      editableFrom.setHours(0, 0, 0, 0);
+
+      if (new Date() < editableFrom) {
+        return {
+          error:
+            "Las notas solo se pueden ingresar a partir del día siguiente al examen.",
+        };
+      }
+    }
+
     const existing = await db.exam.findFirst({
       where: {
         activityId,

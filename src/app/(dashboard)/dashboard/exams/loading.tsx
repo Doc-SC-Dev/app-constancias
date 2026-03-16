@@ -29,7 +29,7 @@ export default function ExamsLoading() {
           <Input
             id="fuzzy-input"
             className="max-w-sm"
-            placeholder="Filtrar por actividad, usuario, notas"
+            placeholder="Filtrar por actividad, tipo de activiad y profesor a cargo"
             disabled
           />
         </div>

@@ -4,14 +4,15 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import { DataTable } from "@/components/data-table";
 import { auth, isAuthenticated } from "@/lib/auth";
 import type { PaginationResponse } from "@/lib/types/pagination";
-import { columns } from "./_components/columns";
+import { ExamsTable } from "./_components/exams-table";
 import { listExams, type Exams } from "./actions";
 
 export default async function ExamsPage() {
   const session = await isAuthenticated();
+
+  const isStudent = session.user.role === "STUDENT";
 
   const permission = await auth.api.userHasPermission({
     body: {
@@ -19,7 +20,7 @@ export default async function ExamsPage() {
       permissions: { activity: ["list"] },
     },
   });
-  if (!permission.success) {
+  if (!permission.success && !isStudent) {
     redirect("/dashboard");
   }
 
@@ -34,24 +35,14 @@ export default async function ExamsPage() {
       groups: PaginationResponse<Exams>[],
     ) => groups.length,
   });
-  const isStudent = session.user.role === "STUDENT";
-  const filteredColumns = isStudent
-    ? columns.filter((col) => col.id !== "actions" && (col as any).accessorKey !== "actions")
-    : columns;
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container h-full mx-auto flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Exámenes</h2>
-        <DataTable<Exams>
-          emptyTitle="No hay exámenes"
-          emptyDescription="No hay exámenes registrados."
-          columns={filteredColumns}
-          queryKey="list-exams"
-          queryFn={listExams}
-          placeholder="Filtrar por actividad, usuario, notas"
-        />
+        <ExamsTable isStudent={isStudent} />
       </div>
     </HydrationBoundary>
   );
 }
+

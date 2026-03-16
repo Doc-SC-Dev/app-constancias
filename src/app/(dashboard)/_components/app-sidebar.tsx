@@ -68,7 +68,7 @@ export function AppSideBar({
       title: "Exámenes",
       url: "/dashboard/exams",
       icon: FileText,
-      permission: hasActivities,
+      permission: hasActivities || user.role === "STUDENT",
     },
   ];
   return (

@@ -14,14 +14,41 @@ import type { Exams } from "../actions";
 import { EditExamDialog } from "./edit-exam-dialog";
 import { useState } from "react";
 
+function isExamEditable(startAt: string): boolean {
+  const examDate = new Date(startAt);
+  const editableFrom = new Date(examDate);
+  editableFrom.setDate(editableFrom.getDate() + 1);
+  editableFrom.setHours(0, 0, 0, 0);
+  return new Date() >= editableFrom;
+}
+
 const ActionsCell = ({ exam }: { exam: Exams }) => {
   const [open, setOpen] = useState(false);
+  const canEdit = isExamEditable(exam.startAt);
 
   return (
     <span className="flex flex-1 items-center justify-center">
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-        Editar Nota
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span tabIndex={canEdit ? undefined : 0}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => canEdit && setOpen(true)}
+                disabled={!canEdit}
+              >
+                Editar Nota
+              </Button>
+            </span>
+          </TooltipTrigger>
+          {!canEdit && (
+            <TooltipContent>
+              <p>Debe esperar al menos un día después del examen para editar la nota.</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
       <EditExamDialog
         open={open}
         onOpenChange={setOpen}
