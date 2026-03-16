@@ -63,12 +63,12 @@ export async function createUser(userData: UserCreate) {
           data: {
             gender,
             rut,
-            academicGrade: academicGrade ?? "",
+            acadmicDegreeId: academicGrade,
           },
         },
       });
       if (!session) throw new Error("El usuario ya existe");
-      // try to create student (if user role === student)
+
       if (session.user.role === Roles.STUDENT && studentId) {
         const student = await tx.student.create({
           data: {

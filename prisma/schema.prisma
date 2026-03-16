@@ -149,13 +149,13 @@ model OtherRequest {
 }
 
 model ActivityType {
-  id                   String                 @id @default(uuid())
-  name                 String                 @unique
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @default(now()) @updatedAt
-  activities           Activity[]
-  certificate_template certificate_template[]
-  participantTypes     ParticipantType[]
+  id               String                @id @default(uuid())
+  name             String                @unique
+  participantTypes ParticipantType[]
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @default(now()) @updatedAt
+  activities       Activity[]
+  template         CertificateTemplate[]
 
   @@map("activity_type")
 }
@@ -179,16 +179,16 @@ model Activity {
 }
 
 model ParticipantType {
-  id                   String                 @id @default(uuid())
-  name                 String
-  activityTypeId       String?
-  required             Boolean                @default(false)
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @default(now()) @updatedAt
-  roles                Role[]                 @default([STUDENT, PROFESSOR])
-  certificate_template certificate_template[]
-  participants         Participant[]
-  activityType         ActivityType?          @relation(fields: [activityTypeId], references: [id])
+  id             String                @id @default(uuid())
+  name           String
+  roles          Role[]                @default([STUDENT, PROFESSOR])
+  activityType   ActivityType?         @relation(fields: [activityTypeId], references: [id])
+  activityTypeId String?
+  participants   Participant[]
+  required       Boolean               @default(false)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @default(now()) @updatedAt
+  template       CertificateTemplate[]
 
   @@map("participant_type")
 }
@@ -211,14 +211,13 @@ model Participant {
 }
 
 model Certificate {
-  id                   String                 @id @default(uuid())
-  name                 String                 @unique
-  pdfLink              String                 @default("")
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @default(now()) @updatedAt
-  roles                Role[]                 @default([PROFESSOR, STUDENT])
-  certificate_template certificate_template[]
-  requests             Request[]
+  id        String                @id @default(uuid())
+  name      String                @unique
+  roles     Role[]                @default([PROFESSOR, STUDENT])
+  requests  Request[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @default(now()) @updatedAt
+  template  CertificateTemplate[]
 
   @@map("certificate")
 }
@@ -270,18 +269,21 @@ model AcademicPeriod {
   @@map("academic_period")
 }
 
-model certificate_template {
-  id                String           @id
+model CertificateTemplate {
+  id                String   @id @default(uuid())
   certificateId     String
   role              Role?
   activityTypeId    String?
   participantTypeId String?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
   template          String
-  activity_type     ActivityType?    @relation(fields: [activityTypeId], references: [id], onDelete: Cascade)
-  certificate       Certificate      @relation(fields: [certificateId], references: [id], onDelete: Cascade)
-  participant_type  ParticipantType? @relation(fields: [participantTypeId], references: [id], onDelete: Cascade)
+
+  certificate     Certificate      @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  participantType ParticipantType? @relation(fields: [participantTypeId], references: [id], onDelete: Cascade)
+  activityType    ActivityType?    @relation(fields: [activityTypeId], references: [id], onDelete: Cascade)
+
+  @@map("certificate_template")
 }
 
 enum Gender {

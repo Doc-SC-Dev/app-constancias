@@ -6,6 +6,7 @@ import type { Role } from "@/generated/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { isAdmin } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
+import { dbWithAutdit } from "@/lib/db/prisma";
 import type {
   ActivityCreateDTO,
   ActivityDTO,
@@ -17,7 +18,7 @@ import type { ActivityParticipantDTO } from "@/lib/types/paricipant-activity";
 
 export async function updateActivity(data: ActivityEdit, id: string) {
   try {
-    await db.$transaction([
+    await dbWithAutdit().$transaction([
       db.participant.deleteMany({
         where: { activityId: id },
       }),
@@ -158,7 +159,7 @@ export const createActivity = async ({
 }) => {
   const { participants, type, date, ...rest } = activity;
   const { error, success } = await withTryCatch(
-    db.activity.create({
+    dbWithAutdit().activity.create({
       data: {
         ...rest,
         startAt: date.from,

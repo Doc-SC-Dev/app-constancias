@@ -12,16 +12,16 @@ import { Gender, Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
+import { getOrUpdateActivePeriod } from "@/lib/period";
+import type { ActivityType } from "@/lib/types/activity";
 import {
   Certificates,
   type FullRequest,
   type RequestActivity,
   type RequestCertificate,
-  type RequestUserWithoutParticipant,
-  type RequestUserWithParticipants,
+  type RequestUser,
 } from "@/lib/types/request";
 import { withTryCatch } from "../action";
-import { getOrUpdateActivePeriod } from "@/lib/period";
 
 export const logoutAction = async () => {
   console.log("on logout");
@@ -87,7 +87,8 @@ export const createRequest = async (data: {
     if (!activePeriod) {
       return {
         success: false,
-        message: "En este momento la plataforma se encuentra inactiva, no es posible ingresar solicitudes",
+        message:
+          "En este momento la plataforma se encuentra inactiva, no es posible ingresar solicitudes",
       };
     }
   }
@@ -108,10 +109,10 @@ export const createRequest = async (data: {
         },
         activity: data.activityId
           ? {
-            connect: {
-              id: data.activityId,
-            },
-          }
+              connect: {
+                id: data.activityId,
+              },
+            }
           : {},
         certificate: {
           connect: {
@@ -120,12 +121,12 @@ export const createRequest = async (data: {
         },
         otherRequest: !isStandard
           ? {
-            create: {
-              name: data.certificateName,
-              description: data.description ?? "",
-              userId: data.userId,
-            },
-          }
+              create: {
+                name: data.certificateName,
+                description: data.description ?? "",
+                userId: data.userId,
+              },
+            }
           : undefined,
         state: !isStandard ? "PENDING" : "READY",
       },
@@ -156,6 +157,7 @@ export const createRequest = async (data: {
             participants: {
               where: {
                 activityId: data.activityId,
+                userId: data.userId,
               },
               select: {
                 type: {
@@ -281,20 +283,20 @@ export const downloadCertificate = async (requestId: string) => {
               studentId: true,
             },
           },
-          participants: response
+          participants: response?.activityId
             ? {
-              where: {
-                activityId: response.activityId ?? undefined,
-              },
-              select: {
-                type: {
-                  select: {
-                    name: true,
+                where: {
+                  activityId: response.activityId,
+                },
+                select: {
+                  type: {
+                    select: {
+                      name: true,
+                    },
                   },
                 },
-              },
-            }
-            : false,
+              }
+            : { select: { type: { select: { name: true } } } },
         },
       },
       activity: {
@@ -361,7 +363,7 @@ export const downloadCertificate = async (requestId: string) => {
   };
 };
 
-const getAlumnoRegularText = (user: RequestUserWithoutParticipant) => {
+const getAlumnoRegularText = (user: RequestUser) => {
   const { student } = user;
   if (!student) throw new Error("Alumno no encontrado");
   return `
@@ -374,20 +376,22 @@ es alumno regular de nuestro programa, desde el año ${student.admisionDate.getF
 };
 
 const getActivityTesisProfesorText = (
-  user: RequestUserWithParticipants,
+  user: RequestUser,
   activity: RequestActivity,
 ) => {
   const isMale = user.gender === Gender.MALE;
   const isDoctor = user.academicDegree?.title.at(0);
   const tesista = activity.participants.find((p) => p.type.name === "Tesista");
+  const participantLabel = user.participants?.at(0)?.type.name;
+  if (!participantLabel) throw new Error("Participante no encontrado");
   return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
   <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
-Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? `el ${isDoctor}` : `la ${isDoctor}`} ${user.name}</strong>, participa como ${user.participants[0].type.name} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.gender === Gender.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
+Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? `el ${isDoctor}` : `la ${isDoctor}`} ${user.name}</strong>, participa como ${participantLabel} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.gender === Gender.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
 </div>`;
 };
 
 const getActivityTesisStudentText = (
-  user: RequestUserWithParticipants,
+  user: RequestUser,
   activity: RequestActivity,
 ) => {
   const { student } = user;
@@ -407,7 +411,7 @@ ${guia?.user.name}, desde ${activity.startAt.getUTCMonth()} del ${activity.start
 };
 
 const getStudentQualificationExamBody = (
-  user: RequestUserWithParticipants,
+  user: RequestUser,
   activity: RequestActivity,
 ) => {
   const { rut: userRut, student } = user;
@@ -426,7 +430,7 @@ Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${userN
 };
 // TODO: Implementar mensajes de forma dinamica desde la DB
 const getCertificateText = (
-  user: RequestUserWithParticipants,
+  user: RequestUser,
   certificate: RequestCertificate,
   activity: RequestActivity | null,
 ) => {
@@ -486,11 +490,7 @@ const createPdf = async (request: FullRequest) => {
   const text =
     certificate.name === Certificates.ALUMNO_REGULAR
       ? getAlumnoRegularText(user)
-      : getCertificateText(
-        user as RequestUserWithParticipants,
-        certificate,
-        activity,
-      );
+      : getCertificateText(user, certificate, activity);
   await page.addStyleTag({
     content: `
     @font-face {
@@ -560,4 +560,24 @@ export const getNotAdminUsers = async () => {
   });
 
   return user;
+};
+
+export const getActivityTypes = async (): Promise<ActivityType[]> => {
+  const activityTypes = await db.activityType.findMany({
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+      _count: {
+        select: {
+          participantTypes: true,
+        },
+      },
+    },
+  });
+
+  return activityTypes.map<ActivityType>((activityType) => ({
+    ...activityType,
+    nParticipantsTypes: activityType._count.participantTypes,
+  }));
 };

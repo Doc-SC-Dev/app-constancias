@@ -112,9 +112,9 @@ export const activityCreateSchema = type({
   type: type("string").narrow((value, ctx) =>
     value.length === 0
       ? ctx.reject({
-        message: "Debes seleccionar un tipo de actividad",
-        code: "predicate",
-      })
+          message: "Debes seleccionar un tipo de actividad",
+          code: "predicate",
+        })
       : true,
   ),
   participants: participantSchema,
@@ -154,3 +154,10 @@ export const activityUpdateSchema = type({
 });
 
 export type ActivityUpdateType = typeof activityUpdateSchema.infer;
+
+export type ActivityType = {
+  id: string;
+  name: string;
+  nParticipantsTypes: number;
+  createdAt: Date;
+};

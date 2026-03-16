@@ -2,6 +2,8 @@
   "name": "constancias-doctorado",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.31.0",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
@@ -18,6 +20,7 @@
     "auth:generate": "pnpm dlx @better-auth/cli generate --config ./src/lib/auth/index.ts"
   },
   "dependencies": {
+    "@base-ui/react": "^1.2.0",
     "@hookform/resolvers": "^5.2.2",
     "@pdf-lib/fontkit": "^1.1.1",
     "@prisma/adapter-pg": "^7.0.1",
@@ -57,10 +60,12 @@
     "pdf-lib": "^1.17.1",
     "pg": "^8.16.3",
     "puppeteer": "^24.31.0",
+    "radix-ui": "^1.4.3",
     "react": "19.1.0",
     "react-day-picker": "^9.12.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.66.0",
+    "react-mentions": "^4.4.10",
     "resend": "^6.5.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
@@ -75,6 +80,7 @@
     "@types/pg": "^8.15.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-mentions": "^4.4.1",
     "prettier": "^3.7.3",
     "prisma": "7.1.0",
     "tailwindcss": "^4",

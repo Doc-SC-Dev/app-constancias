@@ -34,11 +34,17 @@ export function HistoryClient({
           <TabsTrigger value="other">Solicitudes Especiales</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="standard" className="flex-1 flex flex-col h-[calc(100vh-210px)] w-full">
+        <TabsContent
+          value="standard"
+          className="flex-1 flex flex-col h-[calc(100vh-210px)] w-full"
+        >
           {standardTable}
         </TabsContent>
 
-        <TabsContent value="other" className="flex-1 flex flex-col h-[calc(100vh-210px)] w-full">
+        <TabsContent
+          value="other"
+          className="flex-1 flex flex-col h-[calc(100vh-210px)] w-full"
+        >
           {otherTable}
         </TabsContent>
       </Tabs>

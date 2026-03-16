@@ -5,7 +5,7 @@ import { DataTable } from "@/components/data-table";
 import { TableCell } from "@/components/table-cell";
 import { formatDate } from "@/lib/utils";
 import { getPaginatedAcademicDegree } from "../actions";
-import CreateGradeDialog from "./create-grade-dialog";
+import CreateGradeDialog from "./dialogs/create-grade-dialog";
 
 export type AcademicDegreeDto = {
   id: string;
@@ -25,21 +25,28 @@ const colums: ColumnDef<AcademicDegreeDto>[] = [
   },
   {
     accessorKey: "abbrevFem",
-    header: "Abreviación Femenina",
+    header: () => (
+      <TableCell className="justify-center">Abreviación Femenina</TableCell>
+    ),
     cell: ({ getValue }) => (
       <TableCell className="justify-center">{getValue<string>()}</TableCell>
     ),
   },
   {
     accessorKey: "abbrevMas",
-    header: "Abreviación Masculina",
+    header: () => (
+      <TableCell className="justify-center">Abreviación Masculina</TableCell>
+    ),
     cell: ({ getValue }) => (
       <TableCell className="justify-center">{getValue<string>()}</TableCell>
     ),
   },
   {
     accessorKey: "createdAt",
-    header: "Fecha de creación",
+    enableGlobalFilter: false,
+    header: () => (
+      <TableCell className="justify-center">Fecha de creación</TableCell>
+    ),
     cell: ({ getValue }) => (
       <TableCell className="justify-center">
         {formatDate(getValue<Date>())}
@@ -58,9 +65,6 @@ export default function ConfigGrades() {
       emptyTitle="No hay grados académicos definidos"
       emptyDescription="Para ver grados académicos comience definiendo un grado académico."
       createDialog={CreateGradeDialog}
-      buttonLabel="Agregar grado académico"
-    >
-      {""}
-    </DataTable>
+    />
   );
 }

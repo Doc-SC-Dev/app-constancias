@@ -1,7 +1,8 @@
 "use client";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, Plus } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormInput } from "@/components/form/FormInput";
@@ -9,12 +10,14 @@ import { FormSelect } from "@/components/form/FormSelect";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
   DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
 import { SelectItem } from "@/components/ui/select";
@@ -33,13 +36,7 @@ import {
   getRequestsTypes,
 } from "../../action";
 
-export default function CreateRequestDialog({
-  user,
-  closeDialog,
-}: {
-  user: User;
-  closeDialog?: () => void;
-}) {
+export default function CreateRequestDialog({ user }: { user: User }) {
   const queryClient = useQueryClient();
   const { data, error } = useQuery({
     queryKey: ["certificate-types"],
@@ -51,6 +48,7 @@ export default function CreateRequestDialog({
     queryFn: getNotAdminUsers,
   });
 
+  const [open, setOpen] = useState<boolean>(false);
   const form = useForm<CreateRequest>({
     resolver: arktypeResolver(createRequestSchema),
     mode: "onChange",
@@ -81,130 +79,144 @@ export default function CreateRequestDialog({
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["list-history-standard"] });
       queryClient.invalidateQueries({ queryKey: ["list-history-other"] });
-      closeDialog?.();
+      setOpen(false);
     } else {
       toast.error(message);
     }
   };
   return (
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Crear solicitud de Constancia</DialogTitle>
-        <DialogDescription>
-          Complete el formulario para crear una nueva solicitud de constancia.
-        </DialogDescription>
-      </DialogHeader>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="default">
+          <Plus />
+          Crear Solicitud
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Crear solicitud de Constancia</DialogTitle>
+          <DialogDescription>
+            Complete el formulario para crear una nueva solicitud de constancia.
+          </DialogDescription>
+        </DialogHeader>
 
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        {data?.isPeriodActive === false && !isAdmin(user.role as Role) && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircleIcon />
-            <AlertTitle>Plataforma inactiva</AlertTitle>
-            <AlertDescription>
-              En este momento la plataforma se encuentra inactiva, no es posible ingresar solicitudes.
-            </AlertDescription>
-          </Alert>
-        )}
-        {data && (
-          <FieldGroup>
-            {isAdmin(user.role as Role) && (
-              <FormSelect
-                control={form.control}
-                name="userId"
-                label="Usuario"
-                description="Seleccione el usuario al que desea crear una solicitud"
-              >
-                {isLoading && !users && <Spinner />}
-                {users
-                  ? users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name}
-                    </SelectItem>
-                  ))
-                  : ""}
-              </FormSelect>
-            )}
-            {users && (userId || !isAdmin(user.role as Role)) && (
-              <FormSelect
-                control={form.control}
-                name="certificateName"
-                label="Tipo de constancia"
-                description="Selecciona el tipo de constancia que deseas solicitar."
-              >
-                {data.certificates.map((certificate) => {
-                  const user = users.find((user) => user.id === userId);
-                  if (certificate.roles.includes(user?.role as Role))
-                    return (
-                      <SelectItem key={certificate.id} value={certificate.name}>
-                        {certificate.name}
-                      </SelectItem>
-                    );
-                  else return "";
-                })}
-              </FormSelect>
-            )}
-            {users &&
-              userId &&
-              ![Certificates.ALUMNO_REGULAR, Certificates.OTHER].includes(
-                certificate as Certificates,
-              ) && (
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          {data?.isPeriodActive === false && !isAdmin(user.role as Role) && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircleIcon />
+              <AlertTitle>Plataforma inactiva</AlertTitle>
+              <AlertDescription>
+                En este momento la plataforma se encuentra inactiva, no es
+                posible ingresar solicitudes.
+              </AlertDescription>
+            </Alert>
+          )}
+          {data && (
+            <FieldGroup>
+              {isAdmin(user.role as Role) && (
                 <FormSelect
                   control={form.control}
-                  name="activityId"
-                  label="Actividad"
-                  description="Selecciona la actividad a la que deseas solicitar la constancia."
+                  name="userId"
+                  label="Usuario"
+                  description="Seleccione el usuario al que desea crear una solicitud"
                 >
-                  {data.activities.map((activity) => {
-                    if (
-                      activity.participants.find((p) => p.userId === userId) !==
-                      undefined
-                    ) {
+                  {isLoading && !users && <Spinner />}
+                  {users
+                    ? users.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.name}
+                        </SelectItem>
+                      ))
+                    : ""}
+                </FormSelect>
+              )}
+              {users && (userId || !isAdmin(user.role as Role)) && (
+                <FormSelect
+                  control={form.control}
+                  name="certificateName"
+                  label="Tipo de constancia"
+                  description="Selecciona el tipo de constancia que deseas solicitar."
+                >
+                  {data.certificates.map((certificate) => {
+                    const user = users.find((user) => user.id === userId);
+                    if (certificate.roles.includes(user?.role as Role))
                       return (
-                        <SelectItem key={activity.id} value={activity.id}>
-                          {activity.name}
+                        <SelectItem
+                          key={certificate.id}
+                          value={certificate.name}
+                        >
+                          {certificate.name}
                         </SelectItem>
                       );
-                    } else return "";
+                    else return "";
                   })}
                 </FormSelect>
               )}
-            {certificate === Certificates.OTHER && (
-              <FormInput
-                control={form.control}
-                name="description"
-                label="Descripción"
-                description="Describa el motivo de la solicitud."
-                placeholder="Ingrese una descripción..."
-              />
-            )}
-          </FieldGroup>
-        )}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircleIcon />
-            <AlertTitle>Error al cargar certificados</AlertTitle>
-            <AlertDescription>
-              Hubo un error al cargar los certificados que puedes solicitar. Por
-              favor, intenta nuevamente.
-            </AlertDescription>
-          </Alert>
-        )}
-        <DialogFooter className="gap-4 pt-4">
-          <DialogClose asChild onClick={() => form.reset()}>
-            <Button variant="ghost">Cancelar</Button>
-          </DialogClose>
-          <Button
-            type="submit"
-            disabled={
-              (!isAdmin(user.role as Role) && data?.isPeriodActive === false) ||
-              form.formState.isSubmitting
-            }
-          >
-            {form.formState.isSubmitting && <Spinner />}
-            Crear
-          </Button>
-        </DialogFooter>
-      </form>
-    </DialogContent>
+              {users &&
+                userId &&
+                ![Certificates.ALUMNO_REGULAR, Certificates.OTHER].includes(
+                  certificate as Certificates,
+                ) && (
+                  <FormSelect
+                    control={form.control}
+                    name="activityId"
+                    label="Actividad"
+                    description="Selecciona la actividad a la que deseas solicitar la constancia."
+                  >
+                    {data.activities.map((activity) => {
+                      if (
+                        activity.participants.find(
+                          (p) => p.userId === userId,
+                        ) !== undefined
+                      ) {
+                        return (
+                          <SelectItem key={activity.id} value={activity.id}>
+                            {activity.name}
+                          </SelectItem>
+                        );
+                      } else return "";
+                    })}
+                  </FormSelect>
+                )}
+              {certificate === Certificates.OTHER && (
+                <FormInput
+                  control={form.control}
+                  name="description"
+                  label="Descripción"
+                  description="Describa el motivo de la solicitud."
+                  placeholder="Ingrese una descripción..."
+                />
+              )}
+            </FieldGroup>
+          )}
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircleIcon />
+              <AlertTitle>Error al cargar certificados</AlertTitle>
+              <AlertDescription>
+                Hubo un error al cargar los certificados que puedes solicitar.
+                Por favor, intenta nuevamente.
+              </AlertDescription>
+            </Alert>
+          )}
+          <DialogFooter className="gap-4 pt-4">
+            <DialogClose asChild onClick={() => form.reset()}>
+              <Button variant="ghost">Cancelar</Button>
+            </DialogClose>
+            <Button
+              type="submit"
+              disabled={
+                (!isAdmin(user.role as Role) &&
+                  data?.isPeriodActive === false) ||
+                form.formState.isSubmitting
+              }
+            >
+              {form.formState.isSubmitting && <Spinner />}
+              Crear
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
