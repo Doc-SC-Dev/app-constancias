@@ -52,7 +52,7 @@ export default function CreateCertificateForm({
     const { isSuccess, value, error } = await createCertificateAction(data);
     if (isSuccess) {
       toast.success("Certificado creado exitosamente", {
-        description: `Se creo el certificado con nombre ${value.name}`,
+        description: `Se creó el certificado con nombre ${value.name}`,
       });
       form.reset();
       router.push("/admin?tab=certificates");
@@ -71,7 +71,7 @@ export default function CreateCertificateForm({
               control={form.control}
               name="name"
               placeholder="Ingresar nombre del certificado"
-              description="Nombre que se mostrara en la aplicación para el certificado que esta creando"
+              description="Nombre que se mostrará en la aplicación para el certificado que está creando"
               label="Nombre"
             />
             {children}

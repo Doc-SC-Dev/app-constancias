@@ -46,7 +46,7 @@ export default function CreateGradeDialog() {
     });
     if (result.isSuccess) {
       toast.success("Grado académico creado exitosamente", {
-        description: `Se creo el grado académico con nombre ${result.value?.name}`,
+        description: `Se creó el grado académico con nombre ${result.value?.name}`,
       });
       setOpen(false);
       form.reset();
@@ -67,7 +67,7 @@ export default function CreateGradeDialog() {
       <DialogTrigger asChild>
         <Button variant="default">
           <Plus />
-          Agregar grado academico
+          Agregar grado académico
         </Button>
       </DialogTrigger>
       <DialogContent>
