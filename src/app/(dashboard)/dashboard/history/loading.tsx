@@ -1,4 +1,3 @@
-
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +21,8 @@ export default function Loading() {
     "Estado",
     "Acción",
   ];
+
+  const row = Array.from({ length: 10 }, (_, i) => i);
 
   return (
     <div className="container mx-auto flex flex-col gap-4 h-full">
@@ -69,10 +70,10 @@ export default function Loading() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[...new Array(10)].map((_, i) => (
+              {row.map((i) => (
                 <TableRow key={`loading-row-${i}`}>
-                  {headers.map((cell, idx) => (
-                    <TableCell key={`tc-s-${idx}-${i}`}>
+                  {headers.map((cell) => (
+                    <TableCell key={`tc-s-${cell}-${i}`}>
                       <div className="flex justify-center">
                         <Skeleton className="h-4 w-24 bg-muted" />
                       </div>

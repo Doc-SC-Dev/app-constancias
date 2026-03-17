@@ -7,8 +7,9 @@ import type { Role } from "@/generated/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import { menus } from "@/lib/types/menus";
-import { getAcademicDegree, getRequestsTypes } from "../action";
+import { getAcademicDegree } from "../action";
 import { DashboardCard } from "./_components/dashboard-card";
+import { verifyAcademicPeriod } from "./history/actions";
 
 export default async function HomePage() {
   const { user } = await isAuthenticated();
@@ -27,8 +28,8 @@ export default async function HomePage() {
 
   await Promise.all([
     queryClient.prefetchQuery({
-      queryKey: ["certificate-types"],
-      queryFn: getRequestsTypes,
+      queryKey: ["verify-academic-period"],
+      queryFn: verifyAcademicPeriod,
     }),
     queryClient.prefetchQuery({
       queryKey: ["get-all-academic-degree"],

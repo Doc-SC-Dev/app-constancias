@@ -50,9 +50,11 @@ export default async function RootLayout({
         hasUser={hasUser.success}
         user={session.user}
       />
-      <SidebarInset>
+      <SidebarInset className="flex flex-col md:h-screen md:overflow-hidden">
         <AppNavBar user={session.user} />
-        <main className="h-full py-10 px-2 sm:px-6 lg:px-8">{children}</main>
+        <main className="flex-1 md:overflow-hidden py-10 px-2 sm:px-6 lg:px-8 flex flex-col">
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

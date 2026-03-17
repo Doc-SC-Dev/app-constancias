@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   Controller,
-  type FieldError as RHFFieldError,
+  type FieldErrors,
   useFieldArray,
   useForm,
 } from "react-hook-form";
@@ -301,19 +301,11 @@ export default function CreateActivityDialog() {
                 </Button>
               </div>
               <FieldGroup>
-                {form.formState.errors.participants?.root?.message && (
-                  <FieldError
-                    errors={[
-                      {
-                        message:
-                          (form.formState.errors.participants as RHFFieldError)
-                            ?.message ?? "",
-                      },
-                    ]}
-                  />
-                )}
                 <TableError
-                  errors={form.formState.errors.participants as any}
+                  errors={
+                    form.formState.errors
+                      .participants as unknown as FieldErrors[]
+                  }
                 />
                 {participants.length > 0 && (
                   <Table>

@@ -1,80 +1,24 @@
 "use server";
 
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import fontkit from "@pdf-lib/fontkit";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { PDFDocument } from "pdf-lib";
-import puppeteer from "puppeteer";
 import { generateCertificateAction } from "@/features/requests/actions/generate-certificate.action";
-import { Gender, Role } from "@/generated/prisma";
+import { Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
-import { isAdmin, Roles } from "@/lib/authorization/permissions";
+import { isAdmin } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { getOrUpdateActivePeriod } from "@/lib/period";
 import type { ActivityType } from "@/lib/types/activity";
-import {
-  Certificates,
-  type FullRequest,
-  type RequestActivity,
-  type RequestCertificate,
-  type RequestUser,
-} from "@/lib/types/request";
+import { Certificates } from "@/lib/types/request";
+import { Result } from "@/shared/core/Result";
 import { withTryCatch } from "../action";
 
 export const logoutAction = async () => {
-  console.log("on logout");
   await auth.api.signOut({
     headers: await headers(),
   });
   redirect("/login");
-};
-
-export const getRequestsTypes = async ({ userId }: { userId: string }) => {
-  await isAuthenticated();
-  const [certificates, activities, activePeriod, user] = await Promise.all([
-    db.certificate.findMany({
-      select: {
-        name: true,
-        id: true,
-        roles: true,
-        template: {
-          select: {
-            role: true,
-            activityTypeId: true,
-            participantTypeId: true,
-          },
-        },
-      },
-    }),
-    db.activity.findMany({
-      select: {
-        name: true,
-        id: true,
-        activityTypeId: true,
-        participants: {
-          where: { userId },
-          select: {
-            userId: true,
-            id: true,
-            participantTypeId: true,
-          },
-        },
-      },
-    }),
-    getOrUpdateActivePeriod(),
-    db.user.findUnique({ where: { id: userId }, select: { role: true } }),
-  ]);
-  // filtrado de certificados por rol de usuario
-  const filterCertificates = certificates.filter(
-    (cert) =>
-      cert.template.find((temp) => temp.role === user?.role || !temp.role) !==
-      undefined,
-  );
-  const isPeriodActive = activePeriod !== null;
-  return { activities, certificates, isPeriodActive, activePeriod };
 };
 
 export const getAcademicDegree = async () => {
@@ -117,7 +61,7 @@ export const createRequest = async (data: {
     success,
     error,
     data: request,
-  } = await withTryCatch<FullRequest>(
+  } = await withTryCatch<{ id: string }>(
     db.request.create({
       data: {
         user: {
@@ -148,92 +92,7 @@ export const createRequest = async (data: {
           : undefined,
         state: !isStandard ? "PENDING" : "READY",
       },
-      select: {
-        id: true,
-        user: {
-          select: {
-            academicDegree: {
-              select: {
-                title: {
-                  take: 1,
-                  select: {
-                    abbrev: true,
-                  },
-                },
-              },
-            },
-            name: true,
-            rut: true,
-            gender: true,
-            role: true,
-            student: {
-              select: {
-                admisionDate: true,
-                studentId: true,
-              },
-            },
-            participants: {
-              where: {
-                activityId: data.activityId,
-                userId: data.userId,
-              },
-              select: {
-                type: {
-                  select: {
-                    name: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        activity: {
-          select: {
-            name: true,
-            startAt: true,
-            endAt: true,
-            activityType: {
-              select: {
-                name: true,
-              },
-            },
-            participants: {
-              where: {
-                userId: { not: data.userId },
-              },
-              select: {
-                user: {
-                  select: {
-                    name: true,
-                    academicDegree: {
-                      select: {
-                        title: {
-                          take: 1,
-                          select: {
-                            abbrev: true,
-                          },
-                        },
-                      },
-                    },
-                    gender: true,
-                  },
-                },
-                hours: true,
-                type: {
-                  select: {
-                    name: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        certificate: {
-          select: {
-            name: true,
-          },
-        },
-      },
+      select: { id: true },
     }),
   );
 
@@ -249,6 +108,7 @@ export const createRequest = async (data: {
   if (isStandard) {
     const pdf = await generateCertificateAction({
       requestId: request.id,
+      user,
     });
     revalidatePath("/dashboard/history");
     return {
@@ -266,303 +126,11 @@ export const createRequest = async (data: {
 };
 
 export const downloadCertificate = async (requestId: string) => {
-  await isAuthenticated();
+  const { user } = await isAuthenticated();
+  const data = await generateCertificateAction({ requestId, user });
 
-  const response = await db.request.findUnique({
-    where: { id: requestId },
-    select: {
-      userId: true,
-      activityId: true,
-    },
-  });
-  const request = await db.request.findUnique({
-    where: {
-      id: requestId,
-    },
-    select: {
-      id: true,
-      user: {
-        select: {
-          academicDegree: {
-            select: {
-              title: {
-                take: 1,
-                select: {
-                  abbrev: true,
-                },
-              },
-            },
-          },
-          name: true,
-          rut: true,
-          gender: true,
-          role: true,
-          student: {
-            select: {
-              admisionDate: true,
-              studentId: true,
-            },
-          },
-          participants: response?.activityId
-            ? {
-                where: {
-                  activityId: response.activityId,
-                },
-                select: {
-                  type: {
-                    select: {
-                      name: true,
-                    },
-                  },
-                },
-              }
-            : { select: { type: { select: { name: true } } } },
-        },
-      },
-      activity: {
-        select: {
-          name: true,
-          startAt: true,
-          endAt: true,
-          activityType: {
-            select: {
-              name: true,
-            },
-          },
-          participants: {
-            where: {
-              userId: { not: response?.userId },
-            },
-            select: {
-              user: {
-                select: {
-                  name: true,
-                  academicDegree: {
-                    select: {
-                      title: {
-                        take: 1,
-                        select: {
-                          abbrev: true,
-                        },
-                      },
-                    },
-                  },
-                  gender: true,
-                },
-              },
-              hours: true,
-              type: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      certificate: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  if (!request) {
-    return {
-      success: false,
-      message: "Solicitud no encontrada",
-    };
-  }
-
-  const pdf = await generateCertificateAction({ requestId: request.id });
-
-  return {
-    success: true,
-    data: pdf.value?.pdfBase64,
-  };
-};
-
-const getAlumnoRegularText = (user: RequestUser) => {
-  const { student } = user;
-  if (!student) throw new Error("Alumno no encontrado");
-  return `
-  <div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
-  <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de 
-Doctorado en Ciencias Médicas, de la Universidad de La Frontera, deja 
-constancia que ${user.gender === Gender.MALE ? "el Sr." : "la Sra."} ${user.name}, Matrícula Nº ${student.studentId}, 
-es alumno regular de nuestro programa, desde el año ${student.admisionDate.getFullYear()} a la fecha. 
-</div>`;
-};
-
-const getActivityTesisProfesorText = (
-  user: RequestUser,
-  activity: RequestActivity,
-) => {
-  const isMale = user.gender === Gender.MALE;
-  const isDoctor = user.academicDegree?.title.at(0);
-  const tesista = activity.participants.find((p) => p.type.name === "Tesista");
-  const participantLabel = user.participants?.at(0)?.type.name;
-  if (!participantLabel) throw new Error("Participante no encontrado");
-  return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
-  <strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
-Ciencias Médicas, de la Universidad de La Frontera, deja constancia que <strong>${isMale ? `el ${isDoctor}` : `la ${isDoctor}`} ${user.name}</strong>, participa como ${participantLabel} en la ${activity.activityType.name} “${activity.name}” ${tesista?.user.gender === Gender.FEMALE ? "de la" : "del"} estudiante ${tesista?.user.name}.
-</div>`;
-};
-
-const getActivityTesisStudentText = (
-  user: RequestUser,
-  activity: RequestActivity,
-) => {
-  const { student } = user;
-  if (!student) throw new Error("Estudiante no fue encontrado");
-  const isMale = user.gender === Gender.MALE;
-  const guia = activity.participants.find(
-    (p) => p.type.name === "Profesor guia",
-  );
-  const isDoctor = guia?.user.academicDegree?.title.at(0)?.abbrev;
-  return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
-<strong>PROF. DR. CARLOS MANTEROLA DELGADO</strong>, Director del Programa de Doctorado en 
-Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${!isMale ? "la estudiante, Sra." : "el estudiante, Sr."} 
-${user.name}, matricula Nº ${student.studentId}, se encuentra realizando su Trabajo 
-de título (equivalente a tesis), modalidad proyecto de titulación “${activity.name}” bajo dirección de ${guia?.user.gender === Gender.FEMALE ? `la ${isDoctor ? "Dra." : "Sra."}` : `el ${isDoctor ? "Dr." : "Sr."}`} 
-${guia?.user.name}, desde ${activity.startAt.getUTCMonth()} del ${activity.startAt.getFullYear()} a la fecha.
-</div>`;
-};
-
-const getStudentQualificationExamBody = (
-  user: RequestUser,
-  activity: RequestActivity,
-) => {
-  const { rut: userRut, student } = user;
-  if (!student) throw new Error("Estudiante no ha sido encontrado");
-  const { studentId } = student;
-  const adjetivo = user.academicDegree?.title.at(0)?.abbrev;
-  const userName = adjetivo + user.name;
-  const studentMOF = user.gender === Gender.FEMALE ? "alumna" : "alumno";
-  const activityStartDate = activity.startAt
-    .toLocaleDateString("es-CL")
-    .replaceAll("-", "/");
-  return `<div style="width: 450px; font-family: 'Roboto'; font-size: 12pt;">
-<strong>DRA. TAMARA OTZEN HERNÁNDEZ </strong>, Director del Programa de Doctorado en 
-Ciencias Médicas, de la Universidad de La Frontera, deja constancia que ${userName}, matrícula Nº ${studentId}, RUT ${userRut} es ${studentMOF} regular de nuestro programa y con fecha ${activityStartDate}, aprobó su examen de calificación con nota 6,9.
-</div>`;
-};
-// TODO: Implementar mensajes de forma dinamica desde la DB
-const getCertificateText = (
-  user: RequestUser,
-  certificate: RequestCertificate,
-  activity: RequestActivity | null,
-) => {
-  // TODO: Implementar mensajes para el resto de certificados de forma estatica por ahora
-  if (!activity) throw new Error("Actividad no encontrada");
-  switch (certificate.name) {
-    case Certificates.PARTICIPACION:
-      if (user.role === Roles.PROFESSOR)
-        return getActivityTesisProfesorText(user, activity);
-      if (user.role === Roles.STUDENT)
-        return getActivityTesisStudentText(user, activity);
-      return "";
-    case Certificates.EXAMEN_CALIFICACION:
-      if (user.role === Role.STUDENT)
-        return getStudentQualificationExamBody(user, activity);
-      else return "";
-    default:
-      return "";
-  }
-};
-
-const createPdf = async (request: FullRequest) => {
-  const { user, activity, certificate } = request;
-  const templatePath = path.join(
-    process.cwd(),
-    "public",
-    "assets",
-    "templates",
-    "template.pdf",
-  );
-
-  const robotoPath = path.join(
-    process.cwd(),
-    "public",
-    "assets",
-    "fonts",
-    "Roboto.ttf",
-  );
-
-  const templateBytes = readFileSync(templatePath);
-  const robotoBytes = readFileSync(robotoPath);
-
-  const pdfDoc = await PDFDocument.load(templateBytes);
-  pdfDoc.registerFontkit(fontkit);
-
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-    ],
-  });
-  const page = await browser.newPage();
-
-  const text =
-    certificate.name === Certificates.ALUMNO_REGULAR
-      ? getAlumnoRegularText(user)
-      : getCertificateText(user, certificate, activity);
-  await page.addStyleTag({
-    content: `
-    @font-face {
-      font-family: 'Roboto';
-      src: url('${robotoPath}');
-    }
-      div {
-        font-family: 'Roboto' !important;
-        font-size: 12pt !important;
-      }
-      `,
-  });
-  await page.setContent(text);
-
-  const parcheBuffer = await page.pdf({
-    width: 450,
-    height: 400,
-    printBackground: false,
-    omitBackground: true,
-  });
-
-  await browser.close();
-
-  const parcheDoc = await PDFDocument.load(parcheBuffer);
-  const [parchePage] = await pdfDoc.copyPages(parcheDoc, [0]);
-  const embeddedPage = await pdfDoc.embedPage(parchePage);
-  const robotoFont = await pdfDoc.embedFont(robotoBytes);
-
-  const form = pdfDoc.getForm();
-  const date = new Date();
-  const month = date.toLocaleString("es-CL", { month: "long" });
-  const footerField = form.getTextField("footer_field");
-
-  footerField.setFontSize(12);
-  footerField.updateAppearances(robotoFont);
-  footerField.setText(
-    `Temuco, Chile - ${month.at(0)?.toUpperCase() + month.slice(1)} de ${date.getFullYear()}.`,
-  );
-
-  const firstPage = pdfDoc.getPages()[0];
-
-  firstPage.drawPage(embeddedPage, {
-    x: 85.68,
-    y: 85,
-    width: 450,
-    height: 400,
-    xScale: 1,
-    yScale: 1,
-  });
-
-  const pdfFinalBytes = await pdfDoc.save();
-  return Buffer.from(pdfFinalBytes).toString("base64");
+  if (data.isSuccess) return Result.ok(data.value).serialize();
+  return Result.fail(data.error.message).serialize();
 };
 
 export const getNotAdminUsers = async () => {
@@ -578,8 +146,11 @@ export const getNotAdminUsers = async () => {
       role: true,
     },
   });
+  if (user.length === 0) {
+    return Result.fail("No se han encontrado usuarios").serialize();
+  }
 
-  return user;
+  return Result.ok(user).serialize();
 };
 
 export const getActivityTypes = async (): Promise<ActivityType[]> => {
@@ -601,3 +172,103 @@ export const getActivityTypes = async (): Promise<ActivityType[]> => {
     nParticipantsTypes: activityType._count.participantTypes,
   }));
 };
+
+export async function getAvailableCertificates({ userId }: { userId: string }) {
+  const user = await db.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      role: true,
+    },
+  });
+
+  if (!user) {
+    return Result.fail("Usuario no encontrado").serialize();
+  }
+
+  const certificates = await db.certificate.findMany({
+    where: {
+      template: {
+        some: {
+          OR: [
+            {
+              role: user.role,
+            },
+            {
+              activityType: {
+                activities: {
+                  some: {
+                    participants: {
+                      some: {
+                        userId: userId,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            {
+              participantType: {
+                participants: {
+                  some: {
+                    userId: userId,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    select: {
+      name: true,
+      id: true,
+    },
+  });
+
+  return Result.ok(certificates).serialize();
+}
+
+export async function getAvailableActivities({
+  certificateName,
+}: {
+  certificateName: string;
+}) {
+  const activities = await db.activity.findMany({
+    where: {
+      activityType: {
+        OR: [
+          {
+            template: {
+              some: {
+                certificate: {
+                  name: certificateName,
+                },
+              },
+            },
+          },
+          {
+            participantTypes: {
+              some: {
+                template: {
+                  some: {
+                    certificate: {
+                      name: certificateName,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+    select: {
+      name: true,
+      id: true,
+    },
+  });
+
+  return Result.ok(activities).serialize();
+}

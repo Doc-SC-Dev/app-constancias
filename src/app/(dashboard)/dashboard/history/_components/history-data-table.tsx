@@ -2,11 +2,10 @@
 
 import { useMemo } from "react";
 import { DataTable } from "@/components/data-table";
-import ActionDialogManager from "@/components/form/action-dialog-manager";
 import type { User } from "@/lib/types/users";
-import CreateRequestDialog from "../../_components/create-request-dialog";
 import { getHistoryPaginated } from "../actions";
 import { getColumns } from "./colums";
+import CreateRequestDialog from "./dialog/create-request-dialog";
 
 interface HistoryDataTableProps {
   user: User;
@@ -28,8 +27,8 @@ export function HistoryDataTable({
 
     const allowedColumns = ["certName", "state", "createdAt", "actions"];
     return allColumns.filter((col) => {
-      const key = (col as any).accessorKey || col.id;
-      return allowedColumns.includes(key);
+      const key = "accessorKey" in col ? (col.accessorKey as string) : col.id;
+      return key && allowedColumns.includes(key);
     });
   }, [isAdmin]);
 
@@ -39,11 +38,11 @@ export function HistoryDataTable({
     <DataTable
       emptyDescription={
         isStandard
-          ? "No se han creado constancias. Para iniciar debe crear una constancia"
-          : "No se han creado otras solicitudes."
+          ? "No se han recibido solicitudes de constancia"
+          : "No se han recibido solicitudes especiales."
       }
       emptyTitle={isStandard ? "No hay Solicitudes" : "No hay solicitudes"}
-      createDialog={(props) => <CreateRequestDialog user={user} {...props} />}
+      createDialog={() => <CreateRequestDialog user={user} />}
       queryKey={`list-history-${filter}`}
       queryFn={({ pageParam }) =>
         getHistoryPaginated({
@@ -59,6 +58,6 @@ export function HistoryDataTable({
           ? "Filtrar por Nombre, Rol, RUT y Solicitud"
           : "Filtrar por Nombre de Solicitud"
       }
-    ></DataTable>
+    />
   );
 }
