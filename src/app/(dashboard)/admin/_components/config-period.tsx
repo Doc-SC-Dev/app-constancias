@@ -40,14 +40,14 @@ function ConfigPeriodContent({ periods }: { periods: AcademicPeriod[] }) {
                   className="text-sm bg-teal-50 text-teal-700 ring-teal-600/20"
                   variant="outline"
                 >
-                  <strong>Inicio Solicitudes:</strong>{" "}
+                  <strong>Inicio de Periodo:</strong>{" "}
                   {formatDate(period.startDate)}
                 </Badge>
                 <Badge
                   className="text-sm bg-rose-50 text-rose-700 ring-rose-600/20"
                   variant="outline"
                 >
-                  <strong>Cierre Solicitudes:</strong>
+                  <strong>Cierre de Periodo:</strong>
                   {formatDate(period.endDate)}
                 </Badge>
               </div>

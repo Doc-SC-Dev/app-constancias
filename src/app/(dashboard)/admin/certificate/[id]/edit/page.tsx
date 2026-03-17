@@ -39,7 +39,7 @@ function EditCertificatePageContent({
       <CardHeader>
         <CardTitle>
           <h1 className="text-4xl font-bold">
-            Editar certficado {certificate.name}
+            Editar certificado {certificate.name}
           </h1>
         </CardTitle>
         <CardDescription></CardDescription>

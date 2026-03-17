@@ -49,7 +49,7 @@ function ConfigDirectorError() {
         <AlertTriangle className="fill-amber-400" />
         <AlertTitle>No se ha configurado un director</AlertTitle>
         <AlertDescription>
-          Seleccione a un usuario para configurarlo como Director del programa
+          Seleccione un usuario para configurarlo como Director del Programa
         </AlertDescription>
       </Alert>
     </div>

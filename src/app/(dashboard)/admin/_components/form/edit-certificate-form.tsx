@@ -91,8 +91,8 @@ export default function EditCertificateForm({
   const onSubmit = async (data: CertificateEditDto) => {
     const { isSuccess, value, error } = await updateCertificateAction(data);
     if (isSuccess) {
-      toast.success("Certificado creado exitosamente", {
-        description: `Se creo el certificado con nombre ${value.name}`,
+      toast.success("Certificado actualizado exitosamente", {
+        description: `Se actualizó el certificado con nombre ${value.name}`,
       });
       form.reset();
       router.push(`/admin/certificate/${value.id}`);
@@ -111,7 +111,7 @@ export default function EditCertificateForm({
               control={form.control}
               name="name"
               placeholder="Ingresar nombre del certificado"
-              description="Nombre que se mostrara en la aplicación para el certificado que esta creando"
+              description="Nombre que se mostrará en la aplicación para el certificado que está creando"
               label="Nombre"
             />
             {children}

@@ -65,7 +65,7 @@ export default function CertificateDT() {
       queryKey="get-paginated-certificate"
       queryFn={getPaginatedCertificates}
       columns={columns}
-      emptyTitle="No se ha creado ningun certificado"
+      emptyTitle="No se ha creado ningún certificado"
       emptyDescription="Cree un nuevo certificado para verlo en esta vista"
       placeholder="Filtrar certificados"
       createDialog={CreateCertificateDialog}
