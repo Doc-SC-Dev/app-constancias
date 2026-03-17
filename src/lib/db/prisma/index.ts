@@ -1,7 +1,7 @@
 // lib/prisma.ts
 
 import { PrismaPg } from "@prisma/adapter-pg";
-import { Prisma, PrismaClient } from "@/generated/prisma/client";
+import { PrismaClient } from "@/generated/prisma/client";
 import { auditStorage } from "@/lib/audit-storage";
 import { env } from "@/lib/env";
 
@@ -20,57 +20,146 @@ export const db =
   });
 
 if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+// src/lib/prisma.ts
 
-export function dbWithAutdit() {
-  return db.$extends({
+const EXCLUDED_MODELS = ["Log", "Session"];
+
+// 1. Definimos tipos auxiliares para tipar dinámicamente los argumentos de Prisma
+type QueryArgs = {
+  where?: Record<string, unknown>;
+  data?: Record<string, unknown> | unknown;
+};
+
+// 2. Definimos una interfaz para los métodos de lectura dinámica en Prisma
+interface PrismaDelegate {
+  findUnique(args: {
+    where: Record<string, unknown>;
+  }): Promise<Record<string, unknown> | null>;
+  findMany(args: {
+    where: Record<string, unknown>;
+  }): Promise<Record<string, unknown>[]>;
+}
+
+// 3. Type Guard seguro para validar si un objeto tiene un ID
+function hasIdProperty(obj: unknown): obj is { id: string | number } {
+  return typeof obj === "object" && obj !== null && "id" in obj;
+}
+
+export const dbWithAutdit = () =>
+  db.$extends({
     query: {
       $allModels: {
-        async update({ model, operation, query, args }) {
-          if ("Log" === model) {
-            await query(args);
-            return;
+        async $allOperations({ model, operation, args, query }) {
+          const mutativeOperations = [
+            "create",
+            "update",
+            "delete",
+            "upsert",
+            "updateMany",
+            "deleteMany",
+          ];
+
+          // Verificamos si debemos ignorar la operación
+          if (
+            !model ||
+            EXCLUDED_MODELS.includes(model) ||
+            !mutativeOperations.includes(operation)
+          ) {
+            return query(args);
           }
 
-          const prisma = Prisma.getExtensionContext(this);
-          const oldData = await (prisma as any).findUnique({
-            where: args.where,
-          });
+          const ctx = auditStorage.getStore() || {
+            userId: null,
+            userName: "SYSTEM",
+          };
 
-          const newData = await query(args);
+          // Tipado estricto para valores antiguos y nuevos
+          let oldValue:
+            | Record<string, unknown>
+            | Record<string, unknown>[]
+            | null = null;
+          let newValue: Record<string, unknown> | unknown = null;
+          let resourceId: string = "bulk_operation";
 
-          const context = auditStorage.getStore();
-          console.log({
-            ...context,
-            action: operation,
-            changes: {
-              new: newData,
-              old: oldData,
-            },
-            resource: model,
-            resourceId: args.where.id ?? "unknown",
-          });
-        },
-        async create({ model, operation, query, args }) {
-          if ("Log" === model) {
-            await query(args);
-            return;
+          // Casteamos args de forma segura hacia nuestra estructura conocida
+          const typedArgs = args as QueryArgs;
+
+          // Extraemos el delegado del modelo dinámicamente de forma segura
+          const delegate = db[
+            model as keyof typeof db
+          ] as unknown as PrismaDelegate;
+
+          // Capturar 'oldValue'
+          if (
+            ["update", "delete", "upsert"].includes(operation) &&
+            typedArgs.where
+          ) {
+            oldValue = await delegate.findUnique({ where: typedArgs.where });
+          } else if (
+            ["updateMany", "deleteMany"].includes(operation) &&
+            typedArgs.where
+          ) {
+            oldValue = await delegate.findMany({ where: typedArgs.where });
           }
 
-          const context = auditStorage.getStore();
+          // Ejecutar mutación interceptada
+          const result = await query(args);
 
-          const newData = await query(args);
+          // Capturar 'newValue'
+          if (operation === "delete" || operation === "deleteMany") {
+            newValue = null;
+          } else if (["create", "update", "upsert"].includes(operation)) {
+            newValue = result;
+          } else if (operation === "updateMany") {
+            newValue = typedArgs.data ?? null;
+          }
 
-          console.log({
-            ...context,
-            action: operation,
-            changes: {
-              new: newData,
-            },
-            resource: model,
-            resourceId: newData.id ?? "unknown",
-          });
+          // Asignar resourceId utilizando nuestro Type Guard estricto
+          if (hasIdProperty(result)) {
+            resourceId = String(result.id);
+          } else if (
+            oldValue &&
+            !Array.isArray(oldValue) &&
+            hasIdProperty(oldValue)
+          ) {
+            resourceId = String(oldValue.id);
+          }
+
+          // Registrar auditoría con tipos limpios (parseamos para forzar que sea JSON válido para Prisma)
+          // await db.log.create({
+          //   data: {
+          //     userName: ctx.userName,
+          //     userId: ctx.userId ?? null,
+          //     action: operation,
+          //     resource: model,
+          //     resourceId,
+          //     oldValue: oldValue ? JSON.parse(JSON.stringify(oldValue)) : null,
+          //     newValue: newValue ? JSON.parse(JSON.stringify(newValue)) : null,
+          //   },
+          // });
+
+          console.log(
+            JSON.stringify(
+              {
+                userName: ctx.userName,
+                userId: ctx.userId ?? null,
+                action: operation,
+                resource: model,
+                resourceId,
+                oldValue: oldValue
+                  ? JSON.parse(JSON.stringify(oldValue))
+                  : null,
+                newValue: newValue
+                  ? JSON.parse(JSON.stringify(newValue))
+                  : null,
+              },
+              null,
+              2,
+            ),
+          );
+
+          return result;
         },
       },
     },
   });
-}
