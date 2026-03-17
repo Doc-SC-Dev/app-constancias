@@ -14,7 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 /* ----------- */
@@ -33,7 +33,6 @@ import { Spinner } from "./ui/spinner";
 
 export interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
-  children?: ReactNode;
   placeholder: string;
   queryKey: string;
   queryFn: ({

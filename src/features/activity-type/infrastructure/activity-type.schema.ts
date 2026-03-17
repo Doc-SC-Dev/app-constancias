@@ -23,8 +23,20 @@ export const UpdateParticipantTypeSchema = type({
   activityTypeId: "string",
 });
 
+export const UpdateActivityTypeNameSchema = type({
+  id: "string",
+  name: type("string >= 2")
+    .configure({
+      message: "El nombre debe tener al menos 2 caracteres",
+    })
+    .pipe((value) => value.trim()),
+});
+
 export type CreateActivityTypeFormDto = typeof CreateActivityTypeSchema.infer;
 export type CreateParticipantTypeForm =
   typeof CreateParticipantTypeSchema.infer;
 export type UpdateParticipantTypeForm =
   typeof UpdateParticipantTypeSchema.infer;
+
+export type UpdateActivityTypeNameForm =
+  typeof UpdateActivityTypeNameSchema.infer;

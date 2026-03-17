@@ -47,6 +47,7 @@ export async function createActivityTypeAction(data: CreateActivityTypeInput) {
     if (!result.isSuccess) {
       return Result.fail(result.error.message).serialize();
     }
+    revalidatePath(`/admin/activity-type`);
     return result.serialize() as SerializedResult<ActivityType, string>;
   });
 }
@@ -54,10 +55,11 @@ export async function createActivityTypeAction(data: CreateActivityTypeInput) {
 export async function updateActivityTypeAction(id: string, name: string) {
   return withAudit(async () => {
     const result = await UpdateActivityType(id, name, repository);
-    revalidatePath(`/admin/activity-type/${id}`);
     if (!result.isSuccess) {
       return Result.fail(result.error.message).serialize();
     }
+    revalidatePath(`/admin/activity-type/${id}`);
+    revalidatePath(`/admin/activity-type`);
     return result.serialize() as SerializedResult<ActivityType, string>;
   });
 }

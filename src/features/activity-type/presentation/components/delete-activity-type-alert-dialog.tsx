@@ -78,9 +78,9 @@ export function DeleteActivityTypeAlertDialogContent({
   return (
     <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
       <AlertDialogHeader>
-        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+        <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
         <AlertDialogDescription>
-          Estás a punto de eliminar el tipo de actividad{" "}
+          Está a punto de eliminar el tipo de actividad{" "}
           <strong>&quot;{currentName}&quot;</strong>. Esta acción no se puede
           deshacer y solo es posible si no hay actividades ni plantillas
           asociadas.

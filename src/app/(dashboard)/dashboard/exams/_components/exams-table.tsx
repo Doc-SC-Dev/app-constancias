@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { DataTable } from "@/components/data-table";
-import { listExams, type Exams } from "../actions";
+import { type Exams, listExams } from "../actions";
 import { columns } from "./columns";
 
 interface ExamsTableProps {
@@ -16,7 +16,7 @@ export function ExamsTable({ isStudent }: ExamsTableProps) {
         ? columns.filter(
             (col) =>
               col.id !== "actions" &&
-              (col as any).accessorKey !== "actions",
+              (col as { accessorKey?: string }).accessorKey !== "actions",
           )
         : columns,
     [isStudent],

@@ -42,3 +42,8 @@ export type UpdateParticipantTypeInput = {
   roles: Role[];
   activityTypeId: string;
 };
+
+export type UpdateActivityTypeNameInput = {
+  id: string;
+  name: string;
+};

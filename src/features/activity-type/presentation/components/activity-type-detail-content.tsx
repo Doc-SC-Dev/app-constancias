@@ -1,7 +1,6 @@
-import { ArrowRight, Calendar, FileText, Pencil, Users } from "lucide-react";
+import { ArrowRight, Calendar, FileText, Users } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -21,6 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Role } from "@/lib/authorization/permissions";
 import { Textos } from "@/lib/utils";
 import type { ActivityType } from "../../domain/ActivityType";
+import ActivityTypeEditDialog from "./ActivityTypeEditDialog";
 import CreateParticipantTypeSheet from "./create-participant-type-sheet";
 import DeleteActivityTypeAlertDialog from "./delete-activity-type-alert-dialog";
 import ParticipantTypeActions from "./participant-type-actions";
@@ -48,9 +48,7 @@ export default function ActivityTypeDetailContent({
           {activityType.name}
         </h1>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" type="button">
-            <Pencil className="h-4 w-4" />
-          </Button>
+          <ActivityTypeEditDialog activityType={activityType} />
           <DeleteActivityTypeAlertDialog
             id={activityType.id}
             currentName={activityType.name}
