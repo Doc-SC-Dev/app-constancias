@@ -1,7 +1,6 @@
 "use server";
 
 import { ArkErrors } from "arktype";
-import { isAuthenticated } from "@/lib/auth";
 import { isAdmin, type Role } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import type { GenderType } from "@/lib/types/users";
@@ -24,12 +23,12 @@ export async function generateCertificateAction(
   const data = GenerateCertificateSchema(raw);
   if (data instanceof ArkErrors) {
     return Result.fail(
-      AppError.validation(`Invalid input: ${data.summary}`),
+      AppError.validation(`Input inválido: ${data.summary}`),
     ).serialize();
   }
 
   // 2. Authorize caller
-  const { user: sessionUser } = await isAuthenticated();
+  const { user: sessionUser } = data;
 
   // 3. Fetch FullRequest eager-loading ALL required relations
   const request = await db.request.findUnique({
@@ -63,15 +62,14 @@ export async function generateCertificateAction(
     },
   });
 
-  if (!request)
+  if (!request) {
     return Result.fail(AppError.notFound("Request not found")).serialize();
+  }
 
   // Check Permissions: Owners, Admins or Super Admins
   if (request.userId !== sessionUser.id && !isAdmin(sessionUser.role as Role)) {
     return Result.fail(
-      AppError.forbidden(
-        "You do not have permission to generate this certificate.",
-      ),
+      AppError.forbidden("No tienes permiso para generar este certificado."),
     ).serialize();
   }
 
@@ -85,15 +83,20 @@ export async function generateCertificateAction(
       select: { name: true },
     });
     if (!directorUser)
-      return Result.fail(AppError.notFound("Program director")).serialize();
+      return Result.fail(
+        AppError.notFound("Director del programa no encontrado"),
+      ).serialize();
 
     // 6. Template Selection logic matches roles/participant/activities exclusivity
     const template = selectTemplate(
       request.certificate.template,
       request as FullRequest,
     );
-    if (!template)
-      return Result.fail(AppError.notFound("CertificateTemplate")).serialize();
+    if (!template) {
+      return Result.fail(
+        AppError.notFound("Plantilla no encontrada"),
+      ).serialize();
+    }
 
     // 7. Render Template completely outside of the web view coupling
     const renderContext = { ...request, director: { name: directorUser.name } };
@@ -121,7 +124,10 @@ export async function generateCertificateAction(
 
   // 9. Generate PDF
   const pdfResult = await generatePdf(renderedBody);
-  if (!pdfResult.isSuccess) return Result.fail(pdfResult.error).serialize();
+
+  if (!pdfResult.isSuccess) {
+    return Result.fail(pdfResult.error).serialize();
+  }
 
   // Expose as Base64 format exclusively allowing straightforward browser attachment downloads
   return Result.ok({
