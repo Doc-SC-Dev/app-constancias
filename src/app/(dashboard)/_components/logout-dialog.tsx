@@ -15,10 +15,10 @@ export default function LogoutDialog() {
   const form = useForm();
   return (
     <DialogContent className="w-sm">
-      <DialogTitle>¿Estás seguro?</DialogTitle>
+      <DialogTitle>Confirmar cierre de sesión</DialogTitle>
       <DialogDescription>
-        Por seguridad, todos tus datos temporales se limpiarán y deberás volver
-        a iniciar sesión para continuar.
+        Por motivos de seguridad, los datos de la sesión actual serán eliminados.
+        Deberá iniciar sesión nuevamente para acceder al sistema.
       </DialogDescription>
       <DialogFooter className="flex gap-4">
         <DialogClose>Cancelar</DialogClose>

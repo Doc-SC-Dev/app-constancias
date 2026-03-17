@@ -100,7 +100,7 @@ export const createRequest = async (data: {
     return {
       success: false,
       message:
-        error === "Algo salió mal"
+        error === "Se ha producido un error inesperado. Por favor, intente nuevamente."
           ? "Se deben completar todos los campos"
           : error,
     };
@@ -113,7 +113,7 @@ export const createRequest = async (data: {
     revalidatePath("/dashboard/history");
     return {
       success: true,
-      message: `Solicitud creada exitosamente con id ${request.id}`,
+      message: `La solicitud ha sido registrada correctamente.`,
       data: pdf,
     };
   }

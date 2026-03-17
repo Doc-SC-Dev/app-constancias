@@ -20,7 +20,7 @@ export default function DeleteAlertDialog({
   return (
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+        <AlertDialogTitle>Confirmar eliminación de registro</AlertDialogTitle>
         <AlertDialogDescription>{description}</AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
