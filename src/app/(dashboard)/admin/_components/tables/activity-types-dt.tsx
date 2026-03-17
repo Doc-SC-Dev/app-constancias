@@ -43,7 +43,7 @@ export default function ActivityTypesDT() {
       queryKey="get-paginated-activity-types"
       placeholder="Filtrar tipos de actividades"
       emptyTitle="No se han creado tipos de actividades"
-      emptyDescription="Para visualizar tipos de actividades empieze creando su primer tipo de actividad"
+      emptyDescription="Para visualizar tipos de actividades empiece creando su primer tipo de actividad"
       createDialog={CreateActivityTypeDialog}
     />
   );

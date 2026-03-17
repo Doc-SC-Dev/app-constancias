@@ -29,7 +29,7 @@ export function EditDirectorDialog({
         <DialogHeader>
           <DialogTitle>Cambio de Director</DialogTitle>
           <DialogDescription>
-            Selecciona un usuario de la lista para remplazar al director actual{" "}
+            Selecciona un usuario de la lista para reemplazar al director actual{" "}
             <strong>{name}</strong> y otorgarle el cargo de Director. Este
             usuario tendrá permisos para gestionar el departamento y supervisar
             las métricas del equipo.

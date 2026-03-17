@@ -7,6 +7,7 @@ enum dashboards {
   HISTORY = "history",
   STUDENTS = "students",
   ACTIVITY = "activities",
+  EXAMS = "exams",
 }
 export type Menu = {
   name: string;
@@ -52,6 +53,13 @@ export const menus: Record<dashboards, Menu> = {
     url: "/dashboard/activity",
     description:
       "Dashboard de administración de actividades tales como proyectos de investigación, tesis o cátedras.",
+    permissions: { activity: ["list"] },
+  },
+  exams: {
+    name: "Exámenes",
+    icon: "file-text",
+    url: "/dashboard/exams",
+    description: "Dashboard de administración de exámenes de calificación.",
     permissions: { activity: ["list"] },
   },
 };

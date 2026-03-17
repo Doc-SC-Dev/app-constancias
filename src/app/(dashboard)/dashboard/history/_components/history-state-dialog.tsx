@@ -105,7 +105,7 @@ export default function HistoryStateDialog({
   return (
     <DialogContent className="max-w-md flex flex-col">
       <DialogHeader>
-        <DialogTitle>Editar Estado de Solicitud</DialogTitle>
+        <DialogTitle>Responder Solicitud</DialogTitle>
       </DialogHeader>
 
       <div className="flex flex-col gap-6 py-4">

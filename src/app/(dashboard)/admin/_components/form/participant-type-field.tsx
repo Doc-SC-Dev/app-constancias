@@ -44,7 +44,7 @@ export default function ParticipantTypeField() {
             Tipo de participantes
           </FieldLegend>
           <FieldDescription>
-            Ingresar los tipos de participantes que estaran asociados al este
+            Ingresar los tipos de participantes que estarán asociados al este
             tipo de actividades y define cuales son requeridos para crear el
             tipo de actividad.
           </FieldDescription>

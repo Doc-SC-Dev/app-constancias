@@ -15,7 +15,7 @@ import UserSelect from "./user-select";
 const newDirectorSchema = type({
   userId: type("string> 1").configure(() => ({
     message:
-      "Se debe seleccionar un usuario para definirilo como nuevo Director",
+      "Se debe seleccionar un usuario para definirlo como nuevo Director",
   })),
 });
 export type NewDirector = typeof newDirectorSchema.infer;
@@ -35,7 +35,7 @@ export default function ChangeDirectorForm({ userId }: { userId: string }) {
     });
 
     if (isSuccess && value) {
-      toast.success("Se actualizo el director exitosamente", {
+      toast.success("Se actualizó el director exitosamente", {
         description: `Ahora el usuario ${value?.name} es el Director de programa de doctorado`,
       });
       form.reset();
@@ -43,7 +43,7 @@ export default function ChangeDirectorForm({ userId }: { userId: string }) {
         queryKey: ["get-non-director-users"],
       });
     } else if (error) {
-      toast.error("Ocurrio un error", { description: error });
+      toast.error("Ocurrió un error", { description: error });
     }
   };
   return (
@@ -59,7 +59,7 @@ export default function ChangeDirectorForm({ userId }: { userId: string }) {
         <DialogFooter className="mt-6">
           <DialogClose asChild>
             <Button variant="destructive" type="button">
-              Cancel
+              Cancelar
             </Button>
           </DialogClose>
           <Button type="submit" variant="outline">

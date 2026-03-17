@@ -50,8 +50,8 @@ export default function CreateActivityTypeForm() {
     }
 
     if (value) {
-      toast.success("Se a creado el nuevo tipo de actividad", {
-        description: `Se creo existosament el tipo de actividad con nombre ${value.name} con ${value.nParticipantsTypes} tipos de participantes.`,
+      toast.success("Se ha creado el nuevo tipo de actividad", {
+        description: `Se creó exitosamente el tipo de actividad con nombre ${value.name} con ${value.nParticipantsTypes} tipos de participantes.`,
       });
       queryClient.invalidateQueries({
         queryKey: ["get-paginated-activity-types"],
@@ -67,7 +67,7 @@ export default function CreateActivityTypeForm() {
           <FormInput
             control={form.control}
             name="name"
-            description="Ingrese en nombre con el que se mostrar el tipo de actividad en la aplicación"
+            description="Ingrese el nombre con el que se mostrará el tipo de actividad en la aplicación"
             placeholder="Ingrese nombre del tipo de actividad"
           />
           <ParticipantTypeField />
