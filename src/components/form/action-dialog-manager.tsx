@@ -12,6 +12,7 @@ import HistoryStateDialog from "@/app/(dashboard)/dashboard/history/_components/
 import HistoryViewDialog from "@/app/(dashboard)/dashboard/history/_components/history-view-dialog";
 import { Button } from "@/components/ui/button";
 import { type Action, Actions } from "@/lib/types/action";
+import type { HistoryEntry } from "@/lib/types/history";
 import { Dialog } from "../ui/dialog";
 import ActionButton from "./action-button";
 
@@ -32,7 +33,9 @@ type ActionDialogProps<T> = {
   isDownloadDisabled?: boolean;
 };
 
-export default function ActionDialogManager<T>({
+export default function ActionDialogManager<
+  T extends { id: string; link?: string },
+>({
   data,
   triggerLabel = "",
   viewDialog: ViewDialog,
@@ -54,27 +57,23 @@ export default function ActionDialogManager<T>({
   };
 
   const handleDownload = async () => {
-    if (!data || !(data as any).id) return;
+    if (!data || !data.id) return;
 
-    if ((data as any).link) {
-      window.open((data as any).link, "_blank");
+    if (data.link) {
+      window.open(data.link, "_blank");
       return;
     }
 
     const promise = async () => {
-      const {
-        success,
-        data: base64,
-        message,
-      } = await downloadCertificate((data as any).id);
-      if (success && base64) {
+      const { isSuccess, value, error } = await downloadCertificate(data.id);
+      if (isSuccess && value) {
         const link = document.createElement("a");
-        link.href = `data:application/pdf;base64,${base64}`;
-        link.download = `${(data as any).certName || "constancia"}.pdf`;
+        link.href = `data:application/pdf;base64,${value.pdfBase64}`;
+        link.download = `${value.fileName || "constancia"}.pdf`;
         link.click();
         return "Certificado descargado exitosamente";
       }
-      throw new Error(message || "Error al descargar el certificado");
+      throw new Error(error);
     };
 
     toast.promise(promise(), {
@@ -144,11 +143,14 @@ export default function ActionDialogManager<T>({
               <EditDialog data={data} closeDialog={closeDialog} />
             )}
             {action === Actions.VIEW_REASON && (
-              <HistoryViewDialog data={data as any} closeDialog={closeDialog} />
+              <HistoryViewDialog
+                data={data as unknown as HistoryEntry}
+                closeDialog={closeDialog}
+              />
             )}
             {action === Actions.UPDATE_STATE && (
               <HistoryStateDialog
-                data={data as any}
+                data={data as unknown as HistoryEntry}
                 closeDialog={closeDialog}
               />
             )}

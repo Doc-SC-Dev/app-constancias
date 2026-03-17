@@ -1,8 +1,8 @@
 import { AlertCircle } from "lucide-react";
-import { FieldErrors } from "react-hook-form";
+import type { FieldErrors } from "react-hook-form";
 
 type TableErrorProps = {
-  errors: FieldErrors<any>[] | FieldErrors<any> | undefined;
+  errors: FieldErrors[] | FieldErrors | undefined;
 };
 
 export function TableError({ errors }: TableErrorProps) {
@@ -14,7 +14,11 @@ export function TableError({ errors }: TableErrorProps) {
     errors.forEach((rowError) => {
       if (!rowError) return;
       Object.values(rowError).forEach((fieldError) => {
-        if (fieldError && typeof fieldError === "object" && "message" in fieldError) {
+        if (
+          fieldError &&
+          typeof fieldError === "object" &&
+          "message" in fieldError
+        ) {
           if (typeof fieldError.message === "string") {
             errorMessages.add(fieldError.message);
           }
@@ -22,8 +26,12 @@ export function TableError({ errors }: TableErrorProps) {
       });
     });
 
-    if ((errors as any).root?.message) {
-      errorMessages.add((errors as any).root.message);
+    const arrayErrors = errors as typeof errors & {
+      root?: { message?: string };
+    };
+
+    if (arrayErrors.root?.message) {
+      errorMessages.add(arrayErrors.root.message);
     }
 
     if (errorMessages.size === 0) return null;
@@ -43,15 +51,19 @@ export function TableError({ errors }: TableErrorProps) {
     );
   }
 
-  if (typeof errors === "object" && "message" in errors && typeof errors.message === "string") {
+  if (
+    typeof errors === "object" &&
+    "message" in errors &&
+    typeof errors.message === "string"
+  ) {
     return (
       <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive dark:bg-destructive/10 mb-4">
         <div className="flex items-center gap-2 font-medium">
           <AlertCircle className="h-4 w-4" />
-          {(errors as any).message}
+          {(errors as unknown as { message: string }).message}
         </div>
       </div>
-    )
+    );
   }
 
   return null;
