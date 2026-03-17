@@ -23,7 +23,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import type { AcademicPeriod } from "@/generated/prisma";
 import { formatDate } from "@/lib/utils";
-import { updateAcademicPeriods } from "../actions";
+import { updateAcademicPeriods } from "../../actions";
 
 export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
   const [open, setOpen] = useState(false);

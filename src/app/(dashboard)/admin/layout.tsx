@@ -7,7 +7,7 @@ export default function AdminLayout({
 }) {
   return (
     <div className="container mx-auto h-full">
-      {/* <NavigationLink /> */}
+      <NavigationLink />
       <div className="space-y-4 mt-4">{children}</div>
     </div>
   );

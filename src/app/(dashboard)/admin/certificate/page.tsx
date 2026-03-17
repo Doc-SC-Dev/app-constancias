@@ -7,7 +7,7 @@ import type { CertificatePaginated } from "@/lib/types/certificate";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { getActivityTypes } from "../../action";
 import { getPaginatedCertificates } from "../actions";
-import CertificateDT from "./tables/certificate-dt";
+import CertificateDT from "./_components/tables/certificate-dt";
 
 export default async function ConfigCertificates() {
   const queryClient = new QueryClient();

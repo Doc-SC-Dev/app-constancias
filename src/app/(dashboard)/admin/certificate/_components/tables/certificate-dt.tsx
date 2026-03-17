@@ -6,6 +6,7 @@ import LinkActionButton from "@/components/link-action-button";
 import { TableCell } from "@/components/table-cell";
 import type { CertificatePaginated } from "@/lib/types/certificate";
 import { formatDate } from "@/lib/utils";
+import DeleteCertificateAlertDialog from "../../[id]/_components/delete-certificate-alert-dialog";
 import { getPaginatedCertificates } from "../../actions";
 import CreateCertificateDialog from "../dialogs/create-certificate-dialog";
 
@@ -50,8 +51,10 @@ const columns: ColumnDef<CertificatePaginated>[] = [
         <TableCell className="justify-center">
           <LinkActionButton
             seeLink={`/admin/certificate/${cert.id}`}
-            data={cert}
             editLink={`/admin/certificate/${cert.id}/edit`}
+            deleteAlertDialog={() => (
+              <DeleteCertificateAlertDialog certificate={cert} />
+            )}
           />
         </TableCell>
       );

@@ -1,12 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Gender, Prisma, type Role } from "@/generated/prisma";
+import { Prisma, type Role } from "@/generated/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { isAdmin } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import { dbWithAutdit } from "@/lib/db/prisma";
-import type { AcademicDegreeCreateDto } from "@/lib/types/acadmic-grades";
 import type { ActivityType } from "@/lib/types/activity";
 import type {
   CertificatePaginated,
@@ -15,72 +14,7 @@ import type {
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import { withAudit } from "@/lib/with-audit";
 import { Result } from "@/shared/core/Result";
-import type { AcademicDegreeDto } from "./_components/config-grades";
 import type { CreateActivityType } from "./_components/form/create-activity-type-form";
-
-export const getPaginatedAcademicDegree = async ({
-  pageParam,
-}: {
-  pageParam: number;
-}): Promise<PaginationResponse<AcademicDegreeDto>> => {
-  const [count, degrees] = await db.$transaction([
-    db.academicDegree.count(),
-    db.academicDegree.findMany({
-      take: PAGE_SIZE,
-      skip: PAGE_SIZE * pageParam,
-      include: {
-        title: {
-          select: {
-            gender: true,
-            abbrev: true,
-          },
-        },
-      },
-    }),
-  ]);
-
-  const data = degrees.map<AcademicDegreeDto>((degree) => ({
-    ...degree,
-    abbrevFem:
-      degree.title.filter((t) => t.gender === Gender.FEMALE)?.at(0)?.abbrev ??
-      "",
-    abbrevMas:
-      degree.title.filter((t) => t.gender === Gender.MALE)?.at(0)?.abbrev ?? "",
-  }));
-  return { data, nextPage: pageParam + 1, totalRows: count };
-};
-
-const createAcademicDegree = async ({
-  name,
-  abbrevFem,
-  abbrevMas,
-}: AcademicDegreeCreateDto): Promise<
-  ReturnType<Result<AcademicDegreeDto, string>["serialize"]>
-> => {
-  const degree = await dbWithAutdit().academicDegree.create({
-    data: {
-      name,
-      title: {
-        create: [
-          {
-            gender: Gender.FEMALE,
-            abbrev: abbrevFem,
-          },
-          {
-            gender: Gender.MALE,
-            abbrev: abbrevMas,
-          },
-        ],
-      },
-    },
-  });
-  const serializeData = Result.ok<AcademicDegreeDto, string>({
-    ...degree,
-    abbrevFem,
-    abbrevMas,
-  }).serialize();
-  return serializeData;
-};
 
 export const updateAcademicPeriods = async (
   periods: { startDate: Date; endDate: Date }[],
@@ -142,12 +76,6 @@ export const updateAcademicPeriods = async (
   revalidatePath("/admin");
   return { success: true, message: "Periodos actualizados exitosamente" };
 };
-
-export async function auditedCreateAcadmicDegree(
-  data: AcademicDegreeCreateDto,
-) {
-  return await withAudit(() => createAcademicDegree(data));
-}
 
 export const getNonDirectorUsers = async () => {
   const users = await db.user.findMany({

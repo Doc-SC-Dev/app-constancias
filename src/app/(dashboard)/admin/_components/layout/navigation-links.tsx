@@ -14,48 +14,51 @@ export default function NavigationLink() {
   const pathname = usePathname();
   const styles = navigationMenuTriggerStyle({
     className:
-      "bg-muted data-[active]:bg-background data-[active]:shadow-sm hover:data-[active]:text-foreground",
+      "bg-muted text-muted-foreground data-[active]:text-foreground data-[active]:bg-background data-[active]:shadow-sm hover:data-[active]:text-foreground",
   });
   return (
-    <NavigationMenu>
-      <NavigationMenuList className="bg-muted rounded-lg">
-        <NavigationMenuItem className="p-1">
-          <NavigationMenuLink
-            asChild
-            className={styles}
-            active={pathname === "/admin"}
-          >
-            <Link href="/admin">General</Link>
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        <NavigationMenuItem className="p-1">
-          <NavigationMenuLink
-            asChild
-            className={styles}
-            active={pathname.includes("/admin/grades")}
-          >
-            <Link href="/admin/grades">Grados Academicos</Link>
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        <NavigationMenuItem className="p-1">
-          <NavigationMenuLink
-            asChild
-            className={styles}
-            active={pathname.includes("/admin/activity-types")}
-          >
-            <Link href="/admin/activity-types">Tipos de actividades</Link>
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        <NavigationMenuItem className="p-1">
-          <NavigationMenuLink
-            asChild
-            className={styles}
-            active={pathname.includes("/admin/certificate")}
-          >
-            <Link href="/admin/certificate">Certificados</Link>
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+    <section className="space-y-4">
+      <h1 className="text-2xl font-bold">Ajustes</h1>
+      <NavigationMenu>
+        <NavigationMenuList className="bg-muted rounded-lg">
+          <NavigationMenuItem className="p-1">
+            <NavigationMenuLink
+              asChild
+              className={styles}
+              active={pathname.includes("/admin/general")}
+            >
+              <Link href="/admin/general">General</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuItem className="p-1">
+            <NavigationMenuLink
+              asChild
+              className={styles}
+              active={pathname.includes("/admin/academic-degree")}
+            >
+              <Link href="/admin/academic-degree">Grados Academicos</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuItem className="p-1">
+            <NavigationMenuLink
+              asChild
+              className={styles}
+              active={pathname.includes("/admin/activity-type")}
+            >
+              <Link href="/admin/activity-type">Tipos de actividades</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuItem className="p-1">
+            <NavigationMenuLink
+              asChild
+              className={styles}
+              active={pathname.includes("/admin/certificate")}
+            >
+              <Link href="/admin/certificate">Certificados</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
+    </section>
   );
 }

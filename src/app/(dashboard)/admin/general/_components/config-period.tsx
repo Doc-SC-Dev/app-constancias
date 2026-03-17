@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { AcademicPeriod } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
-import { ClosePeriodDialog } from "./close-period-dialog";
+import { ClosePeriodDialog } from "./dialogs/close-period-dialog";
 
 export default async function ConfigPeriod() {
   const periodsDesc = await db.academicPeriod.findMany({
