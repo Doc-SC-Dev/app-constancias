@@ -67,7 +67,7 @@ export default function CreateActivityTypeForm() {
           <FormInput
             control={form.control}
             name="name"
-            description="Ingrese en nombre con el que se mostrar el tipo de actividad en la aplicación"
+            description="Ingrese el nombre con el que se mostrará el tipo de actividad en la aplicación"
             placeholder="Ingrese nombre del tipo de actividad"
           />
           <ParticipantTypeField />

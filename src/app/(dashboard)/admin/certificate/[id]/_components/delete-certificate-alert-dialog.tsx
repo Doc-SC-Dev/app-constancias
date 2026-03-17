@@ -33,7 +33,7 @@ export default function DeleteCertificateAlertDialog({
   };
   return (
     <DeleteAlertDialog
-      description={`Estas apunto de realizar una operación irreversible, ¿estás seguro de que quieres continuar?.\n Vas a eliminar el certificado ${certificate.name} y todas sus plantillas asociadas`}
+      description={`Estás a punto de realizar una operación irreversible, ¿estás seguro de que quieres continuar?.\n Vas a eliminar el certificado ${certificate.name} y todas sus plantillas asociadas`}
       onAccept={handleDelete}
     />
   );
