@@ -17,8 +17,8 @@ export default function LogoutDialog() {
     <DialogContent className="w-sm">
       <DialogTitle>Confirmar cierre de sesión</DialogTitle>
       <DialogDescription>
-        Por motivos de seguridad, los datos de la sesión actual serán eliminados.
-        Deberá iniciar sesión nuevamente para acceder al sistema.
+        Por motivos de seguridad, los datos de la sesión actual serán
+        eliminados. Deberá iniciar sesión nuevamente para acceder al sistema.
       </DialogDescription>
       <DialogFooter className="flex gap-4">
         <DialogClose>Cancelar</DialogClose>
