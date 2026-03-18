@@ -16,10 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormLabel,
-} from "@/components/ui/form";
+import { Form, FormLabel } from "@/components/ui/form";
 import { updateExamGrade } from "../actions";
 import type { Exams } from "../actions";
 import {
@@ -89,7 +86,10 @@ export function EditExamDialog({
   useEffect(() => {
     if (exam && open) {
       form.reset({
-        grade: exam.grade !== null && exam.grade > 0 ? exam.grade.toString().replace(".", ",") : "",
+        grade:
+          exam.grade !== null && exam.grade > 0
+            ? exam.grade.toString().replace(".", ",")
+            : "",
       });
     }
   }, [exam, form, open]);
@@ -142,22 +142,32 @@ export function EditExamDialog({
           <DialogTitle className="text-xl">Nota de Examen</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
-
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 mt-4"
+          >
             <div className="space-y-2">
-              <FormLabel className="text-muted-foreground font-semibold">Nombre de la Actividad</FormLabel>
+              <FormLabel className="text-muted-foreground font-semibold">
+                Nombre de la Actividad
+              </FormLabel>
               <div className="text-base">{exam.activityName}</div>
             </div>
 
             <div className="space-y-4">
-              <FormLabel className="text-muted-foreground font-semibold">Tabla de Notas</FormLabel>
+              <FormLabel className="text-muted-foreground font-semibold">
+                Tabla de Notas
+              </FormLabel>
 
               <div className="rounded-md border">
                 <Table>
                   <TableHeader className="bg-muted/50">
                     <TableRow>
-                      <TableHead className="w-[70%] text-foreground font-semibold">Alumno</TableHead>
-                      <TableHead className="text-foreground font-semibold">Nota</TableHead>
+                      <TableHead className="w-[70%] text-foreground font-semibold">
+                        Alumno
+                      </TableHead>
+                      <TableHead className="text-foreground font-semibold">
+                        Nota
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
