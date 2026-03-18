@@ -11,7 +11,9 @@ import type {
 import type { AcademicDegreeError } from "../domain/AcademicDegreeError";
 import type { AcademicDegreeRepository } from "../domain/AcademicDegreeRepository";
 
-export class PrismaAcademicDegreeRepository implements AcademicDegreeRepository {
+export class PrismaAcademicDegreeRepository
+  implements AcademicDegreeRepository
+{
   async findAllPaged(
     page: number,
   ): Promise<Result<PaginationResponse<AcademicDegree>, AcademicDegreeError>> {
@@ -187,7 +189,9 @@ export class PrismaAcademicDegreeRepository implements AcademicDegreeRepository 
     }
   }
 
-  async delete(id: string): Promise<Result<{ name: string }, AcademicDegreeError>> {
+  async delete(
+    id: string,
+  ): Promise<Result<{ name: string }, AcademicDegreeError>> {
     try {
       const academicDegree = await dbWithAutdit().academicDegree.delete({
         where: { id },
