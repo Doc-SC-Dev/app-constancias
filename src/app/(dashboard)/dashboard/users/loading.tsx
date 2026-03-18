@@ -13,14 +13,7 @@ import {
 } from "@/components/ui/table";
 
 export default function UsersLoading() {
-  const headers = [
-    "Estado",
-    "Nombre",
-    "Rol",
-    "Email",
-    "Matrícula",
-    "Acciones",
-  ];
+  const headers = ["Estado", "Nombre", "Rol", "Email", "Matrícula", "Acciones"];
   return (
     <div className="container h-full mx-auto flex flex-col gap-4">
       <h2 className="text-2xl font-bold">Usuarios</h2>

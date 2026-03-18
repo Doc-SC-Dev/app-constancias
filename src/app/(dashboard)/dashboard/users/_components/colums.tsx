@@ -72,7 +72,8 @@ export const columns: ColumnDef<User>[] = [
               row.getValue("role") === "admin" ? "destructive" : "outline"
             }
           >
-            {Textos.Role[row.getValue("role") as string] || row.getValue("role")}
+            {Textos.Role[row.getValue("role") as string] ||
+              row.getValue("role")}
           </Badge>
         </span>
       );
@@ -110,10 +111,11 @@ export const columns: ColumnDef<User>[] = [
       return (
         <span className="flex flex-1 items-center justify-center">
           <LinkActionButton
-            data={user}
             seeLink={`/dashboard/users/${user.id}`}
             editLink={`/dashboard/users/${user.id}/edit`}
-            deleteDialog={DeleteDialog}
+            deleteAlertDialog={({ closeDialog }) => (
+              <DeleteDialog data={user} closeDialog={closeDialog} />
+            )}
           />
         </span>
       );
