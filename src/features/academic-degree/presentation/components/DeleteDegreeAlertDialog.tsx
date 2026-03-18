@@ -1,6 +1,7 @@
+"use client";
+
 import { Trash, X } from "lucide-react";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -13,34 +14,27 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { auditedDeleteAcademicDegree } from "../../actions";
-import type { AcademicDegreeDto } from "../config-grades";
+import type { AcademicDegree } from "../../domain/AcademicDegree";
+import { useAcademicDegree } from "../hooks/useAcademicDegree";
 
-export default function DeleteDegreeAlertDialog({
+export function DeleteDegreeAlertDialog({
   academicDegree,
 }: {
-  academicDegree: AcademicDegreeDto;
+  academicDegree: AcademicDegree;
 }) {
+  const { remove } = useAcademicDegree();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
-  const onDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const onDelete = () => {
     startTransition(async () => {
-      const { value, isSuccess, error } = await auditedDeleteAcademicDegree(
-        academicDegree.id,
-      );
-      if (!isSuccess)
-        toast.error("Ha ocurrido un error al eliminar el grado académico", {
-          description: error,
-        });
-      else
-        toast.success("Eliminado con éxito", {
-          description: `El grado académico ${value.name.length > 25 ? `${academicDegree.name.slice(0, 25)}...` : value.name} ha sido eliminado correctamente`,
-        });
-      setOpen(false);
+      const result = await remove(academicDegree.id);
+      if (result.isSuccess) {
+        setOpen(false);
+      }
     });
   };
+
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>

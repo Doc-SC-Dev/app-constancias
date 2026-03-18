@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -10,16 +11,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { AcademicDegreeDto } from "../config-grades";
-import EditAcademicDegreeForm from "../form/edit-academic-degree-form";
+import type { AcademicDegree } from "../../domain/AcademicDegree";
+import { EditAcademicDegreeForm } from "./EditAcademicDegreeForm";
 
-export default function EditAcademicDegreeSheet({
+export function EditAcademicDegreeSheet({
   academicDegree,
 }: {
-  academicDegree: AcademicDegreeDto;
+  academicDegree: AcademicDegree;
 }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
           className="group flex items-center justify-center transition-all duration-300 ease-in-out hover:gap-2 gap-0 px-3 hover:px-4 "
@@ -39,7 +41,10 @@ export default function EditAcademicDegreeSheet({
             <strong>{academicDegree.name}</strong>.
           </SheetDescription>
         </SheetHeader>
-        <EditAcademicDegreeForm academicDegree={academicDegree} />
+        <EditAcademicDegreeForm
+          academicDegree={academicDegree}
+          setOpen={setOpen}
+        />
       </SheetContent>
     </Sheet>
   );

@@ -3,40 +3,39 @@
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { Save, X } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { FormInput } from "@/components/form/FormInput";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  type AcademicDegreeEditDto,
-  AcademicDegreeEditSchema,
-} from "@/lib/types/acadmic-grades";
-import { auditedEditAcademicDegree } from "../../actions";
-import type { AcademicDegreeDto } from "../config-grades";
+import type {
+  AcademicDegree,
+  UpdateAcademicDegreeInput,
+} from "../../domain/AcademicDegree";
+import { UpdateAcademicDegreeSchema } from "../../infrastructure/academic-degree.schema";
+import { useAcademicDegree } from "../hooks/useAcademicDegree";
 
-export default function EditAcademicDegreeForm({
+export function EditAcademicDegreeForm({
   academicDegree,
+  setOpen,
 }: {
-  academicDegree: AcademicDegreeDto;
+  academicDegree: AcademicDegree;
+  setOpen: (open: boolean) => void;
 }) {
-  const form = useForm<AcademicDegreeEditDto>({
-    resolver: arktypeResolver(AcademicDegreeEditSchema),
+  const { update } = useAcademicDegree();
+
+  const form = useForm({
+    resolver: arktypeResolver(UpdateAcademicDegreeSchema),
     mode: "onChange",
     reValidateMode: "onSubmit",
     defaultValues: academicDegree,
   });
 
-  const onSubmit = async (data: AcademicDegreeEditDto) => {
-    const result = await auditedEditAcademicDegree(data);
-    if (result.isSuccess) {
-      toast.success("Condecoración editada correctamente");
-      form.reset();
-    } else {
-      toast.error(result.error);
-    }
+  const onSubmit = async (data: UpdateAcademicDegreeInput) => {
+    const { isSuccess } = await update(data);
+    if (isSuccess) setOpen(false);
   };
+
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}

@@ -4,22 +4,13 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
 import { TableCell } from "@/components/table-cell";
 import { formatDate } from "@/lib/utils";
-import { getPaginatedAcademicDegree } from "../actions";
-import CreateGradeDialog from "./dialogs/create-grade-dialog";
-import DeleteDegreeAlertDialog from "./dialogs/delete-degree-alert-dialog";
-import EditAcademicDegreeSheet from "./sheet/edit-academic-degree-sheet";
+import type { AcademicDegree } from "../../domain/AcademicDegree";
+import { getPaginatedAcademicDegreesAction } from "../actions";
+import { CreateGradeDialog } from "./CreateGradeDialog";
+import { DeleteDegreeAlertDialog } from "./DeleteDegreeAlertDialog";
+import { EditAcademicDegreeSheet } from "./EditAcademicDegreeSheet";
 
-export type AcademicDegreeDto = {
-  id: string;
-  name: string;
-  abbrevFem: string;
-  abbrevMas: string;
-  abbrevFemId: string;
-  abbrevMasId: string;
-  createdAt: Date;
-};
-
-const colums: ColumnDef<AcademicDegreeDto>[] = [
+const columns: ColumnDef<AcademicDegree>[] = [
   {
     accessorKey: "name",
     header: "Nombre",
@@ -69,12 +60,12 @@ const colums: ColumnDef<AcademicDegreeDto>[] = [
   },
 ];
 
-export default function ConfigGrades() {
+export function ConfigGrades() {
   return (
     <DataTable
-      columns={colums}
+      columns={columns}
       queryKey="get-all-academic-degree-paginated"
-      queryFn={getPaginatedAcademicDegree}
+      queryFn={getPaginatedAcademicDegreesAction}
       placeholder="Filtrar grados académicos"
       emptyTitle="No hay grados académicos definidos"
       emptyDescription="Para ver grados académicos comience definiendo un grado académico."

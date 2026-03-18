@@ -1,11 +1,9 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { FormInput } from "@/components/form/FormInput";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,16 +18,16 @@ import {
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  type AcademicDegreeCreateDto,
-  AcademicDegreeCreateSchema,
-} from "@/lib/types/acadmic-grades";
-import { auditedCreateAcadmicDegree } from "../../actions";
+import type { CreateAcademicDegreeInput } from "../../domain/AcademicDegree";
+import { CreateAcademicDegreeSchema } from "../../infrastructure/academic-degree.schema";
+import { useAcademicDegree } from "../hooks/useAcademicDegree";
 
-export default function CreateGradeDialog() {
-  const queryClient = useQueryClient();
-  const form = useForm<AcademicDegreeCreateDto>({
-    resolver: arktypeResolver(AcademicDegreeCreateSchema),
+export function CreateGradeDialog() {
+  const { create } = useAcademicDegree();
+  const [open, setOpen] = useState<boolean>(false);
+
+  const form = useForm({
+    resolver: arktypeResolver(CreateAcademicDegreeSchema),
     mode: "onChange",
     reValidateMode: "onSubmit",
     defaultValues: {
@@ -39,26 +37,11 @@ export default function CreateGradeDialog() {
     },
   });
 
-  const [open, setOpen] = useState<boolean>(false);
-  const onSubmit = async (data: AcademicDegreeCreateDto) => {
-    const result = await auditedCreateAcadmicDegree({
-      ...data,
-    });
+  const onSubmit = async (data: CreateAcademicDegreeInput) => {
+    const result = await create(data);
     if (result.isSuccess) {
-      toast.success("Grado académico creado exitosamente", {
-        description: `Se creó el grado académico con nombre ${result.value?.name}`,
-      });
       setOpen(false);
       form.reset();
-      queryClient.invalidateQueries({
-        queryKey: ["get-all-academic-degree-paginated"],
-      });
-    } else {
-      toast.error("Error al crear el grado académico", {
-        description: result.error
-          ? result.error
-          : "Error al crear el grado académico",
-      });
     }
   };
 
