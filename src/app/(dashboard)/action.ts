@@ -100,7 +100,8 @@ export const createRequest = async (data: {
     return {
       success: false,
       message:
-        error === "Se ha producido un error inesperado. Por favor, intente nuevamente."
+        error ===
+        "Se ha producido un error inesperado. Por favor, intente nuevamente."
           ? "Se deben completar todos los campos"
           : error,
     };

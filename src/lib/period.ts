@@ -9,7 +9,10 @@ export async function getOrUpdateActivePeriod(): Promise<AcademicPeriod | null> 
   });
 
   if (activePeriod) {
-    if (activePeriod.endDate >= currentDate && activePeriod.startDate <= currentDate) {
+    if (
+      activePeriod.endDate >= currentDate &&
+      activePeriod.startDate <= currentDate
+    ) {
       return activePeriod;
     }
   }
@@ -25,7 +28,7 @@ export async function getOrUpdateActivePeriod(): Promise<AcademicPeriod | null> 
     },
   });
 
-  if (newActivePeriod) { 
+  if (newActivePeriod) {
     return await db.academicPeriod.update({
       where: { id: newActivePeriod.id },
       data: { active: true },
