@@ -1,10 +1,8 @@
-import { DialogTrigger } from "@radix-ui/react-dialog";
 import { ArrowLeftIcon, Edit } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Dialog } from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -15,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import DeleteDialog from "../_components/delete-dialog";
 import { getActivityById } from "../actions";
+import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export default async function ActivityViewPage({
   params,
@@ -38,10 +37,10 @@ export default async function ActivityViewPage({
               <Link href={`/dashboard/activity/${id}/edit`}>Editar</Link>
             </span>
           </Button>
-          <Dialog>
-            <DialogTrigger asChild>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
               <Button variant="destructive">Eliminar</Button>
-            </DialogTrigger>
+            </AlertDialogTrigger>
             <DeleteDialog
               data={{
                 activityType: data.type,
@@ -55,7 +54,7 @@ export default async function ActivityViewPage({
                 nParticipants: data.participants.length,
               }}
             />
-          </Dialog>
+          </AlertDialog>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-6 h-full">

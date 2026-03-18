@@ -21,7 +21,9 @@ export class ActivityTypeError {
     return new ActivityTypeError(ActivityTypeErrorType.ALREADY_EXISTS, message);
   }
 
-  static hasRelations(message = "No se puede realizar la acción debido a relaciones existentes") {
+  static hasRelations(
+    message = "No se puede realizar la acción debido a relaciones existentes",
+  ) {
     return new ActivityTypeError(ActivityTypeErrorType.HAS_RELATIONS, message);
   }
 
@@ -30,7 +32,10 @@ export class ActivityTypeError {
   }
 
   static validationError(message = "Error de validación") {
-    return new ActivityTypeError(ActivityTypeErrorType.VALIDATION_ERROR, message);
+    return new ActivityTypeError(
+      ActivityTypeErrorType.VALIDATION_ERROR,
+      message,
+    );
   }
 
   static unauthorized(message = "No autorizado") {

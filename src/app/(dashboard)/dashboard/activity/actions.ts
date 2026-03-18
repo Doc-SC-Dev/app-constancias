@@ -86,27 +86,27 @@ export const getActivitiesPaginated = async ({
       where: isAdmin(session.user.role as Role)
         ? {}
         : {
-          participants: {
-            some: {
-              userId: {
-                equals: session.user.id,
+            participants: {
+              some: {
+                userId: {
+                  equals: session.user.id,
+                },
               },
             },
           },
-        },
     }),
     db.activity.findMany({
       where: isAdmin(session.user.role as Role)
         ? {}
         : {
-          participants: {
-            some: {
-              userId: {
-                equals: session.user.id,
+            participants: {
+              some: {
+                userId: {
+                  equals: session.user.id,
+                },
               },
             },
           },
-        },
       take: PAGE_SIZE,
       skip: start,
       include: {

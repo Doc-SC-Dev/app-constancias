@@ -60,9 +60,12 @@ const columns: ColumnDef<ActivityType>[] = [
                   },
                 );
               else
-                toast.success("El registro ha sido eliminado correctamente del sistema.", {
-                  description: `El tipo de actividad ${activityType.name.length > 25 ? `${activityType.name.slice(0, 25)}...` : activityType.name} ha sido eliminado correctamente`,
-                });
+                toast.success(
+                  "El registro ha sido eliminado correctamente del sistema.",
+                  {
+                    description: `El tipo de actividad ${activityType.name.length > 25 ? `${activityType.name.slice(0, 25)}...` : activityType.name} ha sido eliminado correctamente`,
+                  },
+                );
             }}
             description={`¿Estás seguro de que quieres eliminar el tipo de actividad ${activityType.name.length > 25 ? `${activityType.name.slice(0, 25)}...` : activityType.name}?`}
           />
