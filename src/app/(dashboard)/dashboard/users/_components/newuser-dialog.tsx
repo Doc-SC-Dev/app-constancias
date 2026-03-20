@@ -207,7 +207,6 @@ export default function NewUserDialog() {
                                     selected={field.value}
                                     onSelect={field.onChange}
                                     mode="single"
-                                    captionLayout="dropdown"
                                     fixedWeeks={true}
                                     locale={es}
                                   />

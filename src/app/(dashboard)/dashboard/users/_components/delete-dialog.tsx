@@ -2,15 +2,15 @@
 
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import {
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import type { User } from "@/lib/types/users";
 import { deleteUser } from "../actions";
@@ -38,13 +38,13 @@ export default function DeleteDialog({
   }
 
   return (
-    <DialogContent className="w-4xl">
-      <DialogHeader>
-        <DialogTitle>¿Estás seguro?</DialogTitle>
-        <DialogDescription>
+    <AlertDialogContent className="w-4xl">
+      <AlertDialogHeader>
+        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+        <AlertDialogDescription>
           Estás a punto de eliminar un usuario
-        </DialogDescription>
-      </DialogHeader>
+        </AlertDialogDescription>
+      </AlertDialogHeader>
       <div className="text-muted-foreground text-sm/normal">
         <span>Si eliminas este usuario:</span>
         <ul className="px-4 list-disc [&>li]:mt-2 py-1">
@@ -57,10 +57,10 @@ export default function DeleteDialog({
         <p>Te recomendamos hacerlo solo si estás completamente seguro.</p>
         <p className="font-bold">Esta acción no se puede deshacer.</p>
       </div>
-      <DialogFooter>
-        <DialogClose asChild>
+      <AlertDialogFooter>
+        <AlertDialogCancel asChild>
           <Button variant="outline">Cancelar</Button>
-        </DialogClose>
+        </AlertDialogCancel>
         <form onSubmit={form.handleSubmit(handleClick)}>
           <Button
             variant="destructive"
@@ -71,7 +71,7 @@ export default function DeleteDialog({
             {form.formState.isSubmitting ? "Eliminando..." : "Eliminar"}
           </Button>
         </form>
-      </DialogFooter>
-    </DialogContent>
+      </AlertDialogFooter>
+    </AlertDialogContent>
   );
 }

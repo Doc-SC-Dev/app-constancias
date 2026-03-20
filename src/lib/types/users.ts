@@ -25,11 +25,27 @@ export type UserWithAcademicDegree = User & {
   };
 };
 
+const rutSchema = type("string").narrow((s, ctx) => {
+  if (!/^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9k]{1}$/.test(s)) {
+    return ctx.reject({
+      code: "predicate",
+      message: "El RUT debe tener puntos y guion",
+    });
+  }
+  return true;
+});
+
 const roleSchema = type.enumerated(...Object.values(Role));
+
 export const userEditSchema = type({
-  name: "string >= 1",
-  rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9k]{1}$/,
-  email: "string.email",
+  id: "string",
+  name: type("string >= 1").configure({
+    message: "El nombre es un campo requerido, no puede estar vacío.",
+  }),
+  rut: rutSchema,
+  email: type("string.email").configure({
+    message: "Ingrese un email valido.",
+  }),
   role: roleSchema,
 });
 
@@ -44,16 +60,6 @@ const nameSchema = type("string").narrow((s, ctx) => {
     return ctx.reject({
       code: "predicate",
       message: "El nombre debe tener al menos 2 caracteres",
-    });
-  }
-  return true;
-});
-
-const rutSchema = type("string").narrow((s, ctx) => {
-  if (!/^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9k]{1}$/.test(s)) {
-    return ctx.reject({
-      code: "predicate",
-      message: "El RUT debe tener puntos y guion",
     });
   }
   return true;
