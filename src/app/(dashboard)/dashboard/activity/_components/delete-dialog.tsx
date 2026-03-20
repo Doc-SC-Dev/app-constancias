@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ export default function DeleteDialog({
   closeDialog,
 }: DialogContentProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const form = useForm();
   async function handleClick() {
     const { success, message } = await deleteActivity({
@@ -33,9 +35,10 @@ export default function DeleteDialog({
     });
     if (!success) {
       toast.error(message);
-      router.replace("/dashboard/activity");
     } else {
       toast.success(`Se eliminó exitosamente la actividad ${activity.name}`);
+      queryClient.invalidateQueries({ queryKey: ["list-activity"] });
+      router.replace("/dashboard/activity");
     }
     if (closeDialog) closeDialog();
   }

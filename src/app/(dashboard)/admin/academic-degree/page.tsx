@@ -1,15 +1,12 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { AcademicDegree } from "@/features/academic-degree/domain/AcademicDegree";
 import { getPaginatedAcademicDegreesAction } from "@/features/academic-degree/presentation/actions";
 import { ConfigGrades } from "@/features/academic-degree/presentation/components/ConfigGrades";
+import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
 
 export default async function AcademicDegreePage() {
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["get-all-academic-degree-paginated"],
     queryFn: ({ pageParam }) =>

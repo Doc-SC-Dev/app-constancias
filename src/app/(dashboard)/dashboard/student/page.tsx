@@ -1,11 +1,8 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import { auth, isAuthenticated } from "@/lib/auth";
+import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { Student } from "@/lib/types/students";
 import { columns } from "./_components/columns";
@@ -23,7 +20,7 @@ export default async function UsersPage() {
     redirect("/dashboard");
   }
 
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["list-students"],

@@ -1,13 +1,10 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { auth, isAuthenticated } from "@/lib/auth";
+import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { ExamsTable } from "./_components/exams-table";
-import { listExams, type Exams } from "./actions";
+import { type Exams, listExams } from "./actions";
 
 export default async function ExamsPage() {
   const session = await isAuthenticated();
@@ -24,7 +21,7 @@ export default async function ExamsPage() {
     redirect("/dashboard");
   }
 
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["list-exams"],

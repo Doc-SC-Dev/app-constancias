@@ -1,11 +1,8 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { Role } from "@/generated/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { isAdmin, Roles } from "@/lib/authorization/permissions";
+import getQueryClient from "@/lib/query-client";
 import { menus } from "@/lib/types/menus";
 import { getAcademicDegree } from "../action";
 import { DashboardCard } from "./_components/dashboard-card";
@@ -28,7 +25,7 @@ export default async function HomePage() {
       user.role === Roles.PROFESSOR ||
       user.role === Roles.STUDENT,
   };
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await Promise.all([
     queryClient.prefetchQuery({

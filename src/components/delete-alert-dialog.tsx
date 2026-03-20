@@ -15,7 +15,7 @@ export default function DeleteAlertDialog({
   onAccept,
 }: {
   description: string;
-  onAccept: () => void;
+  onAccept: () => Promise<void>;
 }) {
   return (
     <AlertDialogContent>

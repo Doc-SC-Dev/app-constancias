@@ -1,5 +1,6 @@
 import { ArrowLeftIcon, Edit } from "lucide-react";
 import Link from "next/link";
+import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -11,9 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDate } from "@/lib/utils";
 import DeleteDialog from "../_components/delete-dialog";
 import { getActivityById } from "../actions";
-import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export default async function ActivityViewPage({
   params,
@@ -73,8 +74,8 @@ export default async function ActivityViewPage({
               Periodo
             </span>
             <span className="text-sm">
-              {new Date(data.startAt).toLocaleDateString()} -{" "}
-              {data.endAt && new Date(data.endAt).toLocaleDateString()}
+              {formatDate(data.startAt)}
+              {data.endAt && ` - ${formatDate(data.endAt)}`}
             </span>
           </div>
         </div>

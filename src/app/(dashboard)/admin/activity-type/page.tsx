@@ -1,15 +1,12 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { ActivityType } from "@/features/activity-type/domain/ActivityType";
 import { getPaginatedActivityTypesAction } from "@/features/activity-type/presentation/actions";
+import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import ActivityTypesDT from "./_components/tables/activity-types-dt";
 
 export default async function ConfigActivityType() {
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["get-paginated-activity-types"],
     queryFn: ({ pageParam }) => getPaginatedActivityTypesAction({ pageParam }),

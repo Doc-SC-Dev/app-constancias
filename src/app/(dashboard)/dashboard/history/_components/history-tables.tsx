@@ -1,8 +1,5 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import getQueryClient from "@/lib/query-client";
 import type { HistoryEntry } from "@/lib/types/history";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { User } from "@/lib/types/users";
@@ -16,7 +13,7 @@ export async function StandardTableWrapper({
   user: User;
   isAdmin: boolean;
 }) {
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["list-history-standard"],
@@ -48,7 +45,7 @@ export async function OtherTableWrapper({
   user: User;
   isAdmin: boolean;
 }) {
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["list-history-other"],

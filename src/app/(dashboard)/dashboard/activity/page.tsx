@@ -1,12 +1,9 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import { LazyCreateActivityDialog } from "@/components/dyamic-dialogs";
 import { auth, isAuthenticated } from "@/lib/auth";
+import getQueryClient from "@/lib/query-client";
 import type { ActivityDTO } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { columns } from "./_components/activity-columns";
@@ -30,7 +27,7 @@ export default async function ActivityPage() {
     },
   });
 
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["list-activity"],
