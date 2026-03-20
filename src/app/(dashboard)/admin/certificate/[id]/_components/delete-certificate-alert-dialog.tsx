@@ -1,4 +1,5 @@
 "use client";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import DeleteAlertDialog from "@/components/delete-alert-dialog";
@@ -11,25 +12,23 @@ export default function DeleteCertificateAlertDialog({
   certificate: Pick<Certificate, "id" | "name">;
 }) {
   const router = useRouter();
-  const handleDelete = () => {
-    toast.promise(deleteCertificate(certificate.id), {
-      loading: "Eliminando certificado...",
-      success: ({ error, value, isSuccess }) => {
-        if (isSuccess) {
-          router.replace("/admin/certificate");
-          return {
-            message: "Certificado eliminado exitosamente",
-            description: `Certificado ${value.name} eliminado exitosamente`,
-          };
-        }
-        return {
-          message: "Error al eliminar certificado",
-          description: error,
-          type: "error",
-        };
-      },
-      error: (error) => error,
+  const queryClient = useQueryClient();
+  const handleDelete = async () => {
+    const { isSuccess, value, error } = await deleteCertificate(certificate.id);
+    if (!isSuccess) {
+      toast.error("Error al eliminar certificado", {
+        description: error,
+      });
+      return;
+    }
+    toast.success("Certificado eliminado exitosamente", {
+      description: `Certificado ${value.name} eliminado exitosamente`,
     });
+    queryClient.invalidateQueries({
+      queryKey: ["get-paginated-certificates"],
+    });
+
+    router.replace("/admin/certificate");
   };
   return (
     <DeleteAlertDialog

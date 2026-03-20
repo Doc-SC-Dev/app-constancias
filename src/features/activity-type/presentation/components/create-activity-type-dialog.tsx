@@ -1,4 +1,6 @@
+"use client";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,8 +13,9 @@ import {
 import CreateActivityTypeForm from "./create-activity-type-form";
 
 export default function CreateActivityTypeDialog() {
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -26,7 +29,7 @@ export default function CreateActivityTypeDialog() {
             Define el nombre y los roles de participación requeridos.
           </DialogDescription>
         </DialogHeader>
-        <CreateActivityTypeForm />
+        <CreateActivityTypeForm setOpen={setOpen} />
       </DialogContent>
     </Dialog>
   );

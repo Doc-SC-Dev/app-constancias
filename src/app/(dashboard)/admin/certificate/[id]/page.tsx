@@ -46,7 +46,7 @@ const CertificateDetailPageContent = ({
         className="w-full flex justify-between gap mb-4"
       >
         <Button variant="ghost" asChild>
-          <Link href="/admin?tab=certificates">
+          <Link href="/admin/certificate">
             <ArrowLeft />
           </Link>
         </Button>

@@ -100,11 +100,12 @@ export const deleteCertificate = async (
     const deletedCertificate = await db.certificate.delete({
       where: { id },
     });
-    revalidatePath("/admin?tab=certificates");
+    revalidatePath("/admin/certificate");
     return Result.ok(deletedCertificate).serialize();
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2003") {
+        console.error(error.message);
         return Result.fail(
           "No se pudo eliminar el certificado por que hay solicitudes que dependen de el",
         ).serialize();

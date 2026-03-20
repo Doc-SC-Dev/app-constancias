@@ -1,5 +1,7 @@
+"use client";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { Edit } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,8 +19,9 @@ export function EditDirectorDialog({
   userId: string;
   name: string;
 }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="lg">
           <Edit />
@@ -35,7 +38,7 @@ export function EditDirectorDialog({
             las métricas del equipo.
           </DialogDescription>
         </DialogHeader>
-        <ChangeDirectorForm userId={userId} />
+        <ChangeDirectorForm userId={userId} setOpen={setOpen} />
       </DialogContent>
     </Dialog>
   );

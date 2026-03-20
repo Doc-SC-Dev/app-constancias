@@ -49,11 +49,13 @@ export function selectTemplate(
         t.role === null &&
         t.participantTypeId === null,
     );
-    if (
-      activityTemplate &&
-      activityTemplate.activityTypeId === request.activity.activityType.id
-    ) {
-      return activityTemplate;
+
+    if (activityTemplate) {
+      return (
+        templates.find(
+          (t) => t.activityTypeId === request.activity?.activityType.id,
+        ) || null
+      );
     }
 
     // Case 3: Participant-type-based

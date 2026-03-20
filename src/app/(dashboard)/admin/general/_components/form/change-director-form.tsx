@@ -20,7 +20,13 @@ const newDirectorSchema = type({
 });
 export type NewDirector = typeof newDirectorSchema.infer;
 
-export default function ChangeDirectorForm({ userId }: { userId: string }) {
+export default function ChangeDirectorForm({
+  userId,
+  setOpen,
+}: {
+  userId: string;
+  setOpen: (open: boolean) => void;
+}) {
   const queryClient = useQueryClient();
   const form = useForm<NewDirector>({
     resolver: arktypeResolver(newDirectorSchema),
@@ -42,6 +48,7 @@ export default function ChangeDirectorForm({ userId }: { userId: string }) {
       queryClient.invalidateQueries({
         queryKey: ["get-non-director-users"],
       });
+      setOpen(false);
     } else if (error) {
       toast.error("Ocurrió un error", { description: error });
     }

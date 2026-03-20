@@ -17,7 +17,11 @@ import {
 import { createActivityTypeAction } from "../actions";
 import ParticipantTypeField from "./participant-type-field";
 
-export default function CreateActivityTypeForm() {
+export default function CreateActivityTypeForm({
+  setOpen,
+}: {
+  setOpen: (open: boolean) => void;
+}) {
   const queryClient = useQueryClient();
   const form = useForm<CreateActivityTypeFormDto>({
     resolver: arktypeResolver(CreateActivityTypeSchema),
@@ -32,23 +36,21 @@ export default function CreateActivityTypeForm() {
   const onSubmit = async (data: CreateActivityTypeFormDto) => {
     const result = await createActivityTypeAction(data);
 
-    if (!result.isSuccess && result.error) {
+    if (!result.isSuccess) {
       toast.error("Error al crear tipo de actividad", {
         description: result.error,
       });
       return;
     }
 
-    if (result.value) {
-      toast.success("Tipo de actividad creado", {
-        description: `Se creó correctamente "${result.value.name}".`,
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["get-paginated-activity-types"],
-      });
-      form.reset();
-      // Close dialog handled by DialogClose or parent
-    }
+    toast.success("Tipo de actividad creado", {
+      description: `Se creó correctamente "${result.value.name}".`,
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["get-paginated-activity-types"],
+    });
+    form.reset();
+    setOpen(false);
   };
 
   return (

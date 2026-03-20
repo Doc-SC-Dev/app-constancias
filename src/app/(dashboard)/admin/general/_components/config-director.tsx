@@ -1,23 +1,37 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/generated/prisma";
 import { db } from "@/lib/db";
+import getQueryClient from "@/lib/query-client";
+import { getNonDirectorUsers } from "../actions";
 import { EditDirectorDialog } from "./dialogs/edit-director-dialog";
 
 export default async function ConfigDirector() {
-  const director = await db.user.findFirst({
-    where: {
-      isDirector: {
-        equals: true,
+  const queryClient = getQueryClient();
+  const [director, _] = await Promise.all([
+    db.user.findFirst({
+      where: {
+        isDirector: {
+          equals: true,
+        },
       },
-    },
-  });
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["get-non-director-users"],
+      queryFn: getNonDirectorUsers,
+    }),
+  ]);
   if (!director) {
     return <ConfigDirectorError />;
   }
-  return <ConfigDirectorContent director={director} />;
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ConfigDirectorContent director={director} />
+    </HydrationBoundary>
+  );
 }
 
 function ConfigDirectorContent({ director }: { director: User }) {
