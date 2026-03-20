@@ -32,9 +32,14 @@ export async function loginAction(
     return { success: true, message: "Inicio de sesión exitoso" };
   } catch (error) {
     if (error instanceof APIError) {
-      console.error(error);
       if (error.status === "UNAUTHORIZED") {
         return { success: false, message: "Correo o contraseña incorrecta" };
+      }
+      if (error.status === "FORBIDDEN") {
+        return {
+          success: false,
+          message: "No tienes permiso para iniciar sesión",
+        };
       }
     }
     if (error instanceof PrismaClientKnownRequestError) {

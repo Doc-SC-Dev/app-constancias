@@ -125,19 +125,6 @@ export const dbWithAutdit = () =>
             resourceId = String(oldValue.id);
           }
 
-          // Registrar auditoría con tipos limpios (parseamos para forzar que sea JSON válido para Prisma)
-          // await db.log.create({
-          //   data: {
-          //     userName: ctx.userName,
-          //     userId: ctx.userId ?? null,
-          //     action: operation,
-          //     resource: model,
-          //     resourceId,
-          //     oldValue: oldValue ? JSON.parse(JSON.stringify(oldValue)) : null,
-          //     newValue: newValue ? JSON.parse(JSON.stringify(newValue)) : null,
-          //   },
-          // });
-
           console.log(
             JSON.stringify(
               {
@@ -157,6 +144,19 @@ export const dbWithAutdit = () =>
               2,
             ),
           );
+
+          // Registrar auditoría con tipos limpios (parseamos para forzar que sea JSON válido para Prisma)
+          await db.log.create({
+            data: {
+              userName: ctx.userName,
+              userId: ctx.userId ?? null,
+              action: operation,
+              resource: model,
+              resourceId,
+              oldValue: oldValue ? JSON.parse(JSON.stringify(oldValue)) : null,
+              newValue: newValue ? JSON.parse(JSON.stringify(newValue)) : null,
+            },
+          });
 
           return result;
         },
