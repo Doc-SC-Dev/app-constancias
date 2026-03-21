@@ -72,6 +72,7 @@ export default function CertificateDT() {
       emptyDescription="Cree un nuevo certificado para verlo en esta vista"
       placeholder="Filtrar certificados"
       createDialog={CreateCertificateDialog}
+      containerClassName="h-fit max-h-full"
     />
   );
 }
