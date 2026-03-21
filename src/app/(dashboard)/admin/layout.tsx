@@ -6,9 +6,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="container mx-auto h-full">
+    <div className="container max-h-full mx-auto flex flex-col">
       <NavigationLink />
-      <div className="space-y-4 mt-4">{children}</div>
+      <div className="flex-1 flex flex-col min-h-0 mt-4">{children}</div>
     </div>
   );
 }

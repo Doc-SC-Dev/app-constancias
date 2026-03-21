@@ -33,7 +33,9 @@ export async function StandardTableWrapper({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <HistoryDataTable user={user} isAdmin={isAdmin} filter="standard" />
+      <div className="container flex-1 mx-auto flex flex-col gap-4">
+        <HistoryDataTable user={user} isAdmin={isAdmin} filter="standard" />
+      </div>
     </HydrationBoundary>
   );
 }
@@ -65,7 +67,9 @@ export async function OtherTableWrapper({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <HistoryDataTable user={user} isAdmin={isAdmin} filter="other" />
+      <div className="container flex-1 mx-auto flex flex-col gap-4">
+        <HistoryDataTable user={user} isAdmin={isAdmin} filter="other" />
+      </div>
     </HydrationBoundary>
   );
 }

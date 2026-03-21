@@ -40,7 +40,7 @@ export default async function ActivityPage() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container mx-auto space-y-4">
+      <div className="container max-h-full mx-auto flex flex-col gap-4">
         <h3 className="text-2xl font-bold">Actividades</h3>
         <DataTable
           emptyTitle="No hay actividades"
@@ -50,6 +50,7 @@ export default async function ActivityPage() {
           queryFn={getActivitiesPaginated}
           queryKey="list-activity"
           placeholder="Filtrar datos en columnas"
+          containerClassName="h-fit max-h-full"
         />
       </div>
     </HydrationBoundary>

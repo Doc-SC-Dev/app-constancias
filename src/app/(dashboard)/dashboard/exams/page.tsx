@@ -35,7 +35,7 @@ export default async function ExamsPage() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container h-full mx-auto flex flex-col gap-4">
+      <div className="container max-h-full mx-auto flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Exámenes</h2>
         <ExamsTable isStudent={isStudent} />
       </div>
