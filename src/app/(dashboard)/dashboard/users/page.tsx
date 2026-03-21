@@ -34,7 +34,7 @@ export default async function UsersPage() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container h-full mx-auto flex flex-col gap-4">
+      <div className="container max-h-full mx-auto flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Usuarios</h2>
         <DataTable<User>
           emptyTitle="No hay usuarios"
@@ -44,6 +44,7 @@ export default async function UsersPage() {
           queryKey="list-users"
           queryFn={listUsers}
           placeholder="Filtrar por Nombre, Rol, Email y RUT"
+          containerClassName="h-fit max-h-full"
         />
       </div>
     </HydrationBoundary>

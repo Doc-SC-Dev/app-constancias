@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/data-table";
+import { LazyDataTable } from "@/components/dynamic-table";
 import { TableCell } from "@/components/table-cell";
 import { formatDate } from "@/lib/utils";
 import type { AcademicDegree } from "../../domain/AcademicDegree";
@@ -62,7 +62,7 @@ const columns: ColumnDef<AcademicDegree>[] = [
 
 export function ConfigGrades() {
   return (
-    <DataTable
+    <LazyDataTable
       columns={columns}
       queryKey="get-all-academic-degree-paginated"
       queryFn={getPaginatedAcademicDegreesAction}
@@ -70,6 +70,7 @@ export function ConfigGrades() {
       emptyTitle="No hay grados académicos definidos"
       emptyDescription="Para ver grados académicos comience definiendo un grado académico."
       createDialog={CreateGradeDialog}
+      containerClassName="h-fit max-h-full"
     />
   );
 }

@@ -46,6 +46,7 @@ export interface DataTableProps<TData> {
   emptyDescription?: string;
   onDialog?: boolean;
   size?: "bg" | "md" | "sm";
+  containerClassName?: string;
 }
 
 export function DataTable<TData>({
@@ -58,6 +59,7 @@ export function DataTable<TData>({
   emptyTitle,
   onDialog = false,
   size = "bg",
+  containerClassName,
 }: DataTableProps<TData>) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [globalFilter, setGlobalFilter] = useState<"">("");
@@ -138,23 +140,28 @@ export function DataTable<TData>({
 
   const columnWidths = useMemo(() => {
     const widths: Record<string, number> = {};
-    const measureColumns = ["name", "user", "email"];
 
     memoColumns.forEach((col: ColumnDef<TData>) => {
-      const colKey = (col as { accessordKey?: string }).accessordKey;
-      if (colKey && measureColumns.includes(colKey)) {
-        let maxLen = 0;
+      const colId =
+        col.id || (col as { accessorKey?: string; id: string }).accessorKey;
+      if (!colId) return;
+
+      let maxLen = typeof col.header === "string" ? col.header.length : 11;
+      const colKey = (col as { accessorKey?: string; id: string }).accessorKey;
+      if (colKey) {
         flatData.forEach((row: TData) => {
           const val = (row as Record<string, unknown>)[colKey];
           if (typeof val === "string") {
             maxLen = Math.max(maxLen, val.length);
+          } else if (typeof val === "number") {
+            maxLen = Math.max(maxLen, String(val).length);
+          } else if (val instanceof Date) {
+            maxLen = Math.max(maxLen, 12);
           }
         });
-        const estimated = Math.max(150, Math.min(maxLen * 8 + 48, 400));
-        if (estimated > 150) {
-          widths[colKey] = estimated;
-        }
       }
+      const estimated = Math.max(100, Math.min(maxLen * 8 + 48, 500));
+      widths[colId] = estimated;
     });
     return widths;
   }, [flatData, memoColumns]);
@@ -195,9 +202,9 @@ export function DataTable<TData>({
     );
   }
   return (
-    <div className="container flex flex-col mx-auto h-full gap-4">
+    <div className="container flex-1 flex flex-col mx-auto min-h-0 gap-4">
       {!onDialog && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-end justify-between gap-4">
           <div className="grid w-full max-w-sm items-center gap-3">
             <Label htmlFor="fuzzy-input">Filtrar</Label>
             <Input
@@ -212,11 +219,17 @@ export function DataTable<TData>({
         </div>
       )}
       <div
-        className="container rounded-md border relative"
-        style={{
-          height: `${getHeight()}px`,
-          overflow: "auto",
-        }}
+        className={cn(
+          "container rounded-md border relative",
+          containerClassName,
+        )}
+        style={
+          containerClassName
+            ? {
+                overflow: "auto",
+              }
+            : { height: `${getHeight()}px`, overflow: "auto" }
+        }
         ref={tableContainerRef}
         onScroll={(e) => fetchMoreOnBottomReached(e.currentTarget)}
       >
@@ -239,14 +252,10 @@ export function DataTable<TData>({
                   return (
                     <TableHead
                       key={header.id}
-                      className={cn(
-                        "flex items-center",
-                        header.column.columnDef.meta?.className ??
-                          (dynamicWidth ? "flex-none" : "flex-1"),
-                      )}
+                      className={cn("flex items-center", "flex-1")}
                       style={
                         dynamicWidth
-                          ? { width: `${dynamicWidth}px` }
+                          ? { minWidth: `${dynamicWidth}px` }
                           : undefined
                       }
                     >
@@ -296,13 +305,12 @@ export function DataTable<TData>({
                             <TableCell
                               key={cell.id}
                               className={cn(
-                                "flex",
-                                cell.column.columnDef.meta?.className ??
-                                  (dynamicWidth ? "flex-none" : "flex-1"),
+                                "flex flex-1",
+                                cell.column.columnDef.meta?.className,
                               )}
                               style={
                                 dynamicWidth
-                                  ? { width: `${dynamicWidth}px` }
+                                  ? { minWidth: `${dynamicWidth}px` }
                                   : undefined
                               }
                             >
