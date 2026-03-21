@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import { DataTable } from "@/components/data-table";
+import { LazyDataTable } from "@/components/dynamic-table";
 import { auth, isAuthenticated } from "@/lib/auth";
 import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
@@ -33,15 +33,16 @@ export default async function UsersPage() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container h-full mx-auto flex flex-col gap-4">
+      <div className="container max-h-full mx-auto flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Estudiantes</h2>
-        <DataTable<Student>
+        <LazyDataTable<Student>
           emptyDescription="No hay estudiantes. Para iniciar debe crear un estudiante"
           emptyTitle="No hay estudiantes"
           columns={columns}
           queryKey="list-students"
           queryFn={listStudents}
           placeholder="Filtrar por matrícula, nombre o email"
+          containerClassName="h-fit max-h-full"
         />
       </div>
     </HydrationBoundary>

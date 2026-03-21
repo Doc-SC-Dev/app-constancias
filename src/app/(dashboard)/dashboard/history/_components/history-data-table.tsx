@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { DataTable } from "@/components/data-table";
+import { LazyDataTable } from "@/components/dynamic-table";
 import type { User } from "@/lib/types/users";
 import { getHistoryPaginated } from "../actions";
 import { getColumns } from "./colums";
@@ -35,7 +35,7 @@ export function HistoryDataTable({
   const isStandard = filter === "standard";
 
   return (
-    <DataTable
+    <LazyDataTable
       emptyDescription={
         isStandard
           ? "No se han recibido solicitudes de constancia"
@@ -58,6 +58,7 @@ export function HistoryDataTable({
           ? "Filtrar por Nombre, Rol, RUT y Solicitud"
           : "Filtrar por Nombre de Solicitud"
       }
+      containerClassName="h-fit max-h-full"
     />
   );
 }

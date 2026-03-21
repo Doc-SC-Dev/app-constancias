@@ -85,6 +85,7 @@ export default function ActivityTypesDT() {
       emptyTitle="No se han creado tipos de actividades"
       emptyDescription="Para visualizar tipos de actividades empiece creando su primer tipo de actividad"
       createDialog={CreateActivityTypeDialog}
+      containerClassName="h-fit max-h-full"
     />
   );
 }

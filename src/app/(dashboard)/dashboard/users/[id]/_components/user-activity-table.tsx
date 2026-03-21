@@ -1,5 +1,5 @@
 "use client";
-import { DataTable } from "@/components/data-table";
+import { LazyDataTable } from "@/components/dynamic-table";
 import { listUserActivities } from "../../actions";
 import { columns } from "./user-activity-columns";
 
@@ -11,14 +11,14 @@ export default function UserActivitiesTable({
   userId,
 }: UserActivitiesTableProps) {
   return (
-    <DataTable
-      size="sm"
+    <LazyDataTable
       columns={columns}
       queryFn={({ pageParam }) => listUserActivities({ pageParam, userId })}
       queryKey="list-user-activity"
       placeholder="Filtrar por actividad..."
       emptyTitle="No hay actividades"
       emptyDescription="El usuario no tiene ninguna actividad registrada"
+      containerClassName="flex-1"
     />
   );
 }
