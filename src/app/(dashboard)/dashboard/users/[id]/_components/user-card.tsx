@@ -47,8 +47,8 @@ export default async function UserCard({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Card>
-        <CardHeader className="flex justify-between">
+      <Card className="h-full">
+        <CardHeader className="flex justify-between items-center">
           <Button variant="link" asChild>
             <Link
               href="/dashboard/users"
@@ -61,8 +61,8 @@ export default async function UserCard({
           <UserEditSheet user={user} />
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="container flex flex-1 items-center justify-between mx-auto">
-            <div className="flex gap-10">
+          <div className="container flex flex-1 items-start lg:items-center lg:flex-row flex-col justify-between">
+            <div className="flex gap-4 flex-row">
               <Avatar className="h-16 w-16">
                 <AvatarImage src={user.image ?? ""} />
                 <AvatarFallback className="text-xl font-bold">
@@ -70,15 +70,15 @@ export default async function UserCard({
                 </AvatarFallback>
               </Avatar>
 
-              <div className="flex flex-col gap-3">
-                <span className="flex items-center space-x-10">
+              <div className="flex flex-col gap-2">
+                <span className="flex items-center gap-4">
                   <CardTitle className="text-4xl">{user.name}</CardTitle>
                   <Badge variant="secondary">
                     {Textos.Role[user.role || ""] || user.role}
                   </Badge>
                 </span>
 
-                <span className="flex items-center space-x-3">
+                <span className="flex items-center gap-2">
                   <MailIcon className="w-4 h-4" />
                   <p className="text-sm/normal text-muted-foreground">
                     {user.email}
@@ -92,14 +92,16 @@ export default async function UserCard({
             </div>
           </div>
 
-          <div className="flex flex-col container mx-auto">
-            <h3 className="text-lg font-semibold mb-4">Peticiones</h3>
-            <UserRequestTable userId={user.id} />
-          </div>
-          <div className="flex flex-col container mx-auto">
-            <h3 className="text-lg font-semibold mb-4">Actividades</h3>
-            <UserActivitiesTable userId={user.id} />
-          </div>
+          <section className="h-[600px] flex flex-col gap-8">
+            <div className="flex-1 min-h-0 flex flex-col ">
+              <h3 className="text-lg font-semibold mb-4">Peticiones</h3>
+              <UserRequestTable userId={user.id} />
+            </div>
+            <div className="flex-1 min-h-0 flex flex-col ">
+              <h3 className="text-lg font-semibold mb-4">Actividades</h3>
+              <UserActivitiesTable userId={user.id} />
+            </div>
+          </section>
         </CardContent>
       </Card>
     </HydrationBoundary>

@@ -36,7 +36,7 @@ export const columns: ColumnDef<User>[] = [
         setIsLoading(false);
       };
       return (
-        <div className="flex flex-1 items-center justify-center space-x-2">
+        <div className="flex flex-1 items-center justify-center gap-2">
           <Switch
             id={`switch-${row.id}`}
             checked={checked}
