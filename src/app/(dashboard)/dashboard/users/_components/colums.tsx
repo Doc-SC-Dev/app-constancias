@@ -62,17 +62,18 @@ export const columns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: "role",
+    accessorFn: (row) => Textos.Role[row.role as string] || row.role,
+    id: "role",
     header: () => <p className="flex flex-1 justify-center">Rol</p>,
     cell({ row }) {
       return (
         <span className="flex flex-1 items-center justify-center">
           <Badge
             variant={
-              row.getValue("role") === "admin" ? "destructive" : "outline"
+              row.original.role === "admin" ? "destructive" : "outline"
             }
           >
-            {Textos.Role[row.getValue("role") as string] || row.getValue("role")}
+            {row.getValue("role") as string}
           </Badge>
         </span>
       );

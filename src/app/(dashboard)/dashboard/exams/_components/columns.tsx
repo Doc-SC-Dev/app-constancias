@@ -22,9 +22,17 @@ function isExamEditable(startAt: string): boolean {
   return new Date() >= editableFrom;
 }
 
-const ActionsCell = ({ exam }: { exam: Exams }) => {
+const ActionsCell = ({ exam, isAdmin }: { exam: Exams; isAdmin: boolean }) => {
   const [open, setOpen] = useState(false);
-  const canEdit = isExamEditable(exam.startAt);
+  const isTimeValid = isExamEditable(exam.startAt);
+  const isApproved = exam.grade !== null && exam.grade >= 4.0;
+  
+  const canEdit = isTimeValid && (isAdmin || !isApproved);
+
+  let tooltipText = "Debe esperar al menos un día después del examen para editar la nota.";
+  if (isTimeValid && !isAdmin && isApproved) {
+    tooltipText = "No puedes editar un examen que está aprobado.";
+  }
 
   return (
     <span className="flex flex-1 items-center justify-center">
@@ -44,7 +52,7 @@ const ActionsCell = ({ exam }: { exam: Exams }) => {
           </TooltipTrigger>
           {!canEdit && (
             <TooltipContent>
-              <p>Debe esperar al menos un día después del examen para editar la nota.</p>
+              <p>{tooltipText}</p>
             </TooltipContent>
           )}
         </Tooltip>
@@ -58,7 +66,7 @@ const ActionsCell = ({ exam }: { exam: Exams }) => {
   );
 };
 
-export const columns: ColumnDef<Exams>[] = [
+export const getColumns = (isAdmin: boolean): ColumnDef<Exams>[] => [
   {
     accessorKey: "activityName",
     header: "Actividades",
@@ -162,7 +170,7 @@ export const columns: ColumnDef<Exams>[] = [
     enableGlobalFilter: false,
     cell: ({ row }) => {
       const exam = row.original;
-      return <ActionsCell exam={exam} />;
+      return <ActionsCell exam={exam} isAdmin={isAdmin} />;
     },
   },
 ];
