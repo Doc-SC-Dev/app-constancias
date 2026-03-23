@@ -25,11 +25,22 @@ export default async function ConfigDirector() {
     }),
   ]);
   if (!director) {
-    return <ConfigDirectorError />;
+    return (
+      <div className="flex flex-col gap-4 w-full">
+        <h1 className="text-2xl">Director del Programa</h1>
+        <ConfigDirectorError />
+      </div>
+    );
   }
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ConfigDirectorContent director={director} />
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex items-center justify-between w-full">
+          <h1 className="text-2xl">Director del Programa</h1>
+          <EditDirectorDialog userId={director.id} name={director.name} />
+        </div>
+        <ConfigDirectorContent director={director} />
+      </div>
     </HydrationBoundary>
   );
 }
@@ -48,9 +59,6 @@ function ConfigDirectorContent({ director }: { director: User }) {
           <p className="text-2xl">{director.name}</p>
           <p className="text-lg">{director.email}</p>
         </div>
-      </div>
-      <div className="flex flex-1 justify-items-start">
-        <EditDirectorDialog userId={director.id} name={director.name} />
       </div>
     </div>
   );
@@ -71,14 +79,17 @@ function ConfigDirectorError() {
 }
 export function ConfigDirectorLoading() {
   return (
-    <div className="flex items-center">
-      <div className="container mx-auto flex items-center gap-10">
-        <div className="flex w-fit items-center gap-4">
-          <Skeleton className="size-20 shrink-0 rounded-full bg-gray-300" />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-6 w-[150] bg-gray-300" />
-          <Skeleton className="h-4 w-[150] bg-gray-300" />
+    <div className="flex flex-col gap-4 w-full">
+      <h1 className="text-2xl">Director del Programa</h1>
+      <div className="flex items-center">
+        <div className="container mx-auto flex items-center gap-10">
+          <div className="flex w-fit items-center gap-4">
+            <Skeleton className="size-20 shrink-0 rounded-full bg-gray-300" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-6 w-[150] bg-gray-300" />
+            <Skeleton className="h-4 w-[150] bg-gray-300" />
+          </div>
         </div>
       </div>
     </div>

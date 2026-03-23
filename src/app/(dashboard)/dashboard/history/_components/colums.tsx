@@ -90,14 +90,15 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
   },
 
   {
-    accessorKey: "role",
+    accessorFn: (row) => Textos.Role[row.role as string] || row.role,
+    id: "role",
     header: () => <span className="flex flex-1 justify-center">Rol</span>,
     cell: ({ row }) => {
       const role = row.original.role;
       return (
         <span className="flex flex-1 items-center justify-center">
           <Badge variant={role === "administrator" ? "destructive" : "outline"}>
-            {Textos.Role[role as string] || role}
+            {row.getValue("role") as string}
           </Badge>
         </span>
       );
