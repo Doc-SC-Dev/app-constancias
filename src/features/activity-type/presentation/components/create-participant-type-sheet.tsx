@@ -34,7 +34,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
-import type { Role } from "@/lib/authorization/permissions";
+import { Roles } from "@/lib/authorization/permissions";
 import { Textos } from "@/lib/utils";
 import {
   type CreateParticipantTypeForm,
@@ -42,7 +42,10 @@ import {
 } from "../../infrastructure/activity-type.schema";
 import { createParticipantTypeAction } from "../actions";
 
-const AVAILABLE_ROLES: Role[] = ["STUDENT", "PROFESSOR"];
+const AVAILABLE_ROLES: (Roles.STUDENT | Roles.PROFESSOR)[] = [
+  Roles.PROFESSOR,
+  Roles.STUDENT,
+];
 
 export default function CreateParticipantTypeSheet({
   activityTypeId,

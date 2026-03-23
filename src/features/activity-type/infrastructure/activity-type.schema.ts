@@ -8,7 +8,7 @@ export const CreateParticipantTypeSchema = type({
   name: "string >= 2",
   roles: "('STUDENT' | 'PROFESSOR')[]",
   activityTypeId: "string",
-  "max?": type("number"),
+  max: type("number | null"),
   min: "number >= 0",
 });
 

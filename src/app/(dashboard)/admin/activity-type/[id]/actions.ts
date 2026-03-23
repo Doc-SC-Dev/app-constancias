@@ -25,7 +25,6 @@ export async function getActivityTypeById(id: string) {
           select: {
             id: true,
             name: true,
-            required: true,
             roles: true,
             createdAt: true,
           },
@@ -64,7 +63,6 @@ async function createParticipantType(data: CreateParticipantTypeInput) {
   const participantType = await dbWithAutdit().participantType.create({
     data: {
       name: data.name,
-      required: data.required,
       roles: data.roles,
       activityType: {
         connect: { id: data.activityTypeId },
@@ -73,7 +71,6 @@ async function createParticipantType(data: CreateParticipantTypeInput) {
     select: {
       id: true,
       name: true,
-      required: true,
       roles: true,
       createdAt: true,
     },
@@ -107,13 +104,11 @@ async function updateParticipantType(data: UpdateParticipantTypeInput) {
     where: { id: data.id },
     data: {
       name: data.name,
-      required: data.required,
       roles: data.roles,
     },
     select: {
       id: true,
       name: true,
-      required: true,
       roles: true,
       createdAt: true,
     },
