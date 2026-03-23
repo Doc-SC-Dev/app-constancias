@@ -2,6 +2,30 @@ import type { CertificateTemplate } from "@/generated/prisma";
 import type { FullRequest } from "../types/request.types";
 
 export function resolveTemplatePath(obj: unknown, path: string): string {
+  if (!path.length) return path;
+
+  // Handle ternary: path == value ? truthy : falsy
+  const ternaryMatch = path.match(
+    /^(.+?)\s*==\s*(.+?)\s*\?\s*(.+?)\s*:\s*(.+)$/,
+  );
+  if (ternaryMatch) {
+    const [, condPath, condValue, truthy, falsy] = ternaryMatch;
+    const resolvedCondValue = resolveSinglePath(obj, condPath.trim());
+    return String(resolvedCondValue) === condValue.trim()
+      ? truthy.trim()
+      : falsy.trim();
+  }
+
+  // Handle space separated paths
+  const subPaths = path.trim().split(/\s+/);
+  if (subPaths.length > 1) {
+    return subPaths.map((p) => resolveSinglePath(obj, p)).join(" ");
+  }
+
+  return resolveSinglePath(obj, path);
+}
+
+function resolveSinglePath(obj: unknown, path: string): string {
   const parts = path.replace(/\[(\d+)\]/g, ".$1").split(".");
   let current: unknown = obj;
   for (const part of parts) {
@@ -15,7 +39,7 @@ export function renderTemplate(
   template: string,
   context: Record<string, unknown>,
 ): string {
-  return template.replace(/\{([\w.[\]]+)\}/g, (_, path) => {
+  return template.replace(/\{(.+?)\}/g, (_, path) => {
     try {
       return resolveTemplatePath(context, path);
     } catch (e) {

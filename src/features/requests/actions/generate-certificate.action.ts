@@ -80,7 +80,11 @@ export async function generateCertificateAction(
     // 5. Fetch Director programmatically (separate from main object)
     const directorUser = await db.user.findFirst({
       where: { isDirector: true },
-      select: { name: true },
+      select: {
+        name: true,
+        academicDegree: { select: { title: true } },
+        gender: true,
+      },
     });
     if (!directorUser)
       return Result.fail(
@@ -88,10 +92,10 @@ export async function generateCertificateAction(
       ).serialize();
 
     // 6. Template Selection logic matches roles/participant/activities exclusivity
-    const template = selectTemplate(
-      request.certificate.template,
-      request as FullRequest,
-    );
+    const template = selectTemplate(request.certificate.template, {
+      ...request,
+      director: directorUser,
+    } as FullRequest);
     if (!template) {
       return Result.fail(
         AppError.notFound("Plantilla no encontrada"),
@@ -99,7 +103,7 @@ export async function generateCertificateAction(
     }
 
     // 7. Render Template completely outside of the web view coupling
-    const renderContext = { ...request, director: { name: directorUser.name } };
+    const renderContext = { ...request, director: directorUser };
     renderedBody = renderTemplate(template.template, renderContext);
 
     // 8. Atomic db transaction guarantees we don't save half-changed states
