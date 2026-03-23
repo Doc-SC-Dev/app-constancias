@@ -172,7 +172,6 @@ async function createActivityType(
   const participanTypes = data.participantTypes.map((pt) =>
     Prisma.validator<Prisma.ParticipantTypeCreateInput>()({
       name: pt.name,
-      required: pt.required,
     }),
   );
   const activityTypeInput = Prisma.validator<Prisma.ActivityTypeCreateInput>()({
