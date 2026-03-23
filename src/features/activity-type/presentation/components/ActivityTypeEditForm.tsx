@@ -42,7 +42,7 @@ export default function ActivityTypeEditForm({
     );
     if (isSuccess) {
       toast.success("Tipo de actividad actualizado correctamente", {
-        description: `Se cambio exitosamente el nombre del tipo de actividad de ${name} a ${value.name}`,
+        description: `Se cambió exitosamente el nombre del tipo de actividad de ${name} a ${value.name}`,
       });
       onOpenChange(false);
     } else {

@@ -41,7 +41,7 @@ export default function CreateActivityTypeForm() {
 
     if (!isSuccess && error) {
       toast.error(
-        "Ha ocurrido un error a tratar de crear el tipo de actividad",
+        "Ha ocurrido un error al tratar de crear el tipo de actividad",
         {
           description: error,
         },
@@ -50,8 +50,8 @@ export default function CreateActivityTypeForm() {
     }
 
     if (value) {
-      toast.success("Se a creado el nuevo tipo de actividad", {
-        description: `Se creo existosament el tipo de actividad con nombre ${value.name} con ${value.nParticipantsTypes} tipos de participantes.`,
+      toast.success("Se ha creado el nuevo tipo de actividad", {
+        description: `Se creó exitosamente el tipo de actividad con nombre ${value.name} con ${value.nParticipantsTypes} tipos de participantes.`,
       });
       queryClient.invalidateQueries({
         queryKey: ["get-paginated-activity-types"],

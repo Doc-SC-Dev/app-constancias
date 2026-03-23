@@ -41,7 +41,7 @@ export default function CreateActivityTypeForm() {
 
     if (!isSuccess && error) {
       toast.error(
-        "Ha ocurrido un error a tratar de crear el tipo de actividad",
+        "Ha ocurrido un error al tratar de crear el tipo de actividad",
         {
           description: error,
         },
