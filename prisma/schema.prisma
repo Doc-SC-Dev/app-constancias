@@ -184,10 +184,9 @@ model ParticipantType {
   roles          Role[]                @default([STUDENT, PROFESSOR])
   activityType   ActivityType?         @relation(fields: [activityTypeId], references: [id])
   activityTypeId String?
-  minCapacity    Int                   @default(1)
+  minCapacity    Int                   @default(0)
   maxCapacity    Int?
   participants   Participant[]
-  required       Boolean               @default(false)
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @default(now()) @updatedAt
   template       CertificateTemplate[]

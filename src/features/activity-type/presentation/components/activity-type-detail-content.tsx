@@ -1,6 +1,15 @@
-import { ArrowRight, Calendar, FileText, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Calendar,
+  FileText,
+  Hash,
+  InfinityIcon,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,12 +21,10 @@ import {
   Item,
   ItemActions,
   ItemContent,
-  ItemDescription,
   ItemGroup,
   ItemTitle,
 } from "@/components/ui/item";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Role } from "@/lib/authorization/permissions";
 import { Textos } from "@/lib/utils";
 import type { ActivityType } from "../../domain/ActivityType";
 import ActivityTypeEditDialog from "./ActivityTypeEditDialog";
@@ -44,9 +51,16 @@ export default function ActivityTypeDetailContent({
         id="activity-type-detail-section-name"
         className="flex justify-between items-center"
       >
-        <h1 className="text-3xl font-bold tracking-tight">
-          {activityType.name}
-        </h1>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="icon">
+            <Link href="/admin/activity-type">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {activityType.name}
+          </h1>
+        </div>
         <div className="flex gap-2">
           <ActivityTypeEditDialog activityType={activityType} />
           <DeleteActivityTypeAlertDialog
@@ -140,43 +154,75 @@ export default function ActivityTypeDetailContent({
               <ItemGroup className="divide-y border-t mt-4">
                 <ScrollArea className="h-[calc(100vh-40rem)] px-6">
                   {activityType.participantTypes.map((participantType) => (
-                    <Item key={participantType.id}>
-                      <ItemContent className="rounded-none boder-0 py-4 px-2">
-                        <ItemTitle className="flex items-center gap-2">
-                          {participantType.name}
-                          {participantType.required ? (
-                            <Badge
-                              variant="default"
-                              className="text-[10px] uppercase h-5"
-                            >
-                              Obligatorio
-                            </Badge>
-                          ) : (
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] uppercase h-5"
-                            >
-                              Opcional
-                            </Badge>
-                          )}
-                        </ItemTitle>
-                        <ItemDescription>
-                          <span className="flex items-center flex-wrap gap-1 mt-1">
-                            <span className="text-xs text-muted-foreground mr-1">
-                              Roles:
-                            </span>
-                            {participantType.roles.map((role) => (
-                              <Badge key={role} variant="outline">
-                                {Textos.Role[role as keyof typeof Textos.Role]}
-                              </Badge>
-                            ))}
-                            {participantType.roles.length === 0 && (
-                              <span className="text-xs italic">
-                                Ninguno asignado
-                              </span>
-                            )}
-                          </span>
-                        </ItemDescription>
+                    <Item
+                      key={participantType.id}
+                      className="group hover:bg-muted/30 transition-colors"
+                    >
+                      <ItemContent className="py-5 px-4 md:px-6">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          {/* Identidad y Estado */}
+                          <div className="flex flex-col gap-1">
+                            <ItemTitle className="font-bold text-lg">
+                              {participantType.name}
+                            </ItemTitle>
+                            <div>
+                              {participantType.min > 0 ? (
+                                <Badge className="bg-[#fa5014] hover:bg-[#fa5014]/90 text-[10px] uppercase h-5 font-bold shadow-sm">
+                                  Obligatorio
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[#008296] border-[#008296] text-[10px] uppercase h-5 font-medium"
+                                >
+                                  Opcional
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          {/* Reglas de Negocio (Responsivo) */}
+                          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground mr-auto md:mr-0 md:ml-auto pr-4">
+                            {/* Roles */}
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-[#009fdd]" />
+                              <div className="flex flex-wrap gap-1">
+                                {participantType.roles.map((role) => (
+                                  <span
+                                    key={role}
+                                    className="bg-muted px-2 py-0.5 rounded-md text-[11px] font-medium border"
+                                  >
+                                    {
+                                      Textos.Role[
+                                        role as keyof typeof Textos.Role
+                                      ]
+                                    }
+                                  </span>
+                                ))}
+                                {participantType.roles.length === 0 && (
+                                  <span className="italic text-xs">
+                                    Sin roles
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            {/* Capacidad */}
+                            <div className="flex items-center gap-2 border-l pl-6 border-muted-foreground/20">
+                              <div className="bg-[#008296]/10 p-1.5 rounded-full">
+                                <Hash className="w-3.5 h-3.5 text-[#008296]" />
+                              </div>
+                              <div className="flex flex-col leading-none">
+                                <span className="text-[10px] uppercase font-bold tracking-wider opacity-60">
+                                  Cupo
+                                </span>
+                                <span className="font-mono font-bold text-[#005092] flex items-center gap-1">
+                                  {participantType.max || (
+                                    <InfinityIcon className="w-4 h-4" />
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </ItemContent>
 
                       <ItemActions>
@@ -184,8 +230,9 @@ export default function ActivityTypeDetailContent({
                           participantTypeId={participantType.id}
                           activityTypeId={activityType.id}
                           currentName={participantType.name}
-                          currentRequired={participantType.required}
-                          currentRoles={participantType.roles as Role[]}
+                          currentRoles={participantType.roles}
+                          currentMin={participantType.min}
+                          currentMax={participantType.max}
                         />
                       </ItemActions>
                     </Item>

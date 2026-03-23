@@ -1,7 +1,7 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { Check, Plus } from "lucide-react";
+import { Check, InfinityIcon, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -14,12 +14,18 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
+  FieldLegend,
   FieldSet,
-  FieldTitle,
 } from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -28,7 +34,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
-import { Switch } from "@/components/ui/switch";
 import type { Role } from "@/lib/authorization/permissions";
 import { Textos } from "@/lib/utils";
 import {
@@ -53,8 +58,9 @@ export default function CreateParticipantTypeSheet({
     defaultValues: {
       activityTypeId,
       name: "",
-      required: false,
       roles: [],
+      min: 0,
+      max: undefined,
     },
   });
 
@@ -94,7 +100,7 @@ export default function CreateParticipantTypeSheet({
         <FormProvider {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-6 px-4 py-4"
+            className="flex flex-col gap-4 px-4"
           >
             <FieldGroup>
               <FormInput
@@ -105,25 +111,72 @@ export default function CreateParticipantTypeSheet({
                 placeholder="Nombre del tipo de participante"
               />
 
-              <Controller
-                control={form.control}
-                name="required"
-                render={({ field }) => (
-                  <Field orientation="horizontal">
-                    <FieldContent>
-                      <FieldTitle>Obligatorio</FieldTitle>
-                      <FieldDescription>
-                        ¿Es indispensable para registrar la actividad?
-                      </FieldDescription>
-                    </FieldContent>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </Field>
-                )}
-              />
+              <FieldSet>
+                <FieldLegend>Cantidad de Participantes</FieldLegend>
+                <FieldContent className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* Mínimo de usos */}
+                  <Controller
+                    control={form.control}
+                    name="min"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Min. Participantes</FieldLabel>
+                        <InputGroup>
+                          {field.value > 0 ? (
+                            <InputGroupAddon className="bg-[#fa5014]/10 text-[#fa5014] text-[10px] font-bold px-2 border-r border-[#fa5014]/20">
+                              REQUERIDO
+                            </InputGroupAddon>
+                          ) : (
+                            <InputGroupAddon className="bg-[#008296]/10 border-r border-[#008296]/20 px-2 text-[10px]">
+                              OPCIONAL
+                            </InputGroupAddon>
+                          )}
+                          <InputGroupInput
+                            type="number"
+                            min={0}
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </InputGroup>
+                        <FieldDescription>0 = Opcional</FieldDescription>
+                      </Field>
+                    )}
+                  />
 
+                  {/* Máximo de usos */}
+                  <Controller
+                    control={form.control}
+                    name="max"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Max. Participantes</FieldLabel>
+                        <InputGroup>
+                          {!field.value && (
+                            <InputGroupAddon className="bg-[#008296]/10 border-r border-[#008296]/20 px-2">
+                              <InfinityIcon className="w-3.5 h-3.5 text-[#008296] animate-pulse" />
+                            </InputGroupAddon>
+                          )}
+                          <InputGroupInput
+                            type="number"
+                            min={0}
+                            placeholder="∞ Sin límite"
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              field.onChange(val === "" ? 0 : Number(val));
+                            }}
+                          />
+                        </InputGroup>
+                        <FieldDescription>
+                          {!field.value ? "Uso ilimitado" : "Límite máximo"}
+                        </FieldDescription>
+                      </Field>
+                    )}
+                  />
+                </FieldContent>
+              </FieldSet>
               <Controller
                 control={form.control}
                 name="roles"
@@ -133,7 +186,7 @@ export default function CreateParticipantTypeSheet({
                     <FieldDescription>
                       ¿Qué tipo de usuarios pueden tener este rol?
                     </FieldDescription>
-                    <div className="flex flex-col gap-3 mt-2">
+                    <div className="flex flex-col gap-3">
                       {AVAILABLE_ROLES.map((role) => {
                         const isChecked = field.value.includes(role);
                         return (
@@ -171,16 +224,22 @@ export default function CreateParticipantTypeSheet({
               />
             </FieldGroup>
 
-            <SheetFooter>
-              <Button type="submit" className="w-full">
+            <SheetFooter className="flex gap-2 ">
+              <SheetClose asChild>
+                <Button variant="outline" onClick={() => form.reset()}>
+                  <X className="h-4 w-4 mr-1" />
+                  Cancelar
+                </Button>
+              </SheetClose>
+              <Button type="submit">
                 {form.formState.isSubmitting ? (
                   <>
-                    <Spinner className="mr-2" /> Guardando
+                    <Spinner className="mr-1" /> Guardando
                   </>
                 ) : (
                   <>
-                    <Check className="h-4 w-4 mr-2" />
-                    Crear Participante
+                    <Check className="h-4 w-4 mr-1" />
+                    Crear
                   </>
                 )}
               </Button>

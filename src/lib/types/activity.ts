@@ -134,6 +134,7 @@ export type ActivityCreateDTO = typeof activityCreateSchema.infer;
 
 export type Activity = {
   participants: {
+    id: string;
     name: string;
     userId: string;
     typeId: string;

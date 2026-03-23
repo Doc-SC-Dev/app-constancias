@@ -1,7 +1,7 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { Check, Pencil, Trash, X } from "lucide-react";
+import { Check, InfinityIcon, Pencil, Trash, X } from "lucide-react";
 import { useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -21,16 +21,20 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
-  FieldContent,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSet,
-  FieldTitle,
+  FieldLegend,
 } from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -39,8 +43,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
-import { Switch } from "@/components/ui/switch";
-import type { Role } from "@/lib/authorization/permissions";
+import { Roles } from "@/lib/authorization/permissions";
 import { Textos } from "@/lib/utils";
 import {
   type UpdateParticipantTypeForm,
@@ -51,22 +54,27 @@ import {
   updateParticipantTypeAction,
 } from "../actions";
 
-const AVAILABLE_ROLES: Role[] = ["STUDENT", "PROFESSOR"];
+const AVAILABLE_ROLES: ("STUDENT" | "PROFESSOR")[] = [
+  Roles.STUDENT,
+  Roles.PROFESSOR,
+];
 
 type ParticipantTypeActionsProps = {
   participantTypeId: string;
   activityTypeId: string;
   currentName: string;
-  currentRequired: boolean;
-  currentRoles: Role[];
+  currentRoles: ("STUDENT" | "PROFESSOR")[];
+  currentMin: number;
+  currentMax: number | null;
 };
 
 export default function ParticipantTypeActions({
   participantTypeId,
   activityTypeId,
   currentName,
-  currentRequired,
   currentRoles,
+  currentMin,
+  currentMax,
 }: ParticipantTypeActionsProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -79,8 +87,9 @@ export default function ParticipantTypeActions({
       id: participantTypeId,
       activityTypeId,
       name: currentName,
-      required: currentRequired,
-      roles: currentRoles,
+      roles: currentRoles as ("STUDENT" | "PROFESSOR")[],
+      min: currentMin,
+      max: currentMax,
     },
   });
 
@@ -149,7 +158,7 @@ export default function ParticipantTypeActions({
           <FormProvider {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-col gap-6 px-4 py-4"
+              className="flex flex-col gap-6 px-4"
             >
               <FieldGroup>
                 <FormInput
@@ -160,37 +169,83 @@ export default function ParticipantTypeActions({
                   placeholder="Nombre del tipo de participante"
                 />
 
-                <Controller
-                  control={form.control}
-                  name="required"
-                  render={({ field }) => (
-                    <Field orientation="horizontal">
-                      <FieldContent>
-                        <FieldTitle>Obligatorio</FieldTitle>
+                <FieldLegend>Cantidad de Participantes</FieldLegend>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* Mínimo de usos */}
+                  <Controller
+                    control={form.control}
+                    name="min"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Min. Participantes</FieldLabel>
+                        <InputGroup>
+                          {field.value && field.value > 0 ? (
+                            <InputGroupAddon className="bg-[#fa5014]/10 text-[#fa5014] text-[10px] font-bold px-2 border-r border-[#fa5014]/20">
+                              REQUERIDO
+                            </InputGroupAddon>
+                          ) : (
+                            <InputGroupAddon className="bg-[#008296]/10 border-r border-[#008296]/20 px-2 text-[10px]">
+                              OPCIONAL
+                            </InputGroupAddon>
+                          )}
+                          <InputGroupInput
+                            type="number"
+                            min={0}
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </InputGroup>
+                        <FieldDescription>0 = Opcional</FieldDescription>
+                      </Field>
+                    )}
+                  />
+
+                  {/* Máximo de usos */}
+                  <Controller
+                    control={form.control}
+                    name="max"
+                    render={({ field }) => (
+                      <Field>
+                        <FieldLabel>Max. Participantes</FieldLabel>
+                        <InputGroup>
+                          {!field.value && (
+                            <InputGroupAddon className="bg-[#008296]/10 border-r border-[#008296]/20 px-2">
+                              <InfinityIcon className="w-3.5 h-3.5 text-[#008296] animate-pulse" />
+                            </InputGroupAddon>
+                          )}
+                          <InputGroupInput
+                            type="number"
+                            min={0}
+                            placeholder="∞ Sin límite"
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              field.onChange(val === "" ? null : Number(val));
+                            }}
+                          />
+                        </InputGroup>
                         <FieldDescription>
-                          Si está activo, toda actividad de este tipo deberá
-                          tener al menos un participante con este rol.
+                          {!field.value ? "Uso ilimitado" : "Límite máximo"}
                         </FieldDescription>
-                      </FieldContent>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </Field>
-                  )}
-                />
+                      </Field>
+                    )}
+                  />
+                </div>
 
                 <Controller
                   control={form.control}
                   name="roles"
                   render={({ field, fieldState }) => (
-                    <FieldSet>
+                    <>
                       <FieldLabel>Roles permitidos</FieldLabel>
                       <FieldDescription>
                         Selecciona qué roles de usuario pueden tomar este tipo
                         de participación.
                       </FieldDescription>
-                      <div className="flex flex-col gap-3 mt-2">
+                      <div className="flex flex-col gap-3">
                         {AVAILABLE_ROLES.map((role) => {
                           const checkboxId = `edit-role-checkbox-${participantTypeId}-${role}`;
                           const isChecked = field.value.includes(role);
@@ -224,21 +279,23 @@ export default function ParticipantTypeActions({
                           {fieldState.error.message}
                         </p>
                       )}
-                    </FieldSet>
+                    </>
                   )}
                 />
               </FieldGroup>
 
-              <SheetFooter className="flex gap-2 mt-4">
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => setEditOpen(false)}
-                >
-                  <X className="h-4 w-4" />
-                  Cancelar
-                </Button>
-                <Button type="submit" variant="outline">
+              <SheetFooter className="flex gap-2">
+                <SheetClose asChild>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => form.reset()}
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar
+                  </Button>
+                </SheetClose>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting ? (
                     <>
                       <Spinner /> Guardando

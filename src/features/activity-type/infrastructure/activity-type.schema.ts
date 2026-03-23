@@ -2,25 +2,23 @@ import { type } from "arktype";
 
 export const CreateActivityTypeSchema = type({
   name: "string >= 2",
-  participantTypes: type({
-    name: "string >= 2",
-    required: "boolean",
-  }).array(),
 });
 
 export const CreateParticipantTypeSchema = type({
   name: "string >= 2",
-  required: "boolean",
-  roles: "('STUDENT' | 'PROFESSOR' | 'ADMINISTRATOR' | 'SUPERADMIN')[]",
+  roles: "('STUDENT' | 'PROFESSOR')[]",
   activityTypeId: "string",
+  "max?": type("number"),
+  min: "number >= 0",
 });
 
 export const UpdateParticipantTypeSchema = type({
   id: "string",
   name: "string >= 2",
-  required: "boolean",
-  roles: "('STUDENT' | 'PROFESSOR' | 'ADMINISTRATOR' | 'SUPERADMIN')[]",
+  roles: "('STUDENT' | 'PROFESSOR')[]",
   activityTypeId: "string",
+  max: type("number | null"),
+  min: type("number"),
 });
 
 export const UpdateActivityTypeNameSchema = type({

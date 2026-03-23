@@ -1,11 +1,12 @@
-import type { Role } from "@/lib/authorization/permissions";
+import type { Role, Roles } from "@/lib/authorization/permissions";
 
 export interface ParticipantType {
   id: string;
   name: string;
-  required: boolean;
-  roles: Role[];
+  roles: (Roles.STUDENT | Roles.PROFESSOR)[];
   createdAt: Date;
+  min: number;
+  max: number | null;
 }
 
 export interface ActivityType {
@@ -22,26 +23,18 @@ export interface ActivityType {
 
 export type CreateActivityTypeInput = {
   name: string;
-  participantTypes: {
-    name: string;
-    required: boolean;
-  }[];
-};
-
-export type CreateParticipantTypeInput = {
-  name: string;
-  required: boolean;
-  roles: Role[];
-  activityTypeId: string;
 };
 
 export type UpdateParticipantTypeInput = {
   id: string;
   name: string;
-  required: boolean;
   roles: Role[];
   activityTypeId: string;
+  min: number;
+  max: number | null;
 };
+
+export type CreateParticipantTypeInput = Omit<UpdateParticipantTypeInput, "id">;
 
 export type UpdateActivityTypeNameInput = {
   id: string;

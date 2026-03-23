@@ -29,9 +29,10 @@ export class ActivityTypeRepositoryImpl implements ActivityTypeRepository {
             select: {
               id: true,
               name: true,
-              required: true,
               roles: true,
               createdAt: true,
+              maxCapacity: true,
+              minCapacity: true,
             },
             orderBy: {
               createdAt: "asc",
@@ -44,7 +45,15 @@ export class ActivityTypeRepositoryImpl implements ActivityTypeRepository {
         return Result.fail(ActivityTypeError.notFound());
       }
 
-      return Result.ok(data as ActivityType);
+      const transformedData = data.participantTypes.map((pt) => ({
+        ...pt,
+        max: pt.maxCapacity,
+        min: pt.minCapacity,
+      }));
+      return Result.ok({
+        ...data,
+        participantTypes: transformedData,
+      } as ActivityType);
     } catch (error) {
       console.error(error);
       return Result.fail(ActivityTypeError.databaseError());
@@ -99,11 +108,6 @@ export class ActivityTypeRepositoryImpl implements ActivityTypeRepository {
       const result = await dbWithAutdit().activityType.create({
         data: {
           name: data.name,
-          participantTypes: {
-            createMany: {
-              data: data.participantTypes,
-            },
-          },
         },
         include: {
           _count: {
@@ -212,7 +216,6 @@ export class ActivityTypeRepositoryImpl implements ActivityTypeRepository {
       const pt = await dbWithAutdit().participantType.create({
         data: {
           name: data.name,
-          required: data.required,
           roles: data.roles as Role[],
           activityType: { connect: { id: data.activityTypeId } },
         },
@@ -236,8 +239,9 @@ export class ActivityTypeRepositoryImpl implements ActivityTypeRepository {
         where: { id: data.id },
         data: {
           name: data.name,
-          required: data.required,
           roles: data.roles as Role[],
+          minCapacity: data.min,
+          maxCapacity: data.max,
         },
       });
       return Result.ok(

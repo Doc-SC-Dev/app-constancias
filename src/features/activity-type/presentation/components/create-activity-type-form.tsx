@@ -15,7 +15,6 @@ import {
   CreateActivityTypeSchema,
 } from "../../infrastructure/activity-type.schema";
 import { createActivityTypeAction } from "../actions";
-import ParticipantTypeField from "./participant-type-field";
 
 export default function CreateActivityTypeForm({
   setOpen,
@@ -29,7 +28,6 @@ export default function CreateActivityTypeForm({
     reValidateMode: "onSubmit",
     defaultValues: {
       name: "",
-      participantTypes: [],
     },
   });
 
@@ -64,7 +62,6 @@ export default function CreateActivityTypeForm({
             description="Nombre del tipo de actividad para mostrar en la aplicación"
             placeholder="Ej: Curso, Taller, Conferencia"
           />
-          <ParticipantTypeField />
         </FieldGroup>
         <DialogFooter className="mt-6">
           <DialogClose asChild onClick={() => form.reset()}>
