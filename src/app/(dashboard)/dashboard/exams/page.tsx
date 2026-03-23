@@ -6,6 +6,8 @@ import {
 import { redirect } from "next/navigation";
 import { auth, isAuthenticated } from "@/lib/auth";
 import type { PaginationResponse } from "@/lib/types/pagination";
+import { isAdmin } from "@/lib/authorization/permissions";
+import type { Role } from "@/generated/prisma";
 import { ExamsTable } from "./_components/exams-table";
 import { listExams, type Exams } from "./actions";
 
@@ -13,6 +15,7 @@ export default async function ExamsPage() {
   const session = await isAuthenticated();
 
   const isStudent = session.user.role === "STUDENT";
+  const sysAdmin = isAdmin(session.user.role as Role);
 
   const permission = await auth.api.userHasPermission({
     body: {
@@ -40,7 +43,7 @@ export default async function ExamsPage() {
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container h-full mx-auto flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Exámenes</h2>
-        <ExamsTable isStudent={isStudent} />
+        <ExamsTable isStudent={isStudent} isAdmin={sysAdmin} />
       </div>
     </HydrationBoundary>
   );

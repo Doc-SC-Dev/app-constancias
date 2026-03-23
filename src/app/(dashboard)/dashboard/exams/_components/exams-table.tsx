@@ -3,23 +3,25 @@
 import { useMemo } from "react";
 import { DataTable } from "@/components/data-table";
 import { listExams, type Exams } from "../actions";
-import { columns } from "./columns";
+import { getColumns } from "./columns";
 
 interface ExamsTableProps {
   isStudent: boolean;
+  isAdmin: boolean;
 }
 
-export function ExamsTable({ isStudent }: ExamsTableProps) {
+export function ExamsTable({ isStudent, isAdmin }: ExamsTableProps) {
+  const tblColumns = useMemo(() => getColumns(isAdmin), [isAdmin]);
   const filteredColumns = useMemo(
     () =>
       isStudent
-        ? columns.filter(
+        ? tblColumns.filter(
             (col) =>
               col.id !== "actions" &&
               (col as any).accessorKey !== "actions",
           )
-        : columns,
-    [isStudent],
+        : tblColumns,
+    [isStudent, tblColumns],
   );
 
   return (

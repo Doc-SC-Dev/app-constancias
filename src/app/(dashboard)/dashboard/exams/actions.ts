@@ -153,6 +153,16 @@ export async function updateExamGrade({
       },
     });
 
+    if (
+      existing &&
+      existing.grade >= 4.0 &&
+      !isAdmin(session.user.role as Role)
+    ) {
+      return {
+        error: "No puedes editar un examen que está aprobado.",
+      };
+    }
+
     if (existing) {
       await db.exam.update({
         where: { id: existing.id },
