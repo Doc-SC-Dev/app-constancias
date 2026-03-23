@@ -29,6 +29,7 @@ jobs:
           push: true
           build-args: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
+            RESEND_API_KEY=${{secrets.RESEND_API_KEY}}
           # Make sure to replace with your own namespace and repository
           tags: |
             devwild/app-constancias:latest
