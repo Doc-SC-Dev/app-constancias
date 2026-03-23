@@ -9,6 +9,11 @@ export default function HightlightTemplate({
 }) {
   const example: FullRequest = {
     id: "1",
+    director: {
+      name: "Director",
+      gender: "MALE",
+      academicDegree: { title: [{ abbrev: "Dr." }] },
+    },
     user: {
       name: "Tomás Alonso Bravo Cañete",
       rut: "20.488.616-4",
@@ -76,6 +81,17 @@ export default function HightlightTemplate({
 
 function resolveByPath(path: string, obj: FullRequest): any {
   if (!path.length) return path;
+
+  // Handle space separated paths
+  const subPaths = path.trim().split(/\s+/);
+  if (subPaths.length > 1) {
+    return subPaths.map((p) => resolveSinglePath(p, obj)).join(" ");
+  }
+
+  return resolveSinglePath(path, obj);
+}
+
+function resolveSinglePath(path: string, obj: FullRequest): any {
   return path.split(".").reduce((acc: Record<string, any>, key: string) => {
     const match = key.match(/^(\w+)\[(\d+)\]$/);
     if (match) {
