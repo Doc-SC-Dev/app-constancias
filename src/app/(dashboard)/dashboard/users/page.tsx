@@ -1,12 +1,9 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import { LazyCreateUserDialog } from "@/components/dyamic-dialogs";
 import { auth, isAuthenticated } from "@/lib/auth";
+import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { User } from "@/lib/types/users";
 import { columns } from "./_components/colums";
@@ -24,7 +21,7 @@ export default async function UsersPage() {
     redirect("/dashboard");
   }
 
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["list-users"],
@@ -37,7 +34,7 @@ export default async function UsersPage() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container h-full mx-auto flex flex-col gap-4">
+      <div className="container max-h-full mx-auto flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Usuarios</h2>
         <DataTable<User>
           emptyTitle="No hay usuarios"
@@ -47,6 +44,7 @@ export default async function UsersPage() {
           queryKey="list-users"
           queryFn={listUsers}
           placeholder="Filtrar por Nombre, Rol, Email y RUT"
+          containerClassName="h-fit max-h-full"
         />
       </div>
     </HydrationBoundary>

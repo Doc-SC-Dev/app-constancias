@@ -99,7 +99,7 @@ const activityTypes: Prisma.ActivityTypeCreateInput[] = [
     participantTypes: {
       createMany: {
         data: [
-          { name: "Profesor encargado", required: true },
+          { name: "Profesor encargado", minCapacity: 1 },
           { name: "Profesor invitado" },
           { name: "Colaborador" },
         ],
@@ -111,12 +111,10 @@ const activityTypes: Prisma.ActivityTypeCreateInput[] = [
     participantTypes: {
       createMany: {
         data: [
-          { name: "Estudiante", required: true },
-          { name: "Profesor guía", required: true },
-          { name: "Profesor co-guia" },
-          { name: "Comisión 1" },
-          { name: "Comision 2" },
-          { name: "Comision 3" },
+          { name: "Estudiante", minCapacity: 1, maxCapacity: 1 },
+          { name: "Profesor guía", minCapacity: 1, maxCapacity: 1 },
+          { name: "Profesor co-guia", minCapacity: 1, maxCapacity: 1 },
+          { name: "Comisión", minCapacity: 3, maxCapacity: 5 },
         ],
       },
     },
@@ -125,7 +123,10 @@ const activityTypes: Prisma.ActivityTypeCreateInput[] = [
     name: "Trabajo de investigación",
     participantTypes: {
       createMany: {
-        data: [{ name: "Autor", required: true }, { name: "Co-autor" }],
+        data: [
+          { name: "Autor", minCapacity: 1, maxCapacity: 1 },
+          { name: "Co-autor", minCapacity: 0 },
+        ],
       },
     },
   },
@@ -134,12 +135,10 @@ const activityTypes: Prisma.ActivityTypeCreateInput[] = [
     participantTypes: {
       createMany: {
         data: [
-          { name: "Estudiante", required: true },
-          { name: "Profesor guia", required: true },
-          { name: "Profesor co-guia" },
-          { name: "Comisión 1" },
-          { name: "Comisión 2" },
-          { name: "Comisión 3" },
+          { name: "Estudiante", maxCapacity: 1, minCapacity: 1 },
+          { name: "Profesor guia", minCapacity: 1, maxCapacity: 1 },
+          { name: "Profesor co-guia", maxCapacity: 3, minCapacity: 1 },
+          { name: "Comisión", minCapacity: 3, maxCapacity: 5 },
         ],
       },
     },
@@ -149,9 +148,9 @@ const activityTypes: Prisma.ActivityTypeCreateInput[] = [
     participantTypes: {
       createMany: {
         data: [
-          { name: "Autor", required: true },
-          { name: "Co-autor" },
-          { name: "ayudante" },
+          { name: "Autor", minCapacity: 1, maxCapacity: 1 },
+          { name: "Co-autor", minCapacity: 1, maxCapacity: 5 },
+          { name: "ayudante", maxCapacity: 1, minCapacity: 0 },
         ],
       },
     },
@@ -161,8 +160,8 @@ const activityTypes: Prisma.ActivityTypeCreateInput[] = [
     participantTypes: {
       createMany: {
         data: [
-          { name: "Pasante", required: true },
-          { name: "Guía", required: true },
+          { name: "Pasante", minCapacity: 1, maxCapacity: 1 },
+          { name: "Guía", minCapacity: 1, maxCapacity: 1 },
         ],
       },
     },

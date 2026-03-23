@@ -76,7 +76,7 @@ export default function ActivityLoading() {
                           </TableCell>
                         ))}
                       </TableRow>
-                    )
+                    ),
                   )}
                 </TableBody>
               </Table>

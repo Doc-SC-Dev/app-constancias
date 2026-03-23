@@ -36,7 +36,7 @@ export default function NewPasswordDialog({
     const { newPass, currentPass } = passData;
     const { success, message } = await ChangePassword({ newPass, currentPass });
     if (message) {
-      toast.error("Ocurrió un error intentando cambiar tu constraseña", {
+      toast.error("Ocurrió un error intentando cambiar tu contraseña", {
         description: message,
       });
       return;
@@ -63,13 +63,13 @@ export default function NewPasswordDialog({
               label="Contraseña actual"
               control={control}
               name="currentPass"
-              description="Solo para asegurarnos de que eres tú."
+              description="Requerido para verificar su identidad."
             />
             <PasswordInput
               label="Nueva contraseña"
               control={control}
               name="newPass"
-              description="¡Hazla difícil de adivinar! Mín. 8 caracteres."
+              description="La contraseña debe contener al menos 8 caracteres."
             />
             <PasswordInput
               label="Confirma nueva contraseña"

@@ -32,31 +32,35 @@ export async function listExams({
   const [count, data] = await db.$transaction([
     db.activity.count({
       where: isAdmin(session.user.role as Role)
-        ? { activityType: { name: { contains: "Examen", mode: "insensitive" } } }
+        ? {
+            activityType: { name: { contains: "Examen", mode: "insensitive" } },
+          }
         : {
-          activityType: { name: { contains: "Examen", mode: "insensitive" } },
-          participants: {
-            some: {
-              userId: {
-                equals: session.user.id,
+            activityType: { name: { contains: "Examen", mode: "insensitive" } },
+            participants: {
+              some: {
+                userId: {
+                  equals: session.user.id,
+                },
               },
             },
           },
-        },
     }),
     db.activity.findMany({
       where: isAdmin(session.user.role as Role)
-        ? { activityType: { name: { contains: "Examen", mode: "insensitive" } } }
+        ? {
+            activityType: { name: { contains: "Examen", mode: "insensitive" } },
+          }
         : {
-          activityType: { name: { contains: "Examen", mode: "insensitive" } },
-          participants: {
-            some: {
-              userId: {
-                equals: session.user.id,
+            activityType: { name: { contains: "Examen", mode: "insensitive" } },
+            participants: {
+              some: {
+                userId: {
+                  equals: session.user.id,
+                },
               },
             },
           },
-        },
       take: PAGE_SIZE,
       skip: start,
       include: {
@@ -74,8 +78,8 @@ export async function listExams({
                 role: true,
                 rut: true,
                 student: {
-                  select: { id: true, studentId: true }
-                }
+                  select: { id: true, studentId: true },
+                },
               },
             },
           },
@@ -89,9 +93,13 @@ export async function listExams({
 
   return {
     data: data.map<Exams>((activity) => {
-      const studentParticipant = activity.participants.find((p) => p.user.role === "STUDENT");
+      const studentParticipant = activity.participants.find(
+        (p) => p.user.role === "STUDENT",
+      );
       const examRecord = studentParticipant?.user.student?.id
-        ? activity.exams.find((e) => e.studentId === studentParticipant.user.student?.id)
+        ? activity.exams.find(
+            (e) => e.studentId === studentParticipant.user.student?.id,
+          )
         : null;
 
       return {
@@ -100,7 +108,11 @@ export async function listExams({
         activityType: activity.activityType.name,
         startAt: activity.startAt.toISOString(),
         endAt: activity.endAt ? activity.endAt.toISOString() : undefined,
-        userName: activity.participants.find((p) => p.user.role === "PROFESSOR")?.user.name || activity.participants[0]?.user.name || "Sin asignar",
+        userName:
+          activity.participants.find((p) => p.user.role === "PROFESSOR")?.user
+            .name ||
+          activity.participants[0]?.user.name ||
+          "Sin asignar",
         grade: examRecord?.grade ?? null,
         studentId: studentParticipant?.user.student?.id ?? null,
         studentName: studentParticipant?.user.name ?? null,
@@ -123,7 +135,10 @@ export async function updateExamGrade({
 }) {
   const session = await isAuthenticated();
 
-  if (!isAdmin(session.user.role as Role) && session.user.role !== "PROFESSOR") {
+  if (
+    !isAdmin(session.user.role as Role) &&
+    session.user.role !== "PROFESSOR"
+  ) {
     return { error: "No tienes permiso para editar notas." };
   }
 

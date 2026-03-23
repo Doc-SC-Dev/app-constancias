@@ -2,6 +2,7 @@
 
 import type { Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
+import { getOrUpdateActivePeriod } from "@/lib/period";
 import type { HistoryEntry } from "@/lib/types/history";
 import { PAGE_SIZE, type PaginationResponse } from "@/lib/types/pagination";
 import type { User } from "@/lib/types/users";
@@ -12,7 +13,7 @@ export const getHistoryPaginated = async ({
   isAdmin,
   filter,
 }: {
-  pageParam: number; 
+  pageParam: number;
   user: User;
   isAdmin: boolean;
   filter?: "standard" | "other";
@@ -101,3 +102,7 @@ export const updateRequestState = async (
     return { success: false, message: "Error al actualizar el estado" };
   }
 };
+
+export async function verifyAcademicPeriod() {
+  return await getOrUpdateActivePeriod();
+}

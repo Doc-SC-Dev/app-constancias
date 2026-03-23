@@ -31,7 +31,7 @@ export function AppAvatar() {
                 setAction("password");
               }}
             >
-              Cambiar constraseña
+              Cambiar contraseña
             </DropdownMenuItem>
           </DialogTrigger>
           <DialogTrigger asChild>

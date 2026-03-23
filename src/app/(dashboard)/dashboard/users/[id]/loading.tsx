@@ -13,7 +13,12 @@ import {
 
 export default function UserLoading() {
   const peticionesHeaders = ["Nombre", "Estado", "Fecha de emisión"];
-  const actividadesHeaders = ["Nombre", "Tipo de Actividad", "Horas", "Participación"];
+  const actividadesHeaders = [
+    "Nombre",
+    "Tipo de Actividad",
+    "Horas",
+    "Participación",
+  ];
 
   return (
     <Card>
@@ -62,15 +67,17 @@ export default function UserLoading() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {[...new Array(3).fill(null).map((_, i) => i + 1)].map((row) => (
-                  <TableRow key={`loading-peticiones-${row}`}>
-                    {peticionesHeaders.map((cell) => (
-                      <TableCell key={`tc-peticiones-${cell}-${row}`}>
-                        <Skeleton className="h-4 bg-muted" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
+                {[...new Array(3).fill(null).map((_, i) => i + 1)].map(
+                  (row) => (
+                    <TableRow key={`loading-peticiones-${row}`}>
+                      {peticionesHeaders.map((cell) => (
+                        <TableCell key={`tc-peticiones-${cell}-${row}`}>
+                          <Skeleton className="h-4 bg-muted" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ),
+                )}
               </TableBody>
             </Table>
           </div>
@@ -87,15 +94,17 @@ export default function UserLoading() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {[...new Array(3).fill(null).map((_, i) => i + 1)].map((row) => (
-                  <TableRow key={`loading-actividades-${row}`}>
-                    {actividadesHeaders.map((cell) => (
-                      <TableCell key={`tc-actividades-${cell}-${row}`}>
-                        <Skeleton className="h-4 bg-muted" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
+                {[...new Array(3).fill(null).map((_, i) => i + 1)].map(
+                  (row) => (
+                    <TableRow key={`loading-actividades-${row}`}>
+                      {actividadesHeaders.map((cell) => (
+                        <TableCell key={`tc-actividades-${cell}-${row}`}>
+                          <Skeleton className="h-4 bg-muted" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ),
+                )}
               </TableBody>
             </Table>
           </div>

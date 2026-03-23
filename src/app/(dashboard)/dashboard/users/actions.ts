@@ -18,12 +18,12 @@ import type {
   UserWithAcademicDegree,
 } from "@/lib/types/users";
 
-export async function updateUser(userData: UserEdit, id: string) {
+export async function updateUser(userData: UserEdit) {
   const { success, data, error } = await withTryCatch<UserSelect>(
     auth.api.adminUpdateUser({
       headers: await headers(),
       body: {
-        userId: id,
+        userId: userData.id,
         data: userData,
       },
     }),

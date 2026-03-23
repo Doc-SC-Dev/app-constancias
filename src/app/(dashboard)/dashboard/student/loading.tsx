@@ -1,5 +1,3 @@
-
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,13 +11,9 @@ import {
 } from "@/components/ui/table";
 
 export default function Loading() {
-  const headers = [
-    "Estado",
-    "Matrícula",
-    "Nombre",
-    "Email",
-    "Año de admisión",
-  ];
+  const headers = ["Estado", "Matrícula", "Nombre", "Email", "Año de admisión"];
+
+  const row = Array.from({ length: 10 }, (_, i) => i);
 
   return (
     <div className="container h-full mx-auto flex flex-col gap-4">
@@ -34,7 +28,6 @@ export default function Loading() {
             disabled
           />
         </div>
-
       </div>
 
       <div className="overflow-hidden rounded-md border">
@@ -49,10 +42,10 @@ export default function Loading() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[...new Array(10)].map((_, i) => (
+            {row.map((i) => (
               <TableRow key={`loading-row-${i}`}>
-                {headers.map((cell, idx) => (
-                  <TableCell key={`tc-s-${idx}-${i}`}>
+                {headers.map((cell) => (
+                  <TableCell key={`tc-s-${cell}-${i}`}>
                     <Skeleton className="h-4 w-full bg-muted" />
                   </TableCell>
                 ))}

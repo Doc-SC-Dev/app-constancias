@@ -14,11 +14,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 /* ----------- */
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -34,7 +33,6 @@ import { Spinner } from "./ui/spinner";
 
 export interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
-  children?: ReactNode;
   placeholder: string;
   queryKey: string;
   queryFn: ({
@@ -48,6 +46,7 @@ export interface DataTableProps<TData> {
   emptyDescription?: string;
   onDialog?: boolean;
   size?: "bg" | "md" | "sm";
+  containerClassName?: string;
 }
 
 export function DataTable<TData>({
@@ -60,6 +59,7 @@ export function DataTable<TData>({
   emptyTitle,
   onDialog = false,
   size = "bg",
+  containerClassName,
 }: DataTableProps<TData>) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [globalFilter, setGlobalFilter] = useState<"">("");
@@ -140,22 +140,28 @@ export function DataTable<TData>({
 
   const columnWidths = useMemo(() => {
     const widths: Record<string, number> = {};
-    const measureColumns = ["name", "user", "email"];
 
-    memoColumns.forEach((col: any) => {
-      if (measureColumns.includes(col.accessorKey)) {
-        let maxLen = 0;
-        flatData.forEach((row: any) => {
-          const val = row[col.accessorKey];
+    memoColumns.forEach((col: ColumnDef<TData>) => {
+      const colId =
+        col.id || (col as { accessorKey?: string; id: string }).accessorKey;
+      if (!colId) return;
+
+      let maxLen = typeof col.header === "string" ? col.header.length : 11;
+      const colKey = (col as { accessorKey?: string; id: string }).accessorKey;
+      if (colKey) {
+        flatData.forEach((row: TData) => {
+          const val = (row as Record<string, unknown>)[colKey];
           if (typeof val === "string") {
             maxLen = Math.max(maxLen, val.length);
+          } else if (typeof val === "number") {
+            maxLen = Math.max(maxLen, String(val).length);
+          } else if (val instanceof Date) {
+            maxLen = Math.max(maxLen, 12);
           }
         });
-        const estimated = Math.max(150, Math.min(maxLen * 8 + 48, 400));
-        if (estimated > 150) {
-          widths[col.accessorKey] = estimated;
-        }
       }
+      const estimated = Math.max(100, Math.min(maxLen * 8 + 48, 500));
+      widths[colId] = estimated;
     });
     return widths;
   }, [flatData, memoColumns]);
@@ -167,7 +173,7 @@ export function DataTable<TData>({
     //measure dynamic row height, except in firefox because it measures table border height incorrectly
     measureElement:
       typeof window !== "undefined" &&
-        navigator.userAgent.indexOf("Firefox") === -1
+      navigator.userAgent.indexOf("Firefox") === -1
         ? (element) => element?.getBoundingClientRect().height
         : undefined,
     overscan: 5,
@@ -196,9 +202,9 @@ export function DataTable<TData>({
     );
   }
   return (
-    <div className="container flex flex-col mx-auto h-full gap-4">
+    <div className="container flex-1 flex flex-col mx-auto min-h-0 gap-4">
       {!onDialog && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-end justify-between gap-4">
           <div className="grid w-full max-w-sm items-center gap-3">
             <Label htmlFor="fuzzy-input">Filtrar</Label>
             <Input
@@ -213,11 +219,17 @@ export function DataTable<TData>({
         </div>
       )}
       <div
-        className="container rounded-md border relative"
-        style={{
-          height: `${getHeight()}px`,
-          overflow: "auto",
-        }}
+        className={cn(
+          "container rounded-md border relative",
+          containerClassName,
+        )}
+        style={
+          containerClassName
+            ? {
+                overflow: "auto",
+              }
+            : { height: `${getHeight()}px`, overflow: "auto" }
+        }
         ref={tableContainerRef}
         onScroll={(e) => fetchMoreOnBottomReached(e.currentTarget)}
       >
@@ -234,24 +246,25 @@ export function DataTable<TData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="flex w-full gap-4">
                 {headerGroup.headers.map((header) => {
-                  const colKey = (header.column.columnDef as any).accessorKey;
+                  const colKey = header.column.id;
                   const dynamicWidth = columnWidths[colKey];
 
                   return (
                     <TableHead
                       key={header.id}
-                      className={cn(
-                        "flex items-center",
-                        header.column.columnDef.meta?.className ?? (dynamicWidth ? "flex-none" : "flex-1"),
-                      )}
-                      style={dynamicWidth ? { width: `${dynamicWidth}px` } : undefined}
+                      className={cn("flex items-center", "flex-1")}
+                      style={
+                        dynamicWidth
+                          ? { minWidth: `${dynamicWidth}px` }
+                          : undefined
+                      }
                     >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
@@ -261,77 +274,66 @@ export function DataTable<TData>({
           <TableBody
             className={`grid relative w-full`}
             style={{
-
               /* ----------- */
-              height: isLoading ? "auto" : `${rowVirtualizer.getTotalSize() ? rowVirtualizer.getTotalSize() : 100}px`,
+              height: isLoading
+                ? "auto"
+                : `${rowVirtualizer.getTotalSize() ? rowVirtualizer.getTotalSize() : 100}px`,
             }}
           >
-            {isLoading ? (
-              [...new Array(10)].map((_, i) => (
-                <TableRow key={`loading-row-${i}`} className="flex w-full gap-4">
-                  {columns.map((col, idx) => {
-                    const metaClass = (col.meta as any)?.className;
+            {rowVirtualizer.getVirtualItems().length
+              ? /* ----------- */
+                rowVirtualizer
+                  .getVirtualItems()
+                  .map((virtualRow) => {
+                    const row = rows[virtualRow.index] as Row<TData>;
                     return (
-                      <TableCell
-                        key={`col-${idx}`}
-                        className={cn("flex", metaClass ? metaClass : "flex-1")}
+                      <TableRow
+                        data-index={virtualRow.index}
+                        ref={(node) => rowVirtualizer.measureElement(node)}
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                        className="flex absolute w-full gap-4"
+                        style={{
+                          transform: `translateY(${virtualRow.start}px)`,
+                        }}
                       >
-                        <div className="flex justify-center w-full">
-                          <Skeleton className="h-4 w-full bg-muted" />
-                        </div>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))
-            ) : rowVirtualizer.getVirtualItems().length ? (
-              /* ----------- */
-              rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                const row = rows[virtualRow.index] as Row<TData>;
-                return (
-                  <TableRow
-                    data-index={virtualRow.index}
-                    ref={(node) => rowVirtualizer.measureElement(node)}
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="flex absolute w-full gap-4"
-                    style={{
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => {
-                      const colKey = (cell.column.columnDef as any).accessorKey;
-                      const dynamicWidth = columnWidths[colKey];
+                        {row.getVisibleCells().map((cell) => {
+                          const colKey = cell.column.id;
+                          const dynamicWidth = columnWidths[colKey];
 
-                      return (
-                        <TableCell
-                          key={cell.id}
-                          className={cn(
-                            "flex",
-                            cell.column.columnDef.meta?.className ?? (dynamicWidth ? "flex-none" : "flex-1"),
-                          )}
-                          style={dynamicWidth ? { width: `${dynamicWidth}px` } : undefined}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      );
-                    })}
+                          return (
+                            <TableCell
+                              key={cell.id}
+                              className={cn(
+                                "flex flex-1",
+                                cell.column.columnDef.meta?.className,
+                              )}
+                              style={
+                                dynamicWidth
+                                  ? { minWidth: `${dynamicWidth}px` }
+                                  : undefined
+                              }
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })
+              : !isFetching && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No hay resultados.
+                    </TableCell>
                   </TableRow>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  {!isFetching && "No hay resultados."}
-                </TableCell>
-              </TableRow>
-            )}
+                )}
           </TableBody>
         </Table>
         {isFetching && !isLoading && (

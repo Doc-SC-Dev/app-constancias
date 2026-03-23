@@ -1,6 +1,5 @@
 "use client";
 import { Download, Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 type ActionButtonProps = {
   onView?: () => void;
@@ -91,7 +91,7 @@ export default function ActionButton({
           action.type === "delete"
             ? "text-destructive hover:text-destructive"
             : "",
-          isDisabled ? "opacity-50 pointer-events-none" : ""
+          isDisabled ? "opacity-50 pointer-events-none" : "",
           /* : action.type === "download"
             ? "text-blue-500 hover:text-blue-600 hover:bg-blue-50"
             : "" */

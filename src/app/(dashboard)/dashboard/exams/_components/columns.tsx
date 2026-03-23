@@ -1,18 +1,17 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Exams } from "../actions";
 import { EditExamDialog } from "./edit-exam-dialog";
-import { useState } from "react";
 
 function isExamEditable(startAt: string): boolean {
   const examDate = new Date(startAt);
@@ -26,42 +25,38 @@ const ActionsCell = ({ exam, isAdmin }: { exam: Exams; isAdmin: boolean }) => {
   const [open, setOpen] = useState(false);
   const isTimeValid = isExamEditable(exam.startAt);
   const isApproved = exam.grade !== null && exam.grade >= 4.0;
-  
+
   const canEdit = isTimeValid && (isAdmin || !isApproved);
 
-  let tooltipText = "Debe esperar al menos un día después del examen para editar la nota.";
+  let tooltipText =
+    "Debe esperar al menos un día después del examen para editar la nota.";
   if (isTimeValid && !isAdmin && isApproved) {
     tooltipText = "No puedes editar un examen que está aprobado.";
   }
+  const hasGrade = exam.grade !== null;
 
   return (
     <span className="flex flex-1 items-center justify-center">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span tabIndex={canEdit ? undefined : 0}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => canEdit && setOpen(true)}
-                disabled={!canEdit}
-              >
-                Editar Nota
-              </Button>
-            </span>
-          </TooltipTrigger>
-          {!canEdit && (
-            <TooltipContent>
-              <p>{tooltipText}</p>
-            </TooltipContent>
-          )}
-        </Tooltip>
-      </TooltipProvider>
-      <EditExamDialog
-        open={open}
-        onOpenChange={setOpen}
-        exam={exam}
-      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span tabIndex={canEdit ? undefined : 0}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => canEdit && setOpen(true)}
+              disabled={!canEdit}
+            >
+              {hasGrade ? "Editar" : "Agregar"} Nota
+            </Button>
+          </span>
+        </TooltipTrigger>
+        {!canEdit && (
+          <TooltipContent side="right">
+            <p>{tooltipText}</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
+      <EditExamDialog open={open} onOpenChange={setOpen} exam={exam} />
     </span>
   );
 };
@@ -114,8 +109,8 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Exams>[] => [
           <p>
             {to
               ? from +
-              " - " +
-              new Date(to).toLocaleDateString("es-CL").replaceAll("-", "/")
+                " - " +
+                new Date(to).toLocaleDateString("es-CL").replaceAll("-", "/")
               : from}
           </p>
         </div>
@@ -128,38 +123,50 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Exams>[] => [
     cell({ row }) {
       const grade = row.getValue("grade") as number | null;
       let stateLabel = "Pendiente";
-      let badgeClass = "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100";
+      let badgeClass =
+        "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-100";
       let dotClass = "bg-yellow-500";
 
       if (grade !== null && grade > 0) {
         if (grade >= 1.0 && grade <= 3.9) {
           stateLabel = "Reprobado";
-          badgeClass = "bg-red-100 text-red-800 border-red-200 hover:bg-red-100";
+          badgeClass =
+            "bg-red-100 text-red-800 border-red-200 hover:bg-red-100";
           dotClass = "bg-red-500";
         } else if (grade >= 4.0 && grade <= 7.0) {
           stateLabel = "Aprobado";
-          badgeClass = "bg-green-100 text-green-800 border-green-200 hover:bg-green-100";
+          badgeClass =
+            "bg-green-100 text-green-800 border-green-200 hover:bg-green-100";
           dotClass = "bg-green-500";
         }
       }
 
       return (
         <div className="flex flex-1 items-center justify-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="cursor-help">
-                  <Badge variant="outline" className={cn("gap-2 font-normal hover:opacity-80 transition-opacity whitespace-nowrap", badgeClass)}>
-                    <span className={cn("size-2 rounded-full", dotClass)} />
-                    {stateLabel}
-                  </Badge>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Nota: {grade !== null && grade > 0 ? grade.toString().replace(".", ",") : "N/A"}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="cursor-help">
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "gap-2 font-normal hover:opacity-80 transition-opacity whitespace-nowrap",
+                    badgeClass,
+                  )}
+                >
+                  <span className={cn("size-2 rounded-full", dotClass)} />
+                  {stateLabel}
+                </Badge>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>
+                Nota:{" "}
+                {grade !== null && grade > 0
+                  ? grade.toString().replace(".", ",")
+                  : "N/A"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       );
     },

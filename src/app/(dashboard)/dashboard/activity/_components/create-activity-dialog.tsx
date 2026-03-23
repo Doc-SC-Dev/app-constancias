@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   Controller,
-  type FieldError as RHFFieldError,
+  type FieldErrors,
   useFieldArray,
   useForm,
 } from "react-hook-form";
@@ -106,6 +106,7 @@ export default function CreateActivityDialog() {
   });
 
   const activityType = form.watch("type");
+  const watchedParticipants = form.watch("participants");
 
   const {
     fields: participants,
@@ -113,6 +114,39 @@ export default function CreateActivityDialog() {
     remove: removeParticipant,
     replace: replaceParticipants,
   } = useFieldArray({ control: form.control, name: "participants" });
+
+  const selectedActivityType = activityTypes?.find(
+    (t) => t.id === activityType,
+  );
+
+  /**
+   * Returns the count of participants already using the given participantTypeId,
+   * optionally excluding a specific row index (used when checking within a row).
+   */
+  const countByType = (typeId: string, excludeIndex?: number): number =>
+    watchedParticipants.filter(
+      (p, i) => p.type === typeId && i !== excludeIndex,
+    ).length;
+
+  /**
+   * Returns true when adding one more participant of this type would exceed max.
+   * max === null or max === 0 means unlimited.
+   */
+  const isTypeAtMax = (typeId: string, excludeIndex?: number): boolean => {
+    const pType = selectedActivityType?.participantTypes.find(
+      (pt) => pt.id === typeId,
+    );
+    if (!pType) return false;
+    const max = pType.max;
+    if (!max || max <= 0) return false;
+    return countByType(typeId, excludeIndex) >= max;
+  };
+
+  /** True when every participant type has reached its maximum */
+  const allTypesAtMax: boolean =
+    !!selectedActivityType &&
+    selectedActivityType.participantTypes.length > 0 &&
+    selectedActivityType.participantTypes.every((pt) => isTypeAtMax(pt.id));
 
   useEffect(() => {
     if (!activityType) {
@@ -125,13 +159,15 @@ export default function CreateActivityDialog() {
     );
     if (activityConfig) {
       const initialParticipants = activityConfig.participantTypes
-        .filter((p) => p.required)
-        .map<ActivityCreateDTO["participants"][0]>((p) => ({
-          id: "",
-          type: p.id,
-          hours: 0,
-          bloqueado: p.required,
-        }));
+        .filter((p) => p.min > 0)
+        .flatMap<ActivityCreateDTO["participants"][0]>((p) =>
+          Array.from({ length: p.min }, () => ({
+            id: "",
+            type: p.id,
+            hours: 0,
+            bloqueado: true,
+          })),
+        );
 
       replaceParticipants(initialParticipants);
     }
@@ -288,6 +324,7 @@ export default function CreateActivityDialog() {
                   type="button"
                   variant="outline"
                   size="sm"
+                  disabled={!activityType || allTypesAtMax}
                   onClick={() =>
                     addParticipant({
                       id: "",
@@ -301,91 +338,93 @@ export default function CreateActivityDialog() {
                 </Button>
               </div>
               <FieldGroup>
-                {form.formState.errors.participants?.root?.message && (
-                  <FieldError
-                    errors={[
-                      {
-                        message:
-                          (form.formState.errors.participants as RHFFieldError)
-                            ?.message ?? "",
-                      },
-                    ]}
-                  />
-                )}
                 <TableError
-                  errors={form.formState.errors.participants as any}
+                  errors={
+                    form.formState.errors
+                      .participants as unknown as FieldErrors[]
+                  }
                 />
                 {participants.length > 0 && (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nombre</TableHead>
-                        <TableHead>Tipo</TableHead>
-                        <TableHead>Horas</TableHead>
-                        <TableHead>Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {participants.map((participant, index) => (
-                        <TableRow key={`tr-${participant.id}`}>
-                          <TableCell>
-                            {isLoading && <Spinner />}
-                            {users && (
-                              <UserSelect
-                                index={index}
-                                fieldName="participants"
-                                users={users}
+                  <div className="max-h-[200px] overflow-y-auto">
+                    <Table>
+                      <TableHeader className="sticky top-0 z-10 bg-background">
+                        <TableRow>
+                          <TableHead>Nombre</TableHead>
+                          <TableHead>Tipo</TableHead>
+                          <TableHead>Horas</TableHead>
+                          <TableHead>Acciones</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {participants.map((participant, index) => (
+                          <TableRow key={`tr-${participant.id}`}>
+                            <TableCell>
+                              {isLoading && <Spinner />}
+                              {users && (
+                                <UserSelect
+                                  index={index}
+                                  fieldName="participants"
+                                  users={users}
+                                  control={form.control}
+                                  hideError={true}
+                                />
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <FormSelect
+                                hideError={true}
                                 control={form.control}
+                                name={`participants.${index}.type`}
+                                disabled={participant.bloqueado}
+                              >
+                                {selectedActivityType?.participantTypes.map(
+                                  (participantType) => {
+                                    const atMax = isTypeAtMax(
+                                      participantType.id,
+                                      index,
+                                    );
+                                    return (
+                                      <SelectItem
+                                        value={participantType.id}
+                                        key={participantType.id}
+                                        disabled={atMax}
+                                      >
+                                        {participantType.min > 0 && (
+                                          <b className="text-red-500">*</b>
+                                        )}{" "}
+                                        {participantType.name}
+                                        {atMax && " (máx. alcanzado)"}
+                                      </SelectItem>
+                                    );
+                                  },
+                                )}
+                              </FormSelect>
+                            </TableCell>
+                            <TableCell>
+                              <FormNumberInput
+                                control={form.control}
+                                name={`participants.${index}.hours`}
                                 hideError={true}
                               />
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <FormSelect
-                              hideError={true}
-                              control={form.control}
-                              name={`participants.${index}.type`}
-                              disabled={participant.bloqueado}
-                            >
-                              {activityTypes
-                                ?.find((type) => type.id === activityType)
-                                ?.participantTypes.map((participantType) => (
-                                  <SelectItem
-                                    value={participantType.id}
-                                    key={participantType.id}
-                                  >
-                                    {participantType.required && (
-                                      <b className="text-red-500">*</b>
-                                    )}{" "}
-                                    {participantType.name}
-                                  </SelectItem>
-                                ))}
-                            </FormSelect>
-                          </TableCell>
-                          <TableCell>
-                            <FormNumberInput
-                              control={form.control}
-                              name={`participants.${index}.hours`}
-                              hideError={true}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {!participant.bloqueado && (
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                onClick={() => removeParticipant(index)}
-                                aria-label={`Remove Participant ${index + 1}`}
-                              >
-                                <Trash />
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                            </TableCell>
+                            <TableCell>
+                              {!participant.bloqueado && (
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={() => removeParticipant(index)}
+                                  aria-label={`Remove Participant ${index + 1}`}
+                                >
+                                  <Trash />
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </FieldGroup>
             </FieldSet>

@@ -2,8 +2,8 @@
 import { Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { AlertDialog } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
-import { Dialog } from "./ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,21 +12,25 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-export default function LinkActionButton<T>({
-  data,
+export default function LinkActionButton({
   seeLink,
   editLink,
-  deleteDialog: DeleteDialog,
+  deleteAlertDialog: DeleteAlertDialog,
 }: {
-  data: T;
   seeLink: string;
-  editLink: string;
-  deleteDialog?: React.ComponentType<{ closeDialog: () => void; data: T }>;
+  editLink?: string;
+  deleteAlertDialog?: React.ComponentType<{ closeDialog: () => void }>;
 }) {
-  const [showDialog, setShowDialog] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(false);
   return (
     <>
-      <DropdownMenu>
+      {DeleteAlertDialog && (
+        <AlertDialog open={open} onOpenChange={setOpen}>
+          <DeleteAlertDialog closeDialog={() => setOpen(false)} />
+        </AlertDialog>
+      )}
+      <DropdownMenu open={openDropdown} onOpenChange={setOpenDropdown}>
         <DropdownMenuTrigger asChild>
           <Button size="icon-sm" variant="ghost">
             <MoreHorizontal />
@@ -34,22 +38,27 @@ export default function LinkActionButton<T>({
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className="hover:bg-muted">
             <Link href={seeLink}>
-              <Eye className="mr-2 h-4 w-4" />
+              <Eye className="mr-2 h-4 w-4 hover:text-accent" />
               Ver
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={editLink}>
-              <Edit className="mr-2 h-4 w-4" />
-              Editar
-            </Link>
-          </DropdownMenuItem>
-          {DeleteDialog && (
+          {editLink && (
+            <DropdownMenuItem asChild className="hover:bg-muted">
+              <Link href={editLink} className="hover:bg-muted">
+                <Edit className="mr-2 h-4 w-4" />
+                Editar
+              </Link>
+            </DropdownMenuItem>
+          )}
+          {DeleteAlertDialog && (
             <DropdownMenuItem
+              onSelect={() => {
+                setOpenDropdown(false);
+                setOpen(true);
+              }}
               variant="destructive"
-              onClick={() => setShowDialog(true)}
             >
               <Trash className="mr-2 h-4 w-4" />
               Eliminar
@@ -57,16 +66,6 @@ export default function LinkActionButton<T>({
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-      {DeleteDialog && (
-        <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DeleteDialog
-            data={data}
-            closeDialog={() => {
-              setShowDialog(false);
-            }}
-          />
-        </Dialog>
-      )}
     </>
   );
 }

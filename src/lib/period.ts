@@ -1,33 +1,45 @@
-import { db } from "@/lib/db";
 import type { AcademicPeriod } from "@/generated/prisma";
+import { db } from "@/lib/db";
 
 export async function getOrUpdateActivePeriod(): Promise<AcademicPeriod | null> {
   const currentDate = new Date();
 
-  const activePeriod = await db.academicPeriod.findFirst({
-    where: { active: true },
-  });
-
-  if (activePeriod) {
-    if (activePeriod.endDate >= currentDate && activePeriod.startDate <= currentDate) {
-      return activePeriod;
-    }
-  }
-
-  await db.academicPeriod.updateMany({
-    where: { active: true },
-    data: { active: false },
-  });
-  const newActivePeriod = await db.academicPeriod.findFirst({
+  const periods = await db.academicPeriod.findMany({
     where: {
-      startDate: { lte: currentDate },
-      endDate: { gte: currentDate },
+      OR: [
+        {
+          active: true,
+        },
+        {
+          startDate: { lte: currentDate },
+          endDate: { gte: currentDate },
+        },
+      ],
     },
   });
 
-  if (newActivePeriod) { 
+  if (periods.length === 0) return null;
+
+  const activePeriod = periods.find((period) => period.active);
+  const periodInRange = periods.find(
+    (period) =>
+      period.startDate <= currentDate && period.endDate >= currentDate,
+  );
+
+  if (activePeriod) {
+    if (activePeriod.id === periodInRange?.id) {
+      return activePeriod;
+    }
+
+    await db.academicPeriod.update({
+      where: { id: activePeriod.id },
+      data: { active: false },
+    });
+  }
+
+  if (periodInRange) {
     return await db.academicPeriod.update({
-      where: { id: newActivePeriod.id },
+      where: { id: periodInRange.id },
       data: { active: true },
     });
   }

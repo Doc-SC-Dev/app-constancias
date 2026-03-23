@@ -1,4 +1,5 @@
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import getQueryClient from "@/lib/query-client";
 import type { HistoryEntry } from "@/lib/types/history";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { User } from "@/lib/types/users";
@@ -12,7 +13,7 @@ export async function StandardTableWrapper({
   user: User;
   isAdmin: boolean;
 }) {
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["list-history-standard"],
@@ -32,7 +33,9 @@ export async function StandardTableWrapper({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <HistoryDataTable user={user} isAdmin={isAdmin} filter="standard" />
+      <div className="container flex-1 mx-auto flex flex-col gap-4">
+        <HistoryDataTable user={user} isAdmin={isAdmin} filter="standard" />
+      </div>
     </HydrationBoundary>
   );
 }
@@ -44,7 +47,7 @@ export async function OtherTableWrapper({
   user: User;
   isAdmin: boolean;
 }) {
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["list-history-other"],
@@ -64,7 +67,9 @@ export async function OtherTableWrapper({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <HistoryDataTable user={user} isAdmin={isAdmin} filter="other" />
+      <div className="container flex-1 mx-auto flex flex-col gap-4">
+        <HistoryDataTable user={user} isAdmin={isAdmin} filter="other" />
+      </div>
     </HydrationBoundary>
   );
 }

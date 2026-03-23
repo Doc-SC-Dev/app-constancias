@@ -15,7 +15,10 @@ export function createLazyDialog<T>(
 }
 
 export const LazyCreateRequestDialog = createLazyDialog<{ user: User }>(
-  () => import("@/app/(dashboard)/dashboard/_components/create-request-dialog"),
+  () =>
+    import(
+      "@/app/(dashboard)/dashboard/history/_components/dialog/create-request-dialog"
+    ),
   () => <p>...Cargando</p>,
   false,
 );

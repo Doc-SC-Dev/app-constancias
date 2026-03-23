@@ -53,7 +53,7 @@ import { createUser } from "../actions";
 export default function NewUserDialog() {
   const { data } = useSession();
   const [open, setOpen] = useState<boolean>(false);
-  const { data: academicDegree, isLoading: loadingDegree } = useQuery({
+  const { data: academicDegree } = useQuery({
     queryKey: ["get-all-academic-degree"],
     queryFn: getAcademicDegree,
   });
@@ -207,7 +207,6 @@ export default function NewUserDialog() {
                                     selected={field.value}
                                     onSelect={field.onChange}
                                     mode="single"
-                                    captionLayout="dropdown"
                                     fixedWeeks={true}
                                     locale={es}
                                   />
