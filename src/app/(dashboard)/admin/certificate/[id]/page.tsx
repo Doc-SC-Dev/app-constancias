@@ -6,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +18,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Certificate } from "@/lib/types/certificate";
 import { formatDate, Textos } from "@/lib/utils";
+import DeleteCertificateAlertDialog from "./_components/delete-certificate-alert-dialog";
 import { findCertificateById } from "./actions";
 
 export default async function CertificateDetailPage({
@@ -44,7 +46,7 @@ const CertificateDetailPageContent = ({
         className="w-full flex justify-between gap mb-4"
       >
         <Button variant="ghost" asChild>
-          <Link href="/admin?tab=certificates">
+          <Link href="/admin/certificate">
             <ArrowLeft />
           </Link>
         </Button>
@@ -55,10 +57,15 @@ const CertificateDetailPageContent = ({
               Editar
             </Link>
           </Button>
-          <Button variant="destructive">
-            <Trash />
-            Eliminar
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash />
+                Eliminar
+              </Button>
+            </AlertDialogTrigger>
+            <DeleteCertificateAlertDialog certificate={certificate} />
+          </AlertDialog>
         </div>
       </section>
       <Card>

@@ -62,6 +62,11 @@ export type RequestCertificate = {
   name: string;
 };
 export type FullRequest = {
+  director: {
+    name: string;
+    gender: Gender;
+    academicDegree: { title: { abbrev: string }[] } | null;
+  };
   id: string;
   user: RequestUser;
   activity: RequestActivity | null;

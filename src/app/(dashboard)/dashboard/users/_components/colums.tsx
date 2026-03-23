@@ -36,7 +36,7 @@ export const columns: ColumnDef<User>[] = [
         setIsLoading(false);
       };
       return (
-        <div className="flex flex-1 items-center justify-center space-x-2">
+        <div className="flex flex-1 items-center justify-center gap-2">
           <Switch
             id={`switch-${row.id}`}
             checked={checked}
@@ -62,17 +62,16 @@ export const columns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: "role",
+    accessorFn: (row) => Textos.Role[row.role as string] || row.role,
+    id: "role",
     header: () => <p className="flex flex-1 justify-center">Rol</p>,
-    cell({ row }) {
+    cell({ row, getValue }) {
       return (
         <span className="flex flex-1 items-center justify-center">
           <Badge
-            variant={
-              row.getValue("role") === "admin" ? "destructive" : "outline"
-            }
+            variant={row.original.role === "admin" ? "destructive" : "outline"}
           >
-            {Textos.Role[row.getValue("role") as string] || row.getValue("role")}
+            {getValue<string>()}
           </Badge>
         </span>
       );
@@ -110,10 +109,11 @@ export const columns: ColumnDef<User>[] = [
       return (
         <span className="flex flex-1 items-center justify-center">
           <LinkActionButton
-            data={user}
             seeLink={`/dashboard/users/${user.id}`}
             editLink={`/dashboard/users/${user.id}/edit`}
-            deleteDialog={DeleteDialog}
+            deleteAlertDialog={({ closeDialog }) => (
+              <DeleteDialog data={user} closeDialog={closeDialog} />
+            )}
           />
         </span>
       );

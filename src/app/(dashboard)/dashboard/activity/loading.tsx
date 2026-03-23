@@ -47,9 +47,15 @@ export default function Loading() {
             <TableRow className="flex w-full gap-4">
               <TableHead className="flex-1 flex items-center">Nombre</TableHead>
               <TableHead className="flex-1 flex items-center">Tipo</TableHead>
-              <TableHead className="flex-1 flex items-center justify-center">Fechas</TableHead>
-              <TableHead className="flex-1 flex items-center justify-center">Cantidad de participantes</TableHead>
-              <TableHead className="flex-1 flex items-center justify-center">Acción</TableHead>
+              <TableHead className="flex-1 flex items-center justify-center">
+                Fechas
+              </TableHead>
+              <TableHead className="flex-1 flex items-center justify-center">
+                Cantidad de participantes
+              </TableHead>
+              <TableHead className="flex-1 flex items-center justify-center">
+                Acción
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

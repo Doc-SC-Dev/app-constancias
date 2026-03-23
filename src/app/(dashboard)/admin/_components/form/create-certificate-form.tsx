@@ -52,10 +52,10 @@ export default function CreateCertificateForm({
     const { isSuccess, value, error } = await createCertificateAction(data);
     if (isSuccess) {
       toast.success("Certificado creado exitosamente", {
-        description: `Se creo el certificado con nombre ${value.name}`,
+        description: `Se creó el certificado con nombre ${value.name}`,
       });
       form.reset();
-      router.push("/admin?tab=certificates");
+      router.push("/admin/certificate");
     } else {
       toast.error("Error al crear el certificado", {
         description: error,
@@ -64,14 +64,14 @@ export default function CreateCertificateForm({
   };
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} id="from-create-certificate">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <ScrollArea className="w-full pr-4 h-[550px] mx-0">
           <FieldGroup className="gap-4 h-full">
             <FormInput
               control={form.control}
               name="name"
               placeholder="Ingresar nombre del certificado"
-              description="Nombre que se mostrara en la aplicación para el certificado que esta creando"
+              description="Nombre que se mostrará en la aplicación para el certificado que está creando"
               label="Nombre"
             />
             {children}
@@ -88,7 +88,7 @@ export default function CreateCertificateForm({
           >
             Cancelar
           </Button>
-          <Button type="submit" form="form-create-certificate">
+          <Button type="submit">
             {form.formState.isSubmitting ? (
               <>
                 <Spinner />

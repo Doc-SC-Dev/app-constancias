@@ -51,7 +51,7 @@ export default function PasswordInput<
               <FieldLabel htmlFor={`field-${field.name}`}>{label}</FieldLabel>
               {forgot && !isMobile && (
                 <Button type="button" variant="link" onClick={() => forgot()}>
-                  ¿Olvistaste tu contraseña?
+                  ¿Olvidaste tu contraseña?
                 </Button>
               )}
             </div>
@@ -63,41 +63,34 @@ export default function PasswordInput<
         );
 
         return (
-          <>
-            <Field data-invalid={fieldState.invalid} orientation="vertical">
-              <FieldContent>{labelElement}</FieldContent>
-              <InputGroup>
-                <InputGroupInput
-                  {...field}
-                  id={`field-${field.name}`}
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  aria-invalid={fieldState.invalid}
-                />
-                <InputGroupAddon align="inline-end">
-                  <InputGroupButton
-                    variant="ghost"
-                    type="button"
-                    size="icon-xs"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    {showPassword ? (
-                      <EyeOff className="size-4" />
-                    ) : (
-                      <Eye className="size-4" />
-                    )}
-                  </InputGroupButton>
-                </InputGroupAddon>
-              </InputGroup>
-              {errorElem}
-            </Field>
-            {isMobile && (
-              <Button variant="link">¿Olvistaste tu constraseña?</Button>
-            )}
-          </>
+          <Field data-invalid={fieldState.invalid} orientation="vertical">
+            <FieldContent>{labelElement}</FieldContent>
+            <InputGroup>
+              <InputGroupInput
+                {...field}
+                id={`field-${field.name}`}
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                aria-invalid={fieldState.invalid}
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  variant="ghost"
+                  type="button"
+                  size="icon-xs"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+            {errorElem}
+          </Field>
         );
       }}
     />

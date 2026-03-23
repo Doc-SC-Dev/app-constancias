@@ -1,14 +1,12 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { Role } from "@/generated/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { isAdmin, Roles } from "@/lib/authorization/permissions";
+import getQueryClient from "@/lib/query-client";
 import { menus } from "@/lib/types/menus";
-import { getAcademicDegree, getRequestsTypes } from "../action";
+import { getAcademicDegree } from "../action";
 import { DashboardCard } from "./_components/dashboard-card";
+import { verifyAcademicPeriod } from "./history/actions";
 
 export default async function HomePage() {
   const { user } = await isAuthenticated();
@@ -22,13 +20,17 @@ export default async function HomePage() {
     Estudiantes: adminPrevilige,
     Solicitudes: true,
     Actividades: adminPrevilige || user.role === Roles.PROFESSOR,
+    Exámenes:
+      adminPrevilige ||
+      user.role === Roles.PROFESSOR ||
+      user.role === Roles.STUDENT,
   };
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await Promise.all([
     queryClient.prefetchQuery({
-      queryKey: ["certificate-types"],
-      queryFn: getRequestsTypes,
+      queryKey: ["verify-academic-period"],
+      queryFn: verifyAcademicPeriod,
     }),
     queryClient.prefetchQuery({
       queryKey: ["get-all-academic-degree"],

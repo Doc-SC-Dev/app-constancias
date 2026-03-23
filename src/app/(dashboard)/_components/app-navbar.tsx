@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Textos } from "@/lib/utils";
 import type { User } from "@/lib/types/users";
+import { Textos } from "@/lib/utils";
 import logoImg from "../../../../public/assets/images/logo-horizontal-blanco.png";
 import { AppAvatar } from "./app-avatar";
 import { AppSideBarTrigger } from "./app-sidebar-trigger";

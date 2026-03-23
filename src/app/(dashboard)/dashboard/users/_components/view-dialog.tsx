@@ -27,7 +27,9 @@ export default function ViewDialog({ data: user }: DialogContentProps) {
             <span className="text-sm/normal text-muted-foreground">
               {user.email}
             </span>
-            <Badge variant="secondary">{Textos.Role[user.role || ""] || user.role}</Badge>
+            <Badge variant="secondary">
+              {Textos.Role[user.role || ""] || user.role}
+            </Badge>
           </div>
         </div>
       </DialogHeader>

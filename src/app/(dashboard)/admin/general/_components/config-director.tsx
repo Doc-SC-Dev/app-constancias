@@ -1,0 +1,97 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { User } from "@/generated/prisma";
+import { db } from "@/lib/db";
+import getQueryClient from "@/lib/query-client";
+import { getNonDirectorUsers } from "../actions";
+import { EditDirectorDialog } from "./dialogs/edit-director-dialog";
+
+export default async function ConfigDirector() {
+  const queryClient = getQueryClient();
+  const [director, _] = await Promise.all([
+    db.user.findFirst({
+      where: {
+        isDirector: {
+          equals: true,
+        },
+      },
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["get-non-director-users"],
+      queryFn: getNonDirectorUsers,
+    }),
+  ]);
+  if (!director) {
+    return (
+      <div className="flex flex-col gap-4 w-full">
+        <h1 className="text-2xl">Director del Programa</h1>
+        <ConfigDirectorError />
+      </div>
+    );
+  }
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex items-center justify-between w-full">
+          <h1 className="text-2xl">Director del Programa</h1>
+          <EditDirectorDialog userId={director.id} name={director.name} />
+        </div>
+        <ConfigDirectorContent director={director} />
+      </div>
+    </HydrationBoundary>
+  );
+}
+
+function ConfigDirectorContent({ director }: { director: User }) {
+  return (
+    <div className="flex w-full items-center">
+      <div className="flex flex-4 items-center gap-10">
+        <Avatar className="w-20 h-20">
+          <AvatarImage src={director.image ?? ""} />
+          <AvatarFallback className="text-3xl">
+            {director.name.at(0)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col gap-2">
+          <p className="text-2xl">{director.name}</p>
+          <p className="text-lg">{director.email}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfigDirectorError() {
+  return (
+    <div className="flex items-center">
+      <Alert variant="default" className=" w-1/2">
+        <AlertTriangle className="fill-amber-400" />
+        <AlertTitle>No se ha configurado un director</AlertTitle>
+        <AlertDescription>
+          Seleccione un usuario para configurarlo como Director del Programa
+        </AlertDescription>
+      </Alert>
+    </div>
+  );
+}
+export function ConfigDirectorLoading() {
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <h1 className="text-2xl">Director del Programa</h1>
+      <div className="flex items-center">
+        <div className="container mx-auto flex items-center gap-10">
+          <div className="flex w-fit items-center gap-4">
+            <Skeleton className="size-20 shrink-0 rounded-full bg-gray-300" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-6 w-[150] bg-gray-300" />
+            <Skeleton className="h-4 w-[150] bg-gray-300" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

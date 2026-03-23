@@ -15,6 +15,8 @@ import type {
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { PAGE_SIZE } from "@/lib/types/pagination";
 import type { ActivityParticipantDTO } from "@/lib/types/paricipant-activity";
+import { withAudit } from "@/lib/with-audit";
+import { Result } from "@/shared/core/Result";
 
 export async function updateActivity(data: ActivityEdit, id: string) {
   try {
@@ -70,6 +72,68 @@ export async function deleteActivity({ activityId }: { activityId: string }) {
   } catch (error) {
     console.error(error);
     return { success: false, message: "Error al eliminar la actividad" };
+  }
+}
+
+export async function addParticipantToActivity(
+  activityId: string,
+  data: { userId: string; participantTypeId: string; hours: number },
+) {
+  try {
+    await dbWithAutdit().participant.create({
+      data: {
+        activity: {
+          connect: {
+            id: activityId,
+          },
+        },
+        user: {
+          connect: {
+            id: data.userId,
+          },
+        },
+        type: {
+          connect: {
+            id: data.participantTypeId,
+          },
+        },
+        hours: data.hours,
+      },
+    });
+    revalidatePath(`/dashboard/activity/${activityId}`);
+    return Result.ok("Participante agregado correctamente").serialize();
+  } catch (error) {
+    console.error(error);
+    return Result.fail("Error al agregar el participante").serialize();
+  }
+}
+
+export async function addParticipantToActivityAudit(
+  activityId: string,
+  data: {
+    userId: string;
+    participantTypeId: string;
+    hours: number;
+  },
+) {
+  return await withAudit(
+    async () => await addParticipantToActivity(activityId, data),
+  );
+}
+
+export async function removeParticipantFromActivity(
+  participantId: string,
+  activityId: string,
+) {
+  try {
+    await dbWithAutdit().participant.delete({
+      where: { id: participantId },
+    });
+    revalidatePath(`/dashboard/activity/${activityId}`);
+    return { success: true, message: "Participante eliminado correctamente" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Error al eliminar el participante" };
   }
 }
 
@@ -195,13 +259,22 @@ export const getActivityTypes = async () => {
         select: {
           id: true,
           name: true,
-          required: true,
+          maxCapacity: true,
+          minCapacity: true,
+          roles: true,
         },
       },
     },
   });
 
-  return data;
+  return data.map((activityType) => ({
+    ...activityType,
+    participantTypes: activityType.participantTypes.map((participantType) => ({
+      ...participantType,
+      max: participantType.maxCapacity,
+      min: participantType.minCapacity,
+    })),
+  }));
 };
 
 export const getActivityParticipants = async ({
@@ -283,6 +356,7 @@ export const getActivityById = async (activityId: string) => {
   return {
     ...rest,
     participants: participants.map((p) => ({
+      id: p.id,
       name: p.user.name,
       userId: p.user.id,
       typeId: p.type.id,

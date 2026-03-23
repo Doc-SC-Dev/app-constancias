@@ -40,11 +40,11 @@ export default function LoginCard({ goToTab }: Props) {
       const result = await loginAction(data);
 
       if (!result.success) {
-        toast.error(result.message);
+        toast.error("Error al iniciar sesión", { description: result.message });
         return;
       }
 
-      toast.success(result.message);
+      toast.success("Inicio de sesión exitoso");
       router.push("/dashboard");
     } catch (err) {
       console.error(err);

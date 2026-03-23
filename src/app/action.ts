@@ -1,6 +1,6 @@
 "use server";
 import { APIError } from "better-auth";
-import { PrismaClientKnownRequestError } from "@/generated/prisma/runtime/client";
+import { Prisma } from "@/generated/prisma";
 
 type TryCatchReturnType<T> =
   | {
@@ -22,11 +22,13 @@ export async function withTryCatch<T>(
     return { success: true, data };
   } catch (error) {
     if (error instanceof APIError) {
+      console.error(error);
       return { success: false, error: error.status as string };
     }
-    if (error instanceof PrismaClientKnownRequestError) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // TODO: Add more specific error messages for prisma
       if (error.code === "P2002") {
+        console.error(error.meta);
         return {
           success: false,
           error: `Ya existe en recurso ${error.meta?.target}`,
@@ -39,7 +41,7 @@ export async function withTryCatch<T>(
         };
       }
       if (error.code === "P2022") {
-        console.log(error.meta);
+        console.error(error.meta);
         return {
           success: false,
           error: `Recurso no encontrado ${error.meta?.target}`,

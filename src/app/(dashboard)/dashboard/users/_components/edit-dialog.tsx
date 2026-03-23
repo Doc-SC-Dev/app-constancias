@@ -40,7 +40,7 @@ export default function EditDialog({
     },
   });
   const onSubmit = async (userData: UserEdit) => {
-    const { success, message } = await updateUser(userData, user.id);
+    const { success, message } = await updateUser(userData);
     if (!success) {
       toast.error(message);
       return;

@@ -1,17 +1,18 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import {
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import type { ActivityDTO } from "@/lib/types/activity";
 import { deleteActivity } from "../actions";
@@ -26,6 +27,7 @@ export default function DeleteDialog({
   closeDialog,
 }: DialogContentProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const form = useForm();
   async function handleClick() {
     const { success, message } = await deleteActivity({
@@ -33,21 +35,22 @@ export default function DeleteDialog({
     });
     if (!success) {
       toast.error(message);
-      router.replace("/dashboard/activity");
     } else {
       toast.success(`Se eliminó exitosamente la actividad ${activity.name}`);
+      queryClient.invalidateQueries({ queryKey: ["list-activity"] });
+      router.replace("/dashboard/activity");
     }
     if (closeDialog) closeDialog();
   }
 
   return (
-    <DialogContent className="w-4xl">
-      <DialogHeader>
-        <DialogTitle>¿Estás seguro?</DialogTitle>
-        <DialogDescription>
+    <AlertDialogContent className="w-4xl">
+      <AlertDialogHeader>
+        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+        <AlertDialogDescription>
           Estás a punto de eliminar una actividad
-        </DialogDescription>
-      </DialogHeader>
+        </AlertDialogDescription>
+      </AlertDialogHeader>
       <div className="text-muted-foreground text-sm/normal">
         <span>Si eliminas esta actividad:</span>
         <ul className="px-4 list-disc [&>li]:mt-2 py-1">
@@ -57,10 +60,10 @@ export default function DeleteDialog({
         <p>Te recomendamos hacerlo solo si estás completamente seguro.</p>
         <p className="font-bold">Esta acción no se puede deshacer.</p>
       </div>
-      <DialogFooter>
-        <DialogClose asChild>
+      <AlertDialogFooter>
+        <AlertDialogCancel asChild>
           <Button variant="outline">Cancelar</Button>
-        </DialogClose>
+        </AlertDialogCancel>
         <form onSubmit={form.handleSubmit(handleClick)}>
           <Button
             variant="destructive"
@@ -71,7 +74,7 @@ export default function DeleteDialog({
             {form.formState.isSubmitting ? "Eliminando..." : "Eliminar"}
           </Button>
         </form>
-      </DialogFooter>
-    </DialogContent>
+      </AlertDialogFooter>
+    </AlertDialogContent>
   );
 }

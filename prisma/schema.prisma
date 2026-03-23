@@ -108,31 +108,31 @@ model Verification {
 }
 
 model Student {
-  id                      String                   @id @default(uuid())
-  studentId               Int                      @unique
-  userId                  String                   @unique
-  isRegularStudent        Boolean                  @default(false)
-  admisionDate            DateTime                 @default(now())
-  updatedAt               DateTime                 @default(now()) @updatedAt
-  createdAt               DateTime                 @default(now())
-  qualificationExamGrades QualificationExamGrade[]
-  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String   @id @default(uuid())
+  studentId        Int      @unique
+  userId           String   @unique
+  isRegularStudent Boolean  @default(false)
+  admisionDate     DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
+  createdAt        DateTime @default(now())
+  exams            Exam[]
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("student")
 }
 
-model QualificationExamGrade {
-  id         String   @id @default(uuid())
-  studentId  String
-  activityId String
+model Exam {
+  studentId  String?
+  activityId String?
   grade      Float
-  updatedAt  DateTime @updatedAt
-  createdAt  DateTime @default(now())
-  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime  @default(now())
+  id         String    @id
+  activity   Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  student    Student?  @relation(fields: [studentId], references: [id], onDelete: SetNull)
 
   @@unique([studentId, activityId])
-  @@map("qualification_exam_grade")
+  @@map("exam")
 }
 
 model OtherRequest {
@@ -161,19 +161,19 @@ model ActivityType {
 }
 
 model Activity {
-  id                      String                   @id @default(uuid())
-  activityTypeId          String
-  name                    String
-  startAt                 DateTime
-  endAt                   DateTime?
-  nAssistant              Int?
-  nParticipants           Int
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @default(now()) @updatedAt
-  activityType            ActivityType             @relation(fields: [activityTypeId], references: [id])
-  participants            Participant[]
-  qualificationExamGrades QualificationExamGrade[]
-  requests                Request[]
+  id             String        @id @default(uuid())
+  activityTypeId String
+  name           String
+  startAt        DateTime
+  endAt          DateTime?
+  nAssistant     Int?
+  nParticipants  Int
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  activityType   ActivityType  @relation(fields: [activityTypeId], references: [id])
+  participants   Participant[]
+  exams          Exam[]
+  requests       Request[]
 
   @@map("activity")
 }
@@ -184,8 +184,9 @@ model ParticipantType {
   roles          Role[]                @default([STUDENT, PROFESSOR])
   activityType   ActivityType?         @relation(fields: [activityTypeId], references: [id])
   activityTypeId String?
+  minCapacity    Int                   @default(0)
+  maxCapacity    Int?
   participants   Participant[]
-  required       Boolean               @default(false)
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @default(now()) @updatedAt
   template       CertificateTemplate[]

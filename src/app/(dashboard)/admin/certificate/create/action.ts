@@ -62,8 +62,7 @@ export async function createCertificateAction(data: CertificateCreateDto) {
         },
       },
     });
-    // revalidatePath("/admin/certificate");
-    revalidatePath("/admin?tab=certificates");
+    revalidatePath("/admin/certificate");
     return Result.ok(certificate).serialize();
   } catch (e) {
     console.error(e);

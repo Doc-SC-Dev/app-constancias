@@ -7,22 +7,22 @@ import type { CertificateEditDto } from "@/lib/types/certificate";
 import { Result } from "@/shared/core/Result";
 
 export async function updateCertificateAction(data: CertificateEditDto) {
-  const templates: Prisma.CertificateTemplateUpdateManyWithWhereWithoutCertificateInput[] =
+  const templates: Prisma.CertificateTemplateCreateWithoutCertificateInput[] =
     [];
 
   if (data.templateLocation === "activity") {
     data.activityTypes.forEach((val) => {
       templates.push({
-        where: { id: val.templateId },
-        data: { template: val.template, activityTypeId: val.id },
+        template: val.template,
+        activityType: { connect: { id: val.id } },
       });
     });
   }
   if (data.templateLocation === "participant") {
     data.participantTypes.forEach((val) => {
       templates.push({
-        where: { id: val.templateId },
-        data: { template: val.template, participantTypeId: val.id },
+        template: val.template,
+        participantType: { connect: { id: val.id } },
       });
     });
   }
@@ -30,8 +30,8 @@ export async function updateCertificateAction(data: CertificateEditDto) {
   if (data.templateLocation === "role") {
     data.roles.forEach((val) => {
       templates.push({
-        where: { id: val.templateId },
-        data: { role: val.name, template: val.template },
+        role: val.name,
+        template: val.template,
       });
     });
   }
@@ -42,7 +42,10 @@ export async function updateCertificateAction(data: CertificateEditDto) {
       data: {
         name: data.name,
         template: {
-          updateMany: templates,
+          create: templates,
+          deleteMany: {
+            certificateId: data.id,
+          },
         },
       },
     });

@@ -1,12 +1,12 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { HistoryEntry } from "@/lib/types/history";
-import { Button } from "@/components/ui/button";
 
 type DialogContentProps = {
   data: HistoryEntry;
@@ -25,12 +25,16 @@ export default function DescriptionViewDialog({
 
       <div className="flex flex-col gap-6 py-4">
         <div className="flex flex-col gap-2">
-          <span className="font-medium text-sm text-muted-foreground">Tipo de Solicitud</span>
+          <span className="font-medium text-sm text-muted-foreground">
+            Tipo de Solicitud
+          </span>
           <span>{request.certName}</span>
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="font-medium text-sm text-muted-foreground">Descripción</span>
+          <span className="font-medium text-sm text-muted-foreground">
+            Descripción
+          </span>
           <span>
             {request.description || "No se ha especificado una descripción."}
           </span>
@@ -38,9 +42,7 @@ export default function DescriptionViewDialog({
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={closeDialog}>
-          Cerrar
-        </Button>
+        <Button onClick={closeDialog}>Cerrar</Button>
       </div>
     </DialogContent>
   );
