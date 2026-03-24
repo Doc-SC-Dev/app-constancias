@@ -58,7 +58,7 @@ export const columns: ColumnDef<Student>[] = [
     cell({ getValue }) {
       return (
         <div className="flex flex-1 items-center justify-center">
-          <p>{getValue<number>()}</p>
+          <p>{getValue<string>()}</p>
         </div>
       );
     },

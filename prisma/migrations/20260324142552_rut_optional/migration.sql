@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "user" ALTER COLUMN "rut" DROP NOT NULL;
