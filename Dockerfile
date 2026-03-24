@@ -79,6 +79,14 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/prisma ./prisma
+# Binarios de Prisma CLI para migrate deploy
+COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+
+# Script de inicio — debe copiarse antes del USER nextjs
+COPY scripts/start.sh ./scripts/start.sh
+RUN chmod +x ./scripts/start.sh
 
 # Cambiar permisos
 RUN chown -R nextjs:nodejs /app
@@ -90,4 +98,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["./scripts/start.sh"]
