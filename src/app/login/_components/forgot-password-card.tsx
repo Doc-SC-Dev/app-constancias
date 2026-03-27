@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -18,6 +19,7 @@ import { FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { type ForgotPassword, forgotPasswordSchema } from "@/lib/types/login";
 import { forgotPassword } from "../actions";
+import logoImg from "../../../../public/assets/images/logo-horizontal-blanco.png";
 
 type Props = {
   goToTab: () => void;
@@ -55,17 +57,26 @@ export default function ForgotPasswordCard({ goToTab }: Props) {
   };
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      <Card className="w-md shadow-lg ">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">
+      <Card className="w-md shadow-2xl overflow-hidden border-none pt-0 gap-0">
+        <div className="bg-primary flex justify-center py-8 px-6">
+          <Image
+            src={logoImg}
+            alt="Logo Universidad"
+            priority
+            height={60}
+            className="w-auto drop-shadow-md"
+          />
+        </div>
+        <CardHeader className="pt-6 pb-2">
+          <CardTitle className="text-2xl font-bold tracking-tight text-center">
             Recuperar Contraseña
           </CardTitle>
           <CardDescription className="text-center">
             Ingresa tu correo electrónico
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <FieldGroup className="gap-4">
+        <CardContent className="pt-4 pb-6">
+          <FieldGroup className="gap-5">
             {cooldown > 0 ? (
               <Alert className="bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-900 dark:text-green-300">
                 <AlertTitle>Correo enviado</AlertTitle>
@@ -81,7 +92,7 @@ export default function ForgotPasswordCard({ goToTab }: Props) {
             )}
           </FieldGroup>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-3">
           {cooldown === 0 && (
             <Button
               type="submit"
@@ -94,6 +105,9 @@ export default function ForgotPasswordCard({ goToTab }: Props) {
                 : "Enviar Correo"}
             </Button>
           )}
+          <Button variant="ghost" type="button" className="w-full" onClick={goToTab}>
+            Volver a Iniciar Sesión
+          </Button>
         </CardFooter>
       </Card>
     </form>

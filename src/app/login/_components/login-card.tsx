@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -19,6 +20,7 @@ import { FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { loginAction } from "../actions";
 import { type LoginData, loginSchema } from "../loginSchema";
+import logoImg from "../../../../public/assets/images/logo-horizontal-blanco.png";
 
 type Props = {
   goToTab: () => void;
@@ -53,15 +55,24 @@ export default function LoginCard({ goToTab }: Props) {
   };
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      <Card className="w-md shadow-lg ">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Iniciar Sesión</CardTitle>
+      <Card className="w-md shadow-2xl overflow-hidden border-none pt-0 gap-0">
+        <div className="bg-primary flex justify-center py-8 px-6">
+          <Image
+            src={logoImg}
+            alt="Logo Universidad"
+            priority
+            height={60}
+            className="w-auto drop-shadow-md"
+          />
+        </div>
+        <CardHeader className="pt-6 pb-2">
+          <CardTitle className="text-2xl font-bold tracking-tight text-center">Iniciar Sesión</CardTitle>
           <CardDescription className="text-center">
             Ingresa con tus credenciales
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <FieldGroup className="gap-4">
+        <CardContent className="pt-4 pb-6">
+          <FieldGroup className="gap-5">
             <FormInput name="email" control={form.control} label="Email" />
             <PasswordInput
               name="password"
