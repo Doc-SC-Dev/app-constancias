@@ -19,16 +19,73 @@
 
 import "dotenv/config";
 import * as path from "node:path";
-import { hashPassword } from "better-auth/crypto";
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { admin } from "better-auth/plugins";
 import XLSX from "xlsx";
-
-import { db } from "@/lib/db";
-import { type Gender, Role } from "../src/generated/prisma";
+import { Gender, Role } from "../src/generated/prisma";
+import {
+  ADMINISTRATOR,
+  ac,
+  PROFESSOR,
+  STUDENT,
+  SUPERADMIN,
+} from "../src/lib/authorization/permissions";
+import { db } from "../src/lib/db";
 
 const prisma = db;
 
 const EXCEL_PATH = path.resolve(import.meta.dirname, "data/estructura_bd.xlsx");
 const DATA_START_ROW = 6;
+
+const auth = betterAuth({
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
+  emailAndPassword: {
+    enabled: true,
+  },
+  user: {
+    additionalFields: {
+      rut: {
+        type: "string",
+        required: false,
+        input: true,
+        returned: true,
+        unique: true,
+      },
+      academicDegreeId: {
+        type: "string",
+        input: true,
+        required: false,
+        returned: true,
+      },
+      gender: {
+        default: Gender.FEMALE,
+        required: true,
+        type: "string",
+        input: true,
+        returned: true,
+      },
+      isDirector: {
+        type: "boolean",
+        default: false,
+        input: true,
+        returned: true,
+        required: false,
+      },
+    },
+  },
+  plugins: [
+    admin({
+      ac: ac,
+      roles: { PROFESSOR, SUPERADMIN, STUDENT, ADMINISTRATOR },
+      adminRoles: [Role.ADMINISTRATOR, Role.SUPERADMIN],
+      defaultRole: Role.STUDENT,
+    }),
+  ],
+  trustedOrigins: ["http://localhost:3000"],
+});
 
 // ─────────────────────────────────────────────
 // Helpers
@@ -61,7 +118,10 @@ function parseDate(value: unknown): Date | null {
   if (!value) return null;
   if (value instanceof Date) return value;
   if (typeof value === "number") {
-    return XLSX.SSF.parse_date_code(value) as unknown as Date;
+    const codeDate = XLSX.SSF.parse_date_code(value);
+
+    if (!codeDate) return null;
+    return new Date(codeDate.y, codeDate.m - 1, codeDate.d);
   }
   const d = new Date(value as string);
   return Number.isNaN(d.getTime()) ? null : d;
@@ -99,8 +159,8 @@ async function seedAcademicDegrees(wb: XLSX.WorkBook) {
   for (const row of rows) {
     if (!row.name) continue;
     await prisma.academicDegree.upsert({
-      where: { name: row.name },
-      update: {},
+      where: { id: row.id || "non-existent-id" },
+      update: { name: row.name },
       create: { id: row.id || undefined, name: row.name },
     });
   }
@@ -168,90 +228,72 @@ async function seedUsers(wb: XLSX.WorkBook) {
   const rows = readSheet<Row>(wb, "User");
 
   for (const row of rows) {
-    if (!row.rut || !row.email) continue;
+    const sanitizedEmail = String(row.email)
+      .trim()
+      .replace(/\s/g, "")
+      .toLowerCase();
+    const sanitizedRut = row.rut ? String(row.rut).trim() : null;
+
+    if (!sanitizedEmail) continue;
 
     let degreeId = row.academicDegreeId || null;
     if (!degreeId && row.academicDegreeName) {
-      const degree = await prisma.academicDegree.findFirst({
+      const degree = await prisma.academicDegree.findUnique({
         where: { name: row.academicDegreeName },
       });
       degreeId = degree?.id ?? null;
     }
 
-    const role =
-      (String(row.role ?? "STUDENT").toUpperCase() as Role) || Role.STUDENT;
+    const role = (String(row.role).toUpperCase() as Role) || Role.STUDENT;
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email: row.email.trim() },
-      include: { accounts: { where: { providerId: "credential" } } },
+    console.log(row);
+
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          {
+            rut: sanitizedRut || undefined,
+          },
+          {
+            email: sanitizedEmail,
+          },
+          { name: row.name.trim() },
+        ],
+      },
     });
 
     if (existingUser) {
-      // Actualiza datos del perfil sin romper la sesión existente
-      await prisma.user.update({
-        where: { email: row.email.trim() },
-        data: {
-          name: row.name.trim(),
-          role,
-          gender: parseGender(row.gender),
-          isDirector: parseBoolean(row.isDirector),
-          banned: parseBoolean(row.banned),
-          banReason: row.banReason || null,
-          academicDegreeId: degreeId,
-        },
-      });
-      // Actualiza la contraseña si ya tiene cuenta credential
-      if (existingUser.accounts.length > 0) {
-        const password =
-          String(row.rut).length === 0 ? row.name : row.rut.replace(".", "");
-        const hashedPassword = await hashPassword(password);
-        await prisma.account.update({
-          where: { id: existingUser.accounts[0].id },
-          data: { password: hashedPassword },
-        });
-      }
       continue;
     }
 
-    // Usuario nuevo — hashea con scrypt (mismo algoritmo que usa Better Auth internamente)
-    const password =
-      String(row.rut).length === 0 ? row.name : row.rut.replace(".", "");
-    const hashedPassword = await hashPassword(password);
-    const userId = row.id || crypto.randomUUID();
-    const now = new Date();
-
     // Transacción atómica: sin Account con providerId "credential",
     // Better Auth no puede autenticar al usuario aunque exista en User
-    await prisma.$transaction([
-      prisma.user.create({
-        data: {
-          id: userId,
-          rut: row.rut.length ? row.rut.trim() : null,
-          name: row.name.trim(),
-          email: row.email.trim(),
-          emailVerified: parseBoolean(row.emailVerified),
-          image: row.image || null,
-          role,
-          banned: parseBoolean(row.banned),
-          banReason: row.banReason || null,
-          banExpires: parseDate(row.banExpires),
-          gender: parseGender(row.gender),
-          isDirector: parseBoolean(row.isDirector),
-          academicDegreeId: degreeId,
-        },
-      }),
-      prisma.account.create({
-        data: {
-          id: crypto.randomUUID(),
-          accountId: userId, // Better Auth usa el userId como accountId en credentials
-          providerId: "credential", // Valor fijo que usa Better Auth para email/password
-          userId,
-          password: hashedPassword,
-          createdAt: now,
-          updatedAt: now,
-        },
-      }),
-    ]);
+    console.log(`Creando usuario: ${sanitizedEmail} (${sanitizedRut})`);
+
+    const user = await auth.api.signUpEmail({
+      body: {
+        email: sanitizedEmail,
+        password: row.rut
+          ? row.rut.replaceAll(/\./g, "")
+          : row.name.toLowerCase(),
+        academicDegreeId: degreeId,
+        gender: parseGender(row.gender),
+        name: row.name.trim(),
+        rut: sanitizedRut,
+        rememberMe: true,
+        isDirector: parseBoolean(row.isDirector),
+      },
+    });
+
+    await prisma.user.update({
+      where: {
+        id: user.user?.id,
+      },
+      data: {
+        emailVerified: true,
+        role,
+      },
+    });
   }
 
   console.log(`     ${rows.length} registros procesados`);
@@ -270,10 +312,10 @@ async function seedStudents(wb: XLSX.WorkBook) {
   const rows = readSheet<Row>(wb, "Student");
   for (const row of rows) {
     if (!row.studentId) continue;
-    let userId = row.userId;
+    let userId = null;
     if (!userId && row.userName) {
       const user = await prisma.user.findFirst({
-        where: { name: row.userName },
+        where: { name: row.userName.trim() },
       });
       if (!user) {
         console.warn(
@@ -282,16 +324,18 @@ async function seedStudents(wb: XLSX.WorkBook) {
         continue;
       }
       userId = user.id;
+    } else {
+      userId = row.userId;
     }
     await prisma.student.upsert({
-      where: { studentId: row.studentId },
+      where: { studentId: String(row.studentId) },
       update: {
         isRegularStudent: parseBoolean(row.isRegularStudent),
         admisionDate: parseDate(row.admisionDate) ?? new Date(),
       },
       create: {
         id: row.id || undefined,
-        studentId: row.studentId,
+        studentId: String(row.studentId),
         userId,
         isRegularStudent: parseBoolean(row.isRegularStudent),
         admisionDate: parseDate(row.admisionDate) ?? new Date(),
@@ -391,28 +435,34 @@ async function seedParticipantTypes(wb: XLSX.WorkBook) {
   const rows = readSheet<Row>(wb, "ParticipantType");
   for (const row of rows) {
     if (!row.name) continue;
-    let activityTypeId = row.activityTypeId || null;
+    let activityTypeId = row.activityTypeId || undefined;
     if (!activityTypeId && row.activityTypeName) {
       const type = await prisma.activityType.findFirst({
         where: { name: row.activityTypeName.trim() },
       });
-      activityTypeId = type?.id ?? null;
+      if (!type) {
+        console.warn(
+          `     ⚠ ParticipantType: tipo "${row.activityTypeName}" no encontrado, saltando`,
+        );
+        continue;
+      }
+      activityTypeId = type.id;
     }
     await prisma.participantType.upsert({
       where: { id: row.id || "non-existent-id" },
       update: {
         name: row.name.trim(),
         roles: parseRoles(row.roles),
-        maxCapacity: Number.isNaN(row.max) ? 0 : Number(row.max),
-        minCapacity: Number(row.min),
+        maxCapacity: Number.isNaN(Number(row.max)) ? 0 : Number(row.max),
+        minCapacity: Number.isNaN(Number(row.min)) ? 0 : Number(row.min),
       },
       create: {
         id: row.id || undefined,
         name: row.name.trim(),
         roles: parseRoles(row.roles),
+        maxCapacity: Number.isNaN(Number(row.max)) ? 0 : Number(row.max),
+        minCapacity: Number.isNaN(Number(row.min)) ? 0 : Number(row.min),
         activityTypeId,
-        maxCapacity: Number.isNaN(row.max) ? 0 : Number(row.max),
-        minCapacity: Number(row.min),
       },
     });
   }
@@ -621,8 +671,8 @@ async function seedAcademicPeriods(wb: XLSX.WorkBook) {
   interface Row {
     id: string;
     name: string;
-    startAt: unknown;
-    endtAt: unknown; // typo intencional — así está en el Excel
+    startDate: unknown;
+    endDate: unknown; // typo intencional — así está en el Excel
     active: unknown;
     isCurrent: unknown;
     createdBy: string;
@@ -630,8 +680,9 @@ async function seedAcademicPeriods(wb: XLSX.WorkBook) {
   const rows = readSheet<Row>(wb, "AcademicPeriod");
   for (const row of rows) {
     if (!row.name) continue;
-    const startDate = parseDate(row.startAt);
-    const endDate = parseDate(row.endtAt);
+    const startDate = parseDate(row.startDate);
+    const endDate = parseDate(row.endDate);
+
     if (!startDate || !endDate) {
       console.warn(
         `     ⚠ AcademicPeriod "${row.name}": fechas inválidas, saltando`,
