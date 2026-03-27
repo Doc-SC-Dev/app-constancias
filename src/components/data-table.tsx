@@ -71,10 +71,8 @@ export function DataTable<TData>({
     queryKey: [queryKey],
     queryFn: async ({ pageParam }) => await queryFn({ pageParam }),
     initialPageParam: 0,
-    getNextPageParam: (
-      _lastPage: PaginationResponse<TData>,
-      allPages: PaginationResponse<TData>[],
-    ) => allPages.length,
+    getNextPageParam: (_lastPage: PaginationResponse<TData>) =>
+      _lastPage.nextPage,
     refetchOnWindowFocus: false,
     placeholderData: keepPreviousData,
   });
@@ -93,7 +91,7 @@ export function DataTable<TData>({
         const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
         //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
         if (
-          scrollHeight - scrollTop - clientHeight < 500 &&
+          scrollHeight - scrollTop - clientHeight < 600 &&
           !isFetching &&
           totalFetched < totalDBRowCount
         ) {

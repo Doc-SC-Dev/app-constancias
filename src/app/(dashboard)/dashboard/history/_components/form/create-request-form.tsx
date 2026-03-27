@@ -27,6 +27,7 @@ export default function CreateRequestForm({
   user: User;
   setOpen: (open: boolean) => void;
 }) {
+  const isAdminUser = isAdmin(user.role as Role);
   const form = useForm<CreateRequest>({
     resolver: arktypeResolver(createRequestSchema),
     mode: "onChange",
@@ -34,7 +35,7 @@ export default function CreateRequestForm({
     defaultValues: {
       certificateName: "",
       activityId: "",
-      userId: isAdmin(user.role as Role) ? "" : user.id,
+      userId: isAdminUser ? "" : user.id,
       description: "",
     },
     shouldUnregister: false,
@@ -68,7 +69,7 @@ export default function CreateRequestForm({
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
-          <UserSelect />
+          {isAdminUser && <UserSelect />}
           <CertificateSelect />
           <ActivitySelect />
           {certificate === Certificates.OTHER && (

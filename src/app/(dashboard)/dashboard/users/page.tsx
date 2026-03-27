@@ -1,7 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import { DataTable } from "@/components/data-table";
 import { LazyCreateUserDialog } from "@/components/dyamic-dialogs";
+import { LazyDataTable } from "@/components/dynamic-table";
 import { auth, isAuthenticated } from "@/lib/auth";
 import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
@@ -27,16 +27,14 @@ export default async function UsersPage() {
     queryKey: ["list-users"],
     queryFn: ({ pageParam }) => listUsers({ pageParam }),
     initialPageParam: 0,
-    getNextPageParam: (
-      _lastPage: PaginationResponse<User>,
-      groups: PaginationResponse<User>[],
-    ) => groups.length,
+    getNextPageParam: (_lastPage: PaginationResponse<User>) =>
+      _lastPage.nextPage,
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container max-h-full mx-auto flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Usuarios</h2>
-        <DataTable<User>
+        <LazyDataTable<User>
           emptyTitle="No hay usuarios"
           emptyDescription="No hay usuarios disponibles. Para iniciar debe crear un usuario"
           createDialog={LazyCreateUserDialog}
@@ -44,7 +42,7 @@ export default async function UsersPage() {
           queryKey="list-users"
           queryFn={listUsers}
           placeholder="Filtrar por Nombre, Rol, Email y RUT"
-          containerClassName="h-fit max-h-full"
+          containerClassName="max-h-full"
         />
       </div>
     </HydrationBoundary>
