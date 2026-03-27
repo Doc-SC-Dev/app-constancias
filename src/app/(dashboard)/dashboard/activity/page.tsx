@@ -20,12 +20,6 @@ export default async function ActivityPage() {
   if (!listPermission.success) {
     redirect("/dashboard");
   }
-  const createPermission = await auth.api.userHasPermission({
-    body: {
-      userId: session.user.id,
-      permissions: { activity: ["create"] },
-    },
-  });
 
   const queryClient = getQueryClient();
 
@@ -44,7 +38,7 @@ export default async function ActivityPage() {
         <h3 className="text-2xl font-bold">Actividades</h3>
         <DataTable
           emptyTitle="No hay actividades"
-          createDialog={createPermission ? LazyCreateActivityDialog : undefined}
+          createDialog={LazyCreateActivityDialog}
           emptyDescription="No se ha creado ninguna Actividad, para iniciar debe crear una actividad"
           columns={columns}
           queryFn={getActivitiesPaginated}

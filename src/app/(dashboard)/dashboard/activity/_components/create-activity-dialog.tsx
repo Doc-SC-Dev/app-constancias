@@ -68,6 +68,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { admin, useSession } from "@/lib/auth/better-auth/client";
 import {
   type ActivityCreateDTO,
   activityCreateSchema,
@@ -187,6 +188,27 @@ export default function CreateActivityDialog() {
       });
     }
   };
+
+  const { data: session, isPending } = useSession();
+
+  const [canCreate, setCanCreate] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkPermision = async () => {
+      const { data } = await admin.hasPermission({
+        userId: session?.user.id,
+        permissions: {
+          activity: ["create"],
+        },
+      });
+      if (data?.success) setCanCreate(true);
+      else setCanCreate(false);
+    };
+
+    checkPermision();
+  });
+  if (isPending) return <Spinner />;
+  if (!canCreate) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
