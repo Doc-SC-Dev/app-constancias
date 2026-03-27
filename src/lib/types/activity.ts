@@ -99,14 +99,14 @@ export type ActivityEdit = typeof activityEditSchema.infer;
 
 export const activityCreateSchema = type({
   name: type("string").narrow((s, ctx) => {
-  if (s.length < 2) {
-    return ctx.reject({
-      code: "predicate",
-      message: "El nombre debe tener al menos 2 caracteres",
-    });
-  }
-  return true;
-}),
+    if (s.length < 2) {
+      return ctx.reject({
+        code: "predicate",
+        message: "El nombre debe tener al menos 2 caracteres",
+      });
+    }
+    return true;
+  }),
   date: type({ to: "Date | undefined ", from: "Date" }),
 
   type: type("string").narrow((value, ctx) =>
@@ -134,6 +134,7 @@ export type ActivityCreateDTO = typeof activityCreateSchema.infer;
 
 export type Activity = {
   participants: {
+    id: string;
     name: string;
     userId: string;
     typeId: string;

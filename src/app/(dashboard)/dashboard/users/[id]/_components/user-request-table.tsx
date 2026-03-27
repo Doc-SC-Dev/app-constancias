@@ -1,11 +1,11 @@
 "use client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Dot } from "lucide-react";
-import { DataTable } from "@/components/data-table";
+import { LazyDataTable } from "@/components/dynamic-table";
 import { Badge } from "@/components/ui/badge";
 import type { RequestState } from "@/generated/prisma";
 import type { UserRequest } from "@/lib/types/request";
-import { Textos } from "@/lib/utils";
+import { formatDate, Textos } from "@/lib/utils";
 import { listUserRequest } from "../../actions";
 
 const getBadgeColor = (state: RequestState) => {
@@ -44,20 +44,20 @@ const columns: ColumnDef<UserRequest>[] = [
   {
     accessorKey: "createdAt",
     header: "Fecha de emisión",
-    cell: (data) => data.getValue<Date>().toLocaleDateString("es-CL"),
+    cell: (data) => formatDate(data.getValue<Date>()),
   },
 ];
 
 export default function UserRequestTable({ userId }: { userId: string }) {
   return (
-    <DataTable
+    <LazyDataTable
       columns={columns}
       queryFn={({ pageParam }) => listUserRequest({ pageParam, userId })}
       queryKey="list-user-request"
       placeholder="Filtrar Peticiones"
-      size="sm"
       emptyTitle="El usuario no ha realizado peticiones aún"
       emptyDescription="Para poder ver las peticiones, primero espere a que el usuario realice una petición"
+      containerClassName="flex-1"
     />
   );
 }

@@ -32,7 +32,12 @@ export default function TemplateEditor({
   const [preview, setPreview] = useState<boolean>(false);
   const certificateTags = [
     {
-      id: "user.name",
+      id: "director.academicDegree.title[0].abbrev director.name ",
+      display: "Nombre (Director)",
+      description: "Nombre completo del director.",
+    },
+    {
+      id: "user.academicDegree.title[0].abbrev user.name ",
       display: "Nombre (Usuario)",
       description: "Nombre completo del usuario participante.",
     },
@@ -40,11 +45,6 @@ export default function TemplateEditor({
       id: "user.rut",
       display: "RUT (Usuario)",
       description: "Rol Único Tributario del usuario participante.",
-    },
-    {
-      id: "user.academicDegree.title[0].abbrev",
-      display: "Grado académico (Usuario)",
-      description: "Abreviatura del grado académico más alto.",
     },
     {
       id: "activity.name",

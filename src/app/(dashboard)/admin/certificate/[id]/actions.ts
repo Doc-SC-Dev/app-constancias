@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { $Enums, Prisma } from "@/generated/prisma";
 import { db } from "@/lib/db";
 import type { Certificate } from "@/lib/types/certificate";
@@ -90,4 +91,31 @@ export const findCertificateById = async (
       },
     })),
   } satisfies Certificate).serialize();
+};
+
+export const deleteCertificate = async (
+  id: string,
+): Promise<SerializedResult<Pick<Certificate, "id" | "name">, string>> => {
+  try {
+    const deletedCertificate = await db.certificate.delete({
+      where: { id },
+    });
+    revalidatePath("/admin/certificate");
+    return Result.ok(deletedCertificate).serialize();
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2003") {
+        console.error(error.message);
+        return Result.fail(
+          "No se pudo eliminar el certificado por que hay solicitudes que dependen de el",
+        ).serialize();
+      }
+      if (error.code === "P2001") {
+        return Result.fail(
+          "No se pudo eliminar el certificado por que no existe",
+        ).serialize();
+      }
+    }
+    return Result.fail("Error al eliminar el certificado").serialize();
+  }
 };

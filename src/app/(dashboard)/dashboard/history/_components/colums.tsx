@@ -5,11 +5,9 @@ import { useState } from "react";
 import ActionDialogManager from "@/components/form/action-dialog-manager";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-
 import type { HistoryEntry } from "@/lib/types/history";
 import { Certificates } from "@/lib/types/request";
-import { Textos } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { cn, Textos } from "@/lib/utils";
 
 import DescriptionViewDialog from "./description-view-dialog";
 import HistoryStateDialog from "./history-state-dialog";
@@ -78,13 +76,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
     cell: ({ row }) => {
       const certName = row.original.certName;
 
-
-      return (
-        <span className="flex flex-1 items-center gap-2">
-          {certName}
-
-        </span>
-      );
+      return <span className="flex flex-1 items-center gap-2">{certName}</span>;
     },
   },
 
@@ -105,9 +97,7 @@ export const getColumns = (isAdmin: boolean): ColumnDef<HistoryEntry>[] => [
       const role = row.original.role;
       return (
         <span className="flex flex-1 items-center justify-center">
-          <Badge
-            variant={role === "administrator" ? "destructive" : "outline"}
-          >
+          <Badge variant={role === "administrator" ? "destructive" : "outline"}>
             {row.getValue("role") as string}
           </Badge>
         </span>

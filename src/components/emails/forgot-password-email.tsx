@@ -62,7 +62,8 @@ export function ForgotPasswordEmail({ name, url }: ForgotPasswordEmailProps) {
           <Text>{`Hola, ${name}:`}</Text>
           <Text>
             Hemos recibido una solicitud para restablecer la contraseña de tu
-            cuenta en Aplicación de Constancias del Doctorado en Ciencias Médicas.
+            cuenta en Aplicación de Constancias del Doctorado en Ciencias
+            Médicas.
           </Text>
         </Section>
         <Section>
@@ -108,7 +109,7 @@ export function ForgotPasswordEmail({ name, url }: ForgotPasswordEmailProps) {
             <Text className="my-[8px] font-semibold text-[16px] text-gray-900 leading-[24px]">
               Doctorado en Ciencias Médicas
             </Text>
-            <Text className="mt-[4px] mb-[0px] text-[16px] text-gray-500 leading-[24px]">
+            <Text className="mt-[4px] mb-0 text-[16px] text-gray-500 leading-[24px]">
               Aplicación de Constancias
             </Text>
           </Column>
@@ -117,7 +118,7 @@ export function ForgotPasswordEmail({ name, url }: ForgotPasswordEmailProps) {
               <Text className="my-[8px] font-semibold text-[16px] text-gray-500 leading-[24px]">
                 Montevideo 870, Temuco
               </Text>
-              <Text className="mt-[4px] mb-[0px] font-semibold text-[16px] text-gray-500 leading-[24px]">
+              <Text className="mt-[4px] mb-0 font-semibold text-[16px] text-gray-500 leading-[24px]">
                 doccsmedicas@ufrontera.cl
               </Text>
             </Row>

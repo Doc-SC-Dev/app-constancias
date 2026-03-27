@@ -45,7 +45,6 @@ export enum Roles {
   STUDENT = "STUDENT",
   PROFESSOR = "PROFESSOR",
   SUPERADMIN = "SUPERADMIN",
-  ADMINISTRATOR = "ADMINISTRATOR",
 }
 
 export type Role = `${Roles}`;

@@ -55,7 +55,7 @@ export default function CreateCertificateForm({
         description: `Se creó el certificado con nombre ${value.name}`,
       });
       form.reset();
-      router.push("/admin?tab=certificates");
+      router.push("/admin/certificate");
     } else {
       toast.error("Error al crear el certificado", {
         description: error,

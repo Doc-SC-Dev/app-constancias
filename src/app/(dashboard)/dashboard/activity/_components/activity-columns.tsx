@@ -64,11 +64,12 @@ export const columns: ColumnDef<ActivityDTO>[] = [
       const activity = row.original;
       return (
         <TableCell className="justify-center">
-          <LinkActionButton<ActivityDTO>
+          <LinkActionButton
             seeLink={`/dashboard/activity/${activity.id}`}
             editLink={`/dashboard/activity/${activity.id}/edit`}
-            deleteDialog={DeleteDialog}
-            data={activity}
+            deleteAlertDialog={({ closeDialog }) => (
+              <DeleteDialog data={activity} closeDialog={closeDialog} />
+            )}
           />
         </TableCell>
       );

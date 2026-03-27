@@ -1,5 +1,5 @@
-import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import type { Role } from "@/generated/prisma";
 import { auth, isAuthenticated } from "@/lib/auth";
 import { isAdmin } from "@/lib/authorization/permissions";

@@ -1,12 +1,9 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import { LazyCreateActivityDialog } from "@/components/dyamic-dialogs";
 import { auth, isAuthenticated } from "@/lib/auth";
+import getQueryClient from "@/lib/query-client";
 import type { ActivityDTO } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import { columns } from "./_components/activity-columns";
@@ -30,7 +27,7 @@ export default async function ActivityPage() {
     },
   });
 
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await queryClient.prefetchInfiniteQuery({
     queryKey: ["list-activity"],
@@ -43,7 +40,7 @@ export default async function ActivityPage() {
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="container mx-auto space-y-4">
+      <div className="container max-h-full mx-auto flex flex-col gap-4">
         <h3 className="text-2xl font-bold">Actividades</h3>
         <DataTable
           emptyTitle="No hay actividades"
@@ -53,6 +50,7 @@ export default async function ActivityPage() {
           queryFn={getActivitiesPaginated}
           queryKey="list-activity"
           placeholder="Filtrar datos en columnas"
+          containerClassName="h-fit max-h-full"
         />
       </div>
     </HydrationBoundary>

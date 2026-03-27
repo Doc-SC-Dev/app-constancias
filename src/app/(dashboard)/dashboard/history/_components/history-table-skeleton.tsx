@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
- 
+
 export function HistoryTableSkeleton() {
   const headers = [
     "Tipo de Solicitud",
@@ -21,6 +21,8 @@ export function HistoryTableSkeleton() {
     "Estado",
     "Acción",
   ];
+
+  const rows = Array.from({ length: 10 }, (_, i) => i);
 
   return (
     <div className="flex flex-col flex-1">
@@ -52,10 +54,10 @@ export function HistoryTableSkeleton() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[...new Array(10)].map((_, i) => (
+            {rows.map((i) => (
               <TableRow key={`loading-row-${i}`}>
-                {headers.map((cell, idx) => (
-                  <TableCell key={`tc-s-${idx}-${i}`}>
+                {headers.map((cell) => (
+                  <TableCell key={`tc-s-${cell}-${i}`}>
                     <div className="flex justify-center">
                       <Skeleton className="h-4 w-24 bg-muted" />
                     </div>

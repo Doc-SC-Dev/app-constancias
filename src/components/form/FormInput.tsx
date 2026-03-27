@@ -7,7 +7,7 @@ export const FormInput: FormControlFunc<{ placeholder?: string }> = (props) => {
         <Input
           {...field}
           placeholder={props.placeholder}
-          autoComplete=""
+          autoComplete="on"
           type={props.password ? "password" : "text"}
         />
       )}
