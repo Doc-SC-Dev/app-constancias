@@ -131,9 +131,9 @@ function ConfigPeriodError() {
   return (
     <Alert variant="default">
       <Info />
-      <AlertTitle>Períodos académicos inactivos</AlertTitle>
+      <AlertTitle>Periodos académicos inactivos</AlertTitle>
       <AlertDescription>
-        No existe un período académico que esté activo
+        No existe un periodo académico que esté activo
       </AlertDescription>
     </Alert>
   );

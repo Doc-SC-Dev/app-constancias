@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { FieldGroup, FieldSet } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
+import { Save, X } from "lucide-react";
 import { type NewPassword, newPasswordSchema } from "@/lib/types/users";
 import { ChangePassword } from "../dashboard/users/actions";
 
@@ -82,18 +83,19 @@ export default function NewPasswordDialog({
         <DialogFooter>
           <DialogClose asChild>
             <Button
-              className="hover:bg-destructive hover:text-destructive-foreground"
+              className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
               type="button"
               variant="outline"
               onClick={() => {
                 reset();
               }}
             >
+              <X className="mr-2 h-4 w-4" />
               Cancelar
             </Button>
           </DialogClose>
-          <Button type="submit" disabled={formState.isSubmitting}>
-            {formState.isSubmitting && <Spinner />}
+          <Button type="submit" variant="default" disabled={formState.isSubmitting}>
+            {formState.isSubmitting ? <Spinner /> : <Save className="mr-2 h-4 w-4" />}
             Cambiar
           </Button>
         </DialogFooter>

@@ -1,7 +1,7 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { Check, InfinityIcon, Plus, X } from "lucide-react";
+import { InfinityIcon, Plus, Save, X } from "lucide-react";
 import { useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -227,22 +227,26 @@ export default function CreateParticipantTypeSheet({
               />
             </FieldGroup>
 
-            <SheetFooter className="flex gap-2 ">
+            <SheetFooter className="flex gap-2">
               <SheetClose asChild>
-                <Button variant="outline" onClick={() => form.reset()}>
-                  <X className="h-4 w-4 mr-1" />
+                <Button
+                  variant="outline"
+                  onClick={() => form.reset()}
+                  className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+                >
+                  <X className="h-4 w-4 mr-2" />
                   Cancelar
                 </Button>
               </SheetClose>
               <Button type="submit">
                 {form.formState.isSubmitting ? (
                   <>
-                    <Spinner className="mr-1" /> Guardando
+                    <Spinner className="mr-2 h-4 w-4" /> Guardando...
                   </>
                 ) : (
                   <>
-                    <Check className="h-4 w-4 mr-1" />
-                    Crear
+                    <Save className="h-4 w-4 mr-2" />
+                    Guardar
                   </>
                 )}
               </Button>

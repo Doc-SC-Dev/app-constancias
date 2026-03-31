@@ -37,7 +37,7 @@ export default function NavigationLink() {
                 className={styles}
                 active={pathname.includes("/admin/academic-degree")}
               >
-                <Link href="/admin/academic-degree">Grados Academicos</Link>
+                <Link href="/admin/academic-degree">Grados Académicos</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem className="p-1 shrink-0">

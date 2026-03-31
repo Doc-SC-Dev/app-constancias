@@ -60,18 +60,18 @@ export function DeleteDegreeAlertDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>
-            <X className="mr-2" />
+          <AlertDialogCancel className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground">
+            <X className="mr-2 h-4 w-4" />
             Cancelar
           </AlertDialogCancel>
-          <Button onClick={onDelete} variant="destructive" disabled={isPending}>
+          <Button onClick={onDelete} variant="default" disabled={isPending}>
             {isPending ? (
               <>
-                <Spinner className="mr-2" /> Eliminando
+                <Spinner className="mr-2 h-4 w-4" /> Eliminando...
               </>
             ) : (
               <>
-                <Trash className="mr-2" /> Eliminar
+                <Trash className="mr-2 h-4 w-4" /> Eliminar
               </>
             )}
           </Button>

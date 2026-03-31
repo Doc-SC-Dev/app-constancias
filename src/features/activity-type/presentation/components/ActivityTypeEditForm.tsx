@@ -62,10 +62,14 @@ export default function ActivityTypeEditForm({
           description="Ingresa un nuevo nombre para el tipo de actividad."
         />
       </FieldGroup>
-      <DialogFooter>
+      <DialogFooter className="gap-2">
         <DialogClose asChild>
-          <Button variant="outline" type="button">
-            <X className="mr-2" />
+          <Button
+            variant="outline"
+            type="button"
+            className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+          >
+            <X className="mr-2 h-4 w-4" />
             Cancelar
           </Button>
         </DialogClose>
@@ -75,11 +79,11 @@ export default function ActivityTypeEditForm({
         >
           {formState.isSubmitting ? (
             <>
-              <Spinner className="mr-2" /> Guardando...
+              <Spinner className="mr-2 h-4 w-4" /> Guardando...
             </>
           ) : (
             <>
-              <Save className="mr-2" /> Guardar
+              <Save className="mr-2 h-4 w-4" /> Guardar
             </>
           )}
         </Button>

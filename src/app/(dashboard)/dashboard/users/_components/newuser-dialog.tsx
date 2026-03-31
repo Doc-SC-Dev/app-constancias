@@ -2,7 +2,7 @@
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus, Save, X } from "lucide-react";
 import { useState } from "react";
 import { es } from "react-day-picker/locale";
 import { Controller, useForm } from "react-hook-form";
@@ -227,15 +227,21 @@ export default function NewUserDialog() {
           </ScrollArea>
           <DialogFooter className="mt-6 pb-6 px-6">
             <DialogClose asChild onClick={() => reset()}>
-              <Button variant="outline">Cancelar</Button>
+              <Button 
+                variant="outline" 
+                className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancelar
+              </Button>
             </DialogClose>
             <Button
               type="submit"
               variant="default"
               disabled={formState.isSubmitting}
             >
-              {formState.isSubmitting && <Spinner />}
-              Crear
+              {formState.isSubmitting ? <Spinner /> : <Save className="mr-2 h-4 w-4" />}
+              Guardar
             </Button>
           </DialogFooter>
         </form>
