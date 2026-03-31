@@ -21,7 +21,7 @@ export const columns: ColumnDef<Student>[] = [
       const handleSwitchChange = async () => {
         setIsLoading(true);
         const { success, message } = await updateRegularStudent({
-          studentId: row.getValue("studentId") as number,
+          studentId: row.getValue<string>("studentId"),
           isRegular: !checked,
         });
         if (!success) {

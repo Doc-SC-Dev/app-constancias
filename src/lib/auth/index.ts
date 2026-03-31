@@ -20,4 +20,19 @@ const isAuthenticated = cache(async () => {
   return session;
 });
 
-export { isAuthenticated, auth };
+const hasPermission = cache(async (permissions: Record<string, string[]>) => {
+  const { user } = await isAuthenticated();
+  const { success } = await auth.api.userHasPermission({
+    headers: await headers(),
+    body: {
+      userId: user.id,
+      permissions: permissions,
+    },
+  });
+  if (!success) {
+    redirect("/dashboard");
+  }
+  return success;
+});
+
+export { isAuthenticated, auth, hasPermission };

@@ -1,6 +1,6 @@
 export type PaginationResponse<T> = {
   data: T[];
-  nextPage: number;
+  nextPage?: number;
   totalRows: number;
 };
 
