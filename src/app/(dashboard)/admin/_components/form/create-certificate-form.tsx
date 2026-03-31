@@ -1,6 +1,7 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
+import { Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -77,25 +78,28 @@ export default function CreateCertificateForm({
             {children}
           </FieldGroup>
         </ScrollArea>
-        <div className="flex justify-end gap-4 mt-6">
+        <div className="flex justify-end gap-2 mt-6">
           <Button
-            variant="destructive"
+            variant="outline"
             type="button"
+            className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
             onClick={() => {
               router.back();
               form.reset();
             }}
           >
+            <X className="mr-2 h-4 w-4" />
             Cancelar
           </Button>
-          <Button type="submit">
+          <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? (
               <>
-                <Spinner />
-                Guardando certificado
+                <Spinner className="mr-2 h-4 w-4" /> Guardando certificado...
               </>
             ) : (
-              "Guardar"
+              <>
+                <Save className="mr-2 h-4 w-4" /> Guardar
+              </>
             )}
           </Button>
         </div>

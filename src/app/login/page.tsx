@@ -9,7 +9,7 @@ export default async function LoginPage() {
   });
   if (session) redirect("/dashboard");
   return (
-    <div className="flex w-full h-full justify-center items-center">
+    <div className="flex w-full min-h-screen justify-center items-center bg-muted/30">
       <CardTabs />
     </div>
   );

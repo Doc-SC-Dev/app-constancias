@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash } from "lucide-react";
+import { Trash, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -87,16 +87,21 @@ export function DeleteActivityTypeAlertDialogContent({
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-        <AlertDialogAction
-          type="button"
-          className="bg-destructive hover:bg-destructive/90"
-          onClick={onDelete}
-          disabled={isDeleting}
-        >
-          {isDeleting ? <Spinner className="mr-2" /> : null}
-          Eliminar
-        </AlertDialogAction>
+        <AlertDialogCancel className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground">
+          <X className="mr-2 h-4 w-4" />
+          Cancelar
+        </AlertDialogCancel>
+        <Button onClick={onDelete} disabled={isDeleting} variant="default">
+          {isDeleting ? (
+            <>
+              <Spinner className="mr-2 h-4 w-4" /> Eliminando...
+            </>
+          ) : (
+            <>
+              <Trash className="mr-2 h-4 w-4" /> Eliminar
+            </>
+          )}
+        </Button>
       </AlertDialogFooter>
     </AlertDialogContent>
   );

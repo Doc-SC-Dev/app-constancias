@@ -1,12 +1,13 @@
 "use client";
 
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Save, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -239,10 +240,27 @@ export function ClosePeriodDialog({ periods }: { periods: AcademicPeriod[] }) {
             </div>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancelar
+            </Button>
+          </DialogClose>
           <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting && <Spinner />}
-            Guardar
+            {isSubmitting ? (
+              <>
+                <Spinner className="mr-2 h-4 w-4" /> Guardando...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" /> Guardar
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

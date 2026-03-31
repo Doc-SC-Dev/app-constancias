@@ -1,4 +1,5 @@
 "use client";
+import { Trash, X } from "lucide-react";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -24,9 +25,13 @@ export default function DeleteAlertDialog({
         <AlertDialogDescription>{description}</AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+        <AlertDialogCancel className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground">
+          <X className="mr-2 h-4 w-4" />
+          Cancelar
+        </AlertDialogCancel>
         <AlertDialogAction asChild>
-          <Button variant="destructive" onClick={onAccept}>
+          <Button variant="default" onClick={onAccept}>
+            <Trash className="mr-2 h-4 w-4" />
             Continuar
           </Button>
         </AlertDialogAction>

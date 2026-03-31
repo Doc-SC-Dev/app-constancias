@@ -2,7 +2,7 @@
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, X } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormInput } from "@/components/form/FormInput";
@@ -63,9 +63,13 @@ export default function CreateActivityTypeForm({
             placeholder="Ej: Curso, Taller, Conferencia"
           />
         </FieldGroup>
-        <DialogFooter className="mt-6">
+        <DialogFooter className="mt-6 gap-2">
           <DialogClose asChild onClick={() => form.reset()}>
-            <Button type="button" variant="destructive">
+            <Button
+              type="button"
+              variant="outline"
+              className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+            >
               <X className="mr-2 h-4 w-4" />
               Cancelar
             </Button>
@@ -73,11 +77,11 @@ export default function CreateActivityTypeForm({
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? (
               <>
-                <Spinner className="mr-2 h-4 w-4" /> Guardando
+                <Spinner className="mr-2 h-4 w-4" /> Guardando...
               </>
             ) : (
               <>
-                <Check className="mr-2 h-4 w-4" />
+                <Save className="mr-2 h-4 w-4" />
                 Guardar
               </>
             )}
