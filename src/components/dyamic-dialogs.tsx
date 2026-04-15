@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { ComponentType, ReactNode } from "react";
+import type { Role } from "@/lib/authorization/permissions";
 import type { User } from "@/lib/types/users";
 export function createLazyDialog<T>(
   importFn: () => Promise<{ default: ComponentType<T> }>,
@@ -37,8 +38,8 @@ const LazyCreateActivityDialogInternal = createLazyDialog(
   false,
 );
 
-export function LazyCreateUserDialog() {
-  return <LazyCreateUserDialogInternal />;
+export function LazyCreateUserDialog({ userRole }: { userRole: Role }) {
+  return <LazyCreateUserDialogInternal userRole={userRole} />;
 }
 
 export function LazyCreateActivityDialog() {

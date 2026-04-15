@@ -26,7 +26,7 @@ export function CreateGradeDialog() {
   const { create } = useAcademicDegree();
   const [open, setOpen] = useState<boolean>(false);
 
-  const form = useForm({
+  const form = useForm<CreateAcademicDegreeInput>({
     resolver: arktypeResolver(CreateAcademicDegreeSchema),
     mode: "onChange",
     reValidateMode: "onSubmit",

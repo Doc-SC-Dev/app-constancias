@@ -28,7 +28,10 @@ export default function SelectParticipantTypes() {
   const { control, watch } = useFormContext<CertificateCreateDto>();
   const activities = watch("activityTypes");
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["get-list-participant-types", activities],
+    queryKey: [
+      "get-list-participant-types",
+      activities ? activities.map((a) => a.id).join(",") : "",
+    ],
     queryFn: async () => await getParticipantTypes(activities.map((a) => a.id)),
     enabled: !!activities && activities.length > 0,
   });

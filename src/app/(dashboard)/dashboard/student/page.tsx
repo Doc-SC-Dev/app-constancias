@@ -1,7 +1,8 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { LazyDataTable } from "@/components/dynamic-table";
-import { auth, isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth";
+import { isAdmin, type Role } from "@/lib/authorization/permissions";
 import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { Student } from "@/lib/types/students";
@@ -10,13 +11,8 @@ import { listStudents } from "./action";
 
 export default async function UsersPage() {
   const session = await isAuthenticated();
-  const permission = await auth.api.userHasPermission({
-    body: {
-      userId: session.user.id,
-      permissions: { user: ["list"] },
-    },
-  });
-  if (!permission.success) {
+  const adminUser = isAdmin(session.user.role as Role);
+  if (!adminUser) {
     redirect("/dashboard");
   }
 

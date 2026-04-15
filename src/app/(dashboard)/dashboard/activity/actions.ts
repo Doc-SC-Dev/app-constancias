@@ -213,7 +213,7 @@ export const getActivitiesPaginated = async ({
         ? activity.participants[0].user.name
         : "Sin Encargado",
     })),
-    nextPage: pageParam + 1,
+    nextPage: data.length < PAGE_SIZE ? undefined : pageParam + 1,
     totalRows: count,
   };
 };

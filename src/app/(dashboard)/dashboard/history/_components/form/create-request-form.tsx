@@ -44,6 +44,7 @@ export default function CreateRequestForm({
   const queryClient = useQueryClient();
 
   const onSubmit = async (data: CreateRequest) => {
+    // TODO: descargar inmediatamente el pdf
     const {
       success,
       message,
@@ -57,9 +58,15 @@ export default function CreateRequestForm({
     if (success) {
       toast.success(message);
       form.reset();
-      queryClient.invalidateQueries({
-        queryKey: ["list-history-standard", "list-history-other"],
-      });
+      if (data.certificateName === Certificates.OTHER) {
+        queryClient.invalidateQueries({
+          queryKey: ["list-history-other"],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["list-history-standard"],
+        });
+      }
       setOpen(false);
     } else {
       toast.error(message);

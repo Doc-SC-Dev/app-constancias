@@ -44,14 +44,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Gender, Role } from "@/generated/prisma";
-import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
 import { Textos } from "@/lib/utils";
 import { createUser } from "../actions";
 
-export default function NewUserDialog() {
-  const { data } = useSession();
+export default function NewUserDialog({ userRole }: { userRole: Role }) {
   const [open, setOpen] = useState<boolean>(false);
   const { data: academicDegree } = useQuery({
     queryKey: ["get-all-academic-degree"],
@@ -159,7 +157,7 @@ export default function NewUserDialog() {
               >
                 {[...Object.values(Roles)].map((rol) => {
                   if (
-                    data?.user.role !== Roles.SUPERADMIN &&
+                    userRole !== Roles.SUPERADMIN &&
                     rol === Roles.SUPERADMIN
                   ) {
                     return undefined;

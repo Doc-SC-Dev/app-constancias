@@ -29,10 +29,24 @@ const hasPermission = cache(async (permissions: Record<string, string[]>) => {
       permissions: permissions,
     },
   });
-  if (!success) {
-    redirect("/dashboard");
-  }
-  return success;
+  return { user, success };
 });
 
-export { isAuthenticated, auth, hasPermission };
+const hasPermissionOrRedirect = cache(
+  async (permissions: Record<string, string[]>) => {
+    const { user } = await isAuthenticated();
+    const { success } = await auth.api.userHasPermission({
+      headers: await headers(),
+      body: {
+        userId: user.id,
+        permissions: permissions,
+      },
+    });
+    if (!success) {
+      redirect("/dashboard");
+    }
+    return success;
+  },
+);
+
+export { isAuthenticated, auth, hasPermission, hasPermissionOrRedirect };

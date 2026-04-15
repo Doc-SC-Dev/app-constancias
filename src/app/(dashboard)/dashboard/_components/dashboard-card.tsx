@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { Role } from "@/lib/authorization/permissions";
 import { menus } from "@/lib/types/menus";
 import type { User } from "@/lib/types/users";
 
@@ -41,7 +42,7 @@ export function DashboardCard({
       case menus.activities.name:
         return <LazyCreateActivityDialog />;
       case menus.users.name:
-        return <LazyCreateUserDialog />;
+        return <LazyCreateUserDialog userRole={user.role as Role} />;
       default:
         return <></>;
     }
