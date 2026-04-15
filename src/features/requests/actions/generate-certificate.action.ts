@@ -4,6 +4,7 @@ import { ArkErrors } from "arktype";
 import { isAdmin, type Role } from "@/lib/authorization/permissions";
 import { db } from "@/lib/db";
 import type { GenderType } from "@/lib/types/users";
+import { formatDate } from "@/lib/utils";
 import { Result, type SerializedResult } from "@/shared/core/Result";
 import { GenerateCertificateSchema } from "../schemas/generate-certificate.schema";
 import { AppError } from "../services/app-error";
@@ -91,11 +92,33 @@ export async function generateCertificateAction(
         AppError.notFound("Director del programa no encontrado"),
       ).serialize();
 
-    // 6. Template Selection logic matches roles/participant/activities exclusivity
-    const template = selectTemplate(request.certificate.template, {
+    const fullRequest = {
       ...request,
+      user: {
+        ...request.user,
+        student: request.user.student
+          ? {
+              participants: request.activity?.participants
+                .filter((part) => part.user.id === request.user.id)
+                .map((part) => ({ type: { name: part.type.name } })),
+              ...request.user.student,
+              admisionYear: request.user.student.admisionDate.getFullYear(),
+            }
+          : null,
+      },
+      activity: request.activity
+        ? {
+            ...request.activity,
+            startAt: formatDate(request.activity.startAt),
+            endAt: request.activity.endAt
+              ? formatDate(request.activity.endAt)
+              : null,
+          }
+        : null,
       director: directorUser,
-    } as FullRequest);
+    } as FullRequest;
+    // 6. Template Selection logic matches roles/participant/activities exclusivity
+    const template = selectTemplate(request.certificate.template, fullRequest);
     if (!template) {
       return Result.fail(
         AppError.notFound("Plantilla no encontrada"),
@@ -103,8 +126,7 @@ export async function generateCertificateAction(
     }
 
     // 7. Render Template completely outside of the web view coupling
-    const renderContext = { ...request, director: directorUser };
-    renderedBody = renderTemplate(template.template, renderContext);
+    renderedBody = renderTemplate(template.template, fullRequest);
 
     // 8. Atomic db transaction guarantees we don't save half-changed states
     await db.$transaction([
