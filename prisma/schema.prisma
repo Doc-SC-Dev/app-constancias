@@ -226,7 +226,7 @@ model Certificate {
 model Request {
   id               String        @id @default(uuid())
   userId           String
-  certificateId    String
+  certificateId    String?
   state            RequestState
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @default(now()) @updatedAt
@@ -234,7 +234,7 @@ model Request {
   otherRequestId   String?
   generatedContent String?
   activity         Activity?     @relation(fields: [activityId], references: [id])
-  certificate      Certificate   @relation(fields: [certificateId], references: [id])
+  certificate      Certificate?  @relation(fields: [certificateId], references: [id])
   otherRequest     OtherRequest? @relation(fields: [otherRequestId], references: [id])
   user             User          @relation(fields: [userId], references: [id])
 
