@@ -1,5 +1,6 @@
 "use client";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -82,6 +83,15 @@ export default function ForgotPasswordCard({ goToTab }: Props) {
           </FieldGroup>
         </CardContent>
         <CardFooter>
+          <Button
+            type="button"
+            className="w-full"
+            disabled={form.formState.isSubmitting}
+            onClick={goToTab}
+          >
+            <ArrowLeft />
+            Volver
+          </Button>
           {cooldown === 0 && (
             <Button
               type="submit"

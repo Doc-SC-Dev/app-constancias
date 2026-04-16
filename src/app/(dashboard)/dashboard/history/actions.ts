@@ -55,7 +55,7 @@ export const getHistoryPaginated = async ({
         | "professor"
         | "student"
         | "superadmin") || "student",
-    certName: request.certificate.name,
+    certName: request.certificate ? request.certificate.name : "",
     state: request.state,
     createdAt: request.createdAt,
     updatedAt: request.updatedAt,

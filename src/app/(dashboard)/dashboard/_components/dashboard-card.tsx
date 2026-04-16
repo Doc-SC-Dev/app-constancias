@@ -35,8 +35,6 @@ export function DashboardCard({
 }: DashboardCardProps) {
   const selectDialog: () => ReactNode = () => {
     switch (title) {
-      case menus.students.name:
-        return <></>;
       case menus.history.name:
         return <LazyCreateRequestDialog user={user} />;
       case menus.activities.name:
@@ -44,7 +42,7 @@ export function DashboardCard({
       case menus.users.name:
         return <LazyCreateUserDialog userRole={user.role as Role} />;
       default:
-        return <></>;
+        return null;
     }
   };
 
