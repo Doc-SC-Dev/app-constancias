@@ -10,13 +10,14 @@ import type {
 export type RequestUser = {
   id: string; // Required for identity checks
   name: string;
-  rut: string;
+  rut: string | null;
   role: Role;
   gender: Gender;
   academicDegree: { title: { abbrev: string }[] } | null;
   student: {
-    studentId: number;
+    studentId: string;
     admisionDate: Date;
+    admisionYear: number;
     isRegularStudent: boolean;
   } | null;
   participants?: {
@@ -28,8 +29,8 @@ export type RequestUser = {
 
 export type RequestActivity = {
   name: string;
-  startAt: Date;
-  endAt: Date | null;
+  startAt: string;
+  endAt: string | null;
   activityType: {
     id: string;
     name: string;

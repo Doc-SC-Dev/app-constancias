@@ -24,7 +24,7 @@ export function EditAcademicDegreeForm({
 }) {
   const { update } = useAcademicDegree();
 
-  const form = useForm({
+  const form = useForm<UpdateAcademicDegreeInput>({
     resolver: arktypeResolver(UpdateAcademicDegreeSchema),
     mode: "onChange",
     reValidateMode: "onSubmit",

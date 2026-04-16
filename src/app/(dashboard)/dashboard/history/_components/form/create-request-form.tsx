@@ -28,6 +28,7 @@ export default function CreateRequestForm({
   user: User;
   setOpen: (open: boolean) => void;
 }) {
+  const isAdminUser = isAdmin(user.role as Role);
   const form = useForm<CreateRequest>({
     resolver: arktypeResolver(createRequestSchema),
     mode: "onChange",
@@ -35,7 +36,7 @@ export default function CreateRequestForm({
     defaultValues: {
       certificateName: "",
       activityId: "",
-      userId: isAdmin(user.role as Role) ? "" : user.id,
+      userId: isAdminUser ? "" : user.id,
       description: "",
     },
     shouldUnregister: false,
@@ -44,6 +45,7 @@ export default function CreateRequestForm({
   const queryClient = useQueryClient();
 
   const onSubmit = async (data: CreateRequest) => {
+    // TODO: descargar inmediatamente el pdf
     const {
       success,
       message,
@@ -57,9 +59,15 @@ export default function CreateRequestForm({
     if (success) {
       toast.success(message);
       form.reset();
-      queryClient.invalidateQueries({
-        queryKey: ["list-history-standard", "list-history-other"],
-      });
+      if (data.certificateName === Certificates.OTHER) {
+        queryClient.invalidateQueries({
+          queryKey: ["list-history-other"],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["list-history-standard"],
+        });
+      }
       setOpen(false);
     } else {
       toast.error(message);
@@ -69,7 +77,7 @@ export default function CreateRequestForm({
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
-          <UserSelect />
+          {isAdminUser && <UserSelect />}
           <CertificateSelect />
           <ActivitySelect />
           {certificate === Certificates.OTHER && (

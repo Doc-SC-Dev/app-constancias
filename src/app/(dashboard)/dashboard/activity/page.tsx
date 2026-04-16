@@ -2,7 +2,8 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { DataTable } from "@/components/data-table";
 import { LazyCreateActivityDialog } from "@/components/dyamic-dialogs";
-import { auth, isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth";
+import { isAdmin, type Role, Roles } from "@/lib/authorization/permissions";
 import getQueryClient from "@/lib/query-client";
 import type { ActivityDTO } from "@/lib/types/activity";
 import type { PaginationResponse } from "@/lib/types/pagination";
@@ -11,21 +12,12 @@ import { getActivitiesPaginated } from "./actions";
 
 export default async function ActivityPage() {
   const session = await isAuthenticated();
-  const listPermission = await auth.api.userHasPermission({
-    body: {
-      userId: session.user.id,
-      permissions: { activity: ["list"] },
-    },
-  });
-  if (!listPermission.success) {
+  const permission =
+    isAdmin(session.user.role as Role) || session.user.role === Roles.PROFESSOR;
+
+  if (!permission) {
     redirect("/dashboard");
   }
-  const createPermission = await auth.api.userHasPermission({
-    body: {
-      userId: session.user.id,
-      permissions: { activity: ["create"] },
-    },
-  });
 
   const queryClient = getQueryClient();
 
@@ -33,10 +25,8 @@ export default async function ActivityPage() {
     queryKey: ["list-activity"],
     queryFn: ({ pageParam }) => getActivitiesPaginated({ pageParam }),
     initialPageParam: 0,
-    getNextPageParam: (
-      _: PaginationResponse<ActivityDTO>,
-      groups: PaginationResponse<ActivityDTO>[],
-    ) => groups.length,
+    getNextPageParam: (lastPage: PaginationResponse<ActivityDTO>) =>
+      lastPage.nextPage,
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -44,7 +34,7 @@ export default async function ActivityPage() {
         <h3 className="text-2xl font-bold">Actividades</h3>
         <DataTable
           emptyTitle="No hay actividades"
-          createDialog={createPermission ? LazyCreateActivityDialog : undefined}
+          createDialog={LazyCreateActivityDialog}
           emptyDescription="No se ha creado ninguna Actividad, para iniciar debe crear una actividad"
           columns={columns}
           queryFn={getActivitiesPaginated}

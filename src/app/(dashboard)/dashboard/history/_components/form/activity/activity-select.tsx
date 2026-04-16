@@ -15,6 +15,7 @@ export default function ActivitySelect() {
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["get-available-activities", certificateName],
+    enabled: !!certificateName,
     queryFn: () =>
       getAvailableActivities({
         certificateName,

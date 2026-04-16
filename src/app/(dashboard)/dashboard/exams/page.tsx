@@ -1,26 +1,20 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
-import { auth, isAuthenticated } from "@/lib/auth";
+import type { Role } from "@/generated/prisma";
+import { isAuthenticated } from "@/lib/auth";
+import { isAdmin, Roles } from "@/lib/authorization/permissions";
 import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
-import { isAdmin } from "@/lib/authorization/permissions";
-import type { Role } from "@/generated/prisma";
 import { ExamsTable } from "./_components/exams-table";
 import { type Exams, listExams } from "./actions";
 
 export default async function ExamsPage() {
   const session = await isAuthenticated();
 
-  const isStudent = session.user.role === "STUDENT";
+  const isStudent = session.user.role === Roles.STUDENT;
   const sysAdmin = isAdmin(session.user.role as Role);
 
-  const permission = await auth.api.userHasPermission({
-    body: {
-      userId: session.user.id,
-      permissions: { activity: ["list"] },
-    },
-  });
-  if (!permission.success && !isStudent) {
+  if (!sysAdmin && !isStudent) {
     redirect("/dashboard");
   }
 

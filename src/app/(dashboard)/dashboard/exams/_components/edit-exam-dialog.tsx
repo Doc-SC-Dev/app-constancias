@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { type } from "arktype";
-import { toast } from "sonner";
-import { Loader2, Save, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { type } from "arktype";
+import { Loader2, Save, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { FormInput } from "@/components/form/FormInput";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Form, FormLabel } from "@/components/ui/form";
-import { updateExamGrade } from "../actions";
-import type { Exams } from "../actions";
 import {
   Table,
   TableBody,
@@ -27,6 +25,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { Exams } from "../actions";
+import { updateExamGrade } from "../actions";
 
 const formSchema = type("string")
   .configure({
@@ -43,7 +43,7 @@ const formSchema = type("string")
     const normalizedVal = val.replace(",", ".");
     const parsed = parseFloat(normalizedVal);
 
-    if (isNaN(parsed)) {
+    if (Number.isNaN(parsed)) {
       return ctx.reject({
         code: "predicate",
         message: "Debe ingresar una nota numérica.",
@@ -117,7 +117,7 @@ export function EditExamDialog({
       toast.success("Nota actualizada exitosamente.");
       queryClient.invalidateQueries({ queryKey: ["list-exams"] });
       onOpenChange(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error("Ocurrió un error al actualizar la nota.");
     } finally {
       setIsPending(false);
@@ -207,7 +207,8 @@ export function EditExamDialog({
               <Button type="submit" disabled={isPending || !exam.studentId}>
                 {isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Guardando...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                    Guardando...
                   </>
                 ) : (
                   <>

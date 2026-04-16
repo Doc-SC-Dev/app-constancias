@@ -35,7 +35,7 @@ export const listStudents = async ({
       isRegular: student.isRegularStudent,
       admissionDate: student.admisionDate.getFullYear(),
     })),
-    nextPage: pageParam + 1,
+    nextPage: students.length === PAGE_SIZE ? pageParam + 1 : undefined,
     totalRows: total,
   };
 };
@@ -44,7 +44,7 @@ export const updateRegularStudent = async ({
   studentId,
   isRegular,
 }: {
-  studentId: number;
+  studentId: string;
   isRegular: boolean;
 }) => {
   const { success, error } = await withTryCatch<DbStudent>(

@@ -13,14 +13,6 @@ import {
 } from "@/components/ui/table";
 
 export default function Loading() {
-  const headers = [
-    "Nombre",
-    "Tipo",
-    "Fechas",
-    "Cantidad de participantes",
-    "Acción",
-  ];
-
   return (
     <div className="container mx-auto space-y-4">
       <h3 className="text-2xl font-bold">Actividades</h3>
@@ -59,7 +51,7 @@ export default function Loading() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[...new Array(10)].map((_, i) => (
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
               <TableRow key={`loading-row-${i}`} className="flex w-full gap-4">
                 <TableCell className="flex-1 flex items-center">
                   <Skeleton className="h-4 w-full bg-muted" />

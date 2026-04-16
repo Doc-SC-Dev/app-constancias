@@ -52,14 +52,12 @@ export default function ActivityEditForm({
   const { data: users, isLoading } = useQuery({
     queryKey: ["db-users"],
     queryFn: listUsersAdmin,
-    refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 
   const { data: activityTypes, isLoading: isLoadingActivityTypes } = useQuery({
     queryKey: ["db-activity-types"],
     queryFn: getActivityTypes,
-    refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
   const form = useForm<ActivityUpdateType>({

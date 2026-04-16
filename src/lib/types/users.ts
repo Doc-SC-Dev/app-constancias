@@ -75,15 +75,8 @@ export const userCreateSchema = type({
   email: emailSchema,
   role: roleSchema,
   gender: genderSchema,
-  "studentId?": type("string.numeric").narrow((value, ctx) => {
-    if (value !== undefined && Number.isNaN(value)) {
-      console.log(value);
-      return ctx.reject({
-        code: "predicate",
-        message: "Matrícula debe ser una cadena numérica bien formada",
-      });
-    }
-    return true;
+  "studentId?": type("string").moreThanLength(1).configure({
+    message: "La matrícula debe tener al menos 1 caracter",
   }),
   "admissionDate?": "Date",
   academicGrade: type("string > 1").configure({

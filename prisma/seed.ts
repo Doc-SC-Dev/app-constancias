@@ -211,7 +211,7 @@ const createUser = async ({
     if (role === Role.STUDENT) {
       await db.student.create({
         data: {
-          studentId: studentId ?? 0,
+          studentId: studentId?.toString() ?? "",
           admisionDate: new Date(),
           isRegularStudent: true,
           user: {

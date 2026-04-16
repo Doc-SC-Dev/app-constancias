@@ -21,7 +21,7 @@ export const columns: ColumnDef<Student>[] = [
       const handleSwitchChange = async () => {
         setIsLoading(true);
         const { success, message } = await updateRegularStudent({
-          studentId: row.getValue("studentId") as number,
+          studentId: row.getValue<string>("studentId"),
           isRegular: !checked,
         });
         if (!success) {
@@ -58,7 +58,7 @@ export const columns: ColumnDef<Student>[] = [
     cell({ getValue }) {
       return (
         <div className="flex flex-1 items-center justify-center">
-          <p>{getValue<number>()}</p>
+          <p>{getValue<string>()}</p>
         </div>
       );
     },

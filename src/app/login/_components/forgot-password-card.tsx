@@ -1,6 +1,7 @@
 "use client";
-import Image from "next/image";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
+import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -18,8 +19,8 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { type ForgotPassword, forgotPasswordSchema } from "@/lib/types/login";
-import { forgotPassword } from "../actions";
 import logoImg from "../../../../public/assets/images/logo-horizontal-blanco.png";
+import { forgotPassword } from "../actions";
 
 type Props = {
   goToTab: () => void;
@@ -93,6 +94,15 @@ export default function ForgotPasswordCard({ goToTab }: Props) {
           </FieldGroup>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
+          <Button
+            type="button"
+            className="w-full"
+            disabled={form.formState.isSubmitting}
+            onClick={goToTab}
+          >
+            <ArrowLeft />
+            Volver
+          </Button>
           {cooldown === 0 && (
             <Button
               type="submit"
@@ -105,7 +115,12 @@ export default function ForgotPasswordCard({ goToTab }: Props) {
                 : "Enviar Correo"}
             </Button>
           )}
-          <Button variant="ghost" type="button" className="w-full" onClick={goToTab}>
+          <Button
+            variant="ghost"
+            type="button"
+            className="w-full"
+            onClick={goToTab}
+          >
             Volver a Iniciar Sesión
           </Button>
         </CardFooter>
