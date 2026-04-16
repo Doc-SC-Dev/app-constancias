@@ -67,6 +67,11 @@ export async function generateCertificateAction(
     return Result.fail(AppError.notFound("Request not found")).serialize();
   }
 
+  if (!request.certificate)
+    return Result.fail(
+      AppError.internal("Petición no tiene definido un certificado"),
+    ).serialize();
+
   // Check Permissions: Owners, Admins or Super Admins
   if (request.userId !== sessionUser.id && !isAdmin(sessionUser.role as Role)) {
     return Result.fail(
