@@ -1,7 +1,7 @@
 "use client";
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
-import { Plus } from "lucide-react";
+import { Plus, Save, X } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormInput } from "@/components/form/FormInput";
@@ -26,7 +26,7 @@ export function CreateGradeDialog() {
   const { create } = useAcademicDegree();
   const [open, setOpen] = useState<boolean>(false);
 
-  const form = useForm({
+  const form = useForm<CreateAcademicDegreeInput>({
     resolver: arktypeResolver(CreateAcademicDegreeSchema),
     mode: "onChange",
     reValidateMode: "onSubmit",
@@ -84,17 +84,27 @@ export function CreateGradeDialog() {
               placeholder="Ingrese la abreviatura masculina del grado académico"
             />
           </FieldGroup>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <DialogClose asChild>
-              <Button variant="outline">Cancelar</Button>
+              <Button
+                variant="outline"
+                type="button"
+                className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancelar
+              </Button>
             </DialogClose>
             <Button type="submit" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? (
                 <>
-                  <Spinner /> Guardando
+                  <Spinner className="mr-2 h-4 w-4" /> Guardando...
                 </>
               ) : (
-                "Agregar"
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Agregar
+                </>
               )}
             </Button>
           </DialogFooter>

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppNavBar } from "./_components/app-navbar";
 import "../globals.css";
-import { auth, isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth";
+import { isAdmin, type Role, Roles } from "@/lib/authorization/permissions";
 import { AppSideBar } from "./_components/app-sidebar";
 
 export const metadata: Metadata = {
@@ -15,43 +16,18 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await isAuthenticated();
-  const [hasUser, hasRequest, hasActivities] = await Promise.all([
-    auth.api.userHasPermission({
-      body: {
-        userId: session.user.id,
-        permissions: {
-          user: ["list"],
-        },
-      },
-    }),
-    auth.api.userHasPermission({
-      body: {
-        userId: session.user.id,
-        permissions: {
-          request: ["list"],
-        },
-      },
-    }),
-    auth.api.userHasPermission({
-      body: {
-        userId: session.user.id,
-        permissions: {
-          activity: ["list"],
-        },
-      },
-    }),
-  ]);
+  const { user } = await isAuthenticated();
+  const adminUser = isAdmin(user.role as Role);
   return (
     <SidebarProvider>
       <AppSideBar
-        hasActivities={hasActivities.success}
-        hasRequest={hasRequest.success}
-        hasUser={hasUser.success}
-        user={session.user}
+        hasActivities={adminUser || user.role === Roles.PROFESSOR}
+        hasRequest={true}
+        hasUser={adminUser}
+        user={user}
       />
       <SidebarInset className="flex flex-col md:h-screen md:overflow-hidden">
-        <AppNavBar user={session.user} />
+        <AppNavBar user={user} />
         <main className="flex-1 md:overflow-hidden py-10 px-2 sm:px-6 lg:px-8 flex flex-col">
           {children}
         </main>

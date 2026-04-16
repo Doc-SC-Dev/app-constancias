@@ -15,6 +15,7 @@ export default function ActivitySelect() {
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["get-available-activities", certificateName],
+    enabled: !!certificateName,
     queryFn: () =>
       getAvailableActivities({
         certificateName,
@@ -30,7 +31,7 @@ export default function ActivitySelect() {
         <AlertDescription>
           {error?.message ||
             data?.error ||
-            "Ocurrio un error durante la carga de actividades intente nuevamente."}
+            "Ocurrió un error durante la carga de actividades, intente nuevamente."}
         </AlertDescription>
       </Alert>
     );

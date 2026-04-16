@@ -41,11 +41,15 @@ export default function AddParticipantSheet({
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ["db-users"],
     queryFn: listUsersAdmin,
+    refetchOnWindowFocus: false,
+    enabled: open,
   });
 
   const { data: activityTypes, isLoading: isLoadingActivityTypes } = useQuery({
     queryKey: ["db-activity-types"],
     queryFn: getActivityTypes,
+    refetchOnWindowFocus: false,
+    enabled: open,
   });
 
   const participantTypes =

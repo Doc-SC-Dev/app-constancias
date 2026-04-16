@@ -85,9 +85,10 @@ export async function listExams({
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [
+        { createdAt: "desc" },
+        { id: "desc" },
+      ],
     }),
   ]);
 
@@ -119,7 +120,7 @@ export async function listExams({
         studentRut: studentParticipant?.user.rut ?? null,
       };
     }),
-    nextPage: pageParam + 1,
+    nextPage: data.length === PAGE_SIZE ? pageParam + 1 : undefined,
     totalRows: count,
   };
 }

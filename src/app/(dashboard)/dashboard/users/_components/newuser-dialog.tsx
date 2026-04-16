@@ -2,7 +2,7 @@
 
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus, Save, X } from "lucide-react";
 import { useState } from "react";
 import { es } from "react-day-picker/locale";
 import { Controller, useForm } from "react-hook-form";
@@ -44,14 +44,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SelectItem } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Gender, Role } from "@/generated/prisma";
-import { useSession } from "@/lib/auth/better-auth/client";
 import { Roles } from "@/lib/authorization/permissions";
 import { type UserCreate, userCreateSchema } from "@/lib/types/users";
 import { Textos } from "@/lib/utils";
 import { createUser } from "../actions";
 
-export default function NewUserDialog() {
-  const { data } = useSession();
+export default function NewUserDialog({ userRole }: { userRole: Role }) {
   const [open, setOpen] = useState<boolean>(false);
   const { data: academicDegree } = useQuery({
     queryKey: ["get-all-academic-degree"],
@@ -159,7 +157,7 @@ export default function NewUserDialog() {
               >
                 {[...Object.values(Roles)].map((rol) => {
                   if (
-                    data?.user.role !== Roles.SUPERADMIN &&
+                    userRole !== Roles.SUPERADMIN &&
                     rol === Roles.SUPERADMIN
                   ) {
                     return undefined;
@@ -227,15 +225,21 @@ export default function NewUserDialog() {
           </ScrollArea>
           <DialogFooter className="mt-6 pb-6 px-6">
             <DialogClose asChild onClick={() => reset()}>
-              <Button variant="outline">Cancelar</Button>
+              <Button 
+                variant="outline" 
+                className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancelar
+              </Button>
             </DialogClose>
             <Button
               type="submit"
               variant="default"
               disabled={formState.isSubmitting}
             >
-              {formState.isSubmitting && <Spinner />}
-              Crear
+              {formState.isSubmitting ? <Spinner /> : <Save className="mr-2 h-4 w-4" />}
+              Guardar
             </Button>
           </DialogFooter>
         </form>

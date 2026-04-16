@@ -9,7 +9,7 @@ const roles = type("'administrator' | 'professor' | 'student' | 'superadmin'");
 export const historyEntrySchema = type({
   id: "string",
   name: "string >= 1",
-  rut: /^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9kK]$/,
+  rut: type(/^[0-9]{1,2}.[0-9]{3}.[0-9]{3}-[0-9kK]$/).or("null"),
   role: roles,
   certName: "string >= 1",
   state: "string",

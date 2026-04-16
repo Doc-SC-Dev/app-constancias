@@ -1,12 +1,12 @@
 "use client";
 import {
   Activity,
+  FileText,
   History,
   Home,
   Settings,
   User as UserIcon,
   Users,
-  FileText,
 } from "lucide-react";
 import {
   Sidebar,

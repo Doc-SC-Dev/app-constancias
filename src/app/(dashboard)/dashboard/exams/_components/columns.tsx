@@ -65,10 +65,11 @@ export const getColumns = (isAdmin: boolean): ColumnDef<Exams>[] => [
   {
     accessorKey: "activityName",
     header: "Actividades",
-    cell({ row }) {
+    cell({ getValue }) {
+      const value = getValue<string>();
       return (
         <div className="flex flex-1 items-center">
-          <p>{row.getValue("activityName")}</p>
+          <p className="truncate max-w-[500px]">{value}</p>
         </div>
       );
     },

@@ -1,7 +1,6 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import type { Role } from "@/generated/prisma";
-import { auth, isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth";
 import { isAdmin } from "@/lib/authorization/permissions";
 import { HistoryClient } from "./_components/history-client";
 import { HistoryTableSkeleton } from "./_components/history-table-skeleton";
@@ -12,19 +11,6 @@ import {
 
 export default async function HistoryPage() {
   const { user } = await isAuthenticated();
-
-  const { success } = await auth.api.userHasPermission({
-    body: {
-      userId: user.id,
-      permissions: {
-        request: ["list"],
-      },
-    },
-  });
-
-  if (!success) {
-    return redirect("/dashboard");
-  }
 
   const userRole = user.role as Role;
   const adminMode = isAdmin(userRole);

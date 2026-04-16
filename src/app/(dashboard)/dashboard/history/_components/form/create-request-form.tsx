@@ -1,6 +1,7 @@
 "use client";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQueryClient } from "@tanstack/react-query";
+import { Save, X } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormInput } from "@/components/form/FormInput";
@@ -27,6 +28,7 @@ export default function CreateRequestForm({
   user: User;
   setOpen: (open: boolean) => void;
 }) {
+  const isAdminUser = isAdmin(user.role as Role);
   const form = useForm<CreateRequest>({
     resolver: arktypeResolver(createRequestSchema),
     mode: "onChange",
@@ -34,7 +36,7 @@ export default function CreateRequestForm({
     defaultValues: {
       certificateName: "",
       activityId: "",
-      userId: isAdmin(user.role as Role) ? "" : user.id,
+      userId: isAdminUser ? "" : user.id,
       description: "",
     },
     shouldUnregister: false,
@@ -43,6 +45,7 @@ export default function CreateRequestForm({
   const queryClient = useQueryClient();
 
   const onSubmit = async (data: CreateRequest) => {
+    // TODO: descargar inmediatamente el pdf
     const {
       success,
       message,
@@ -56,9 +59,15 @@ export default function CreateRequestForm({
     if (success) {
       toast.success(message);
       form.reset();
-      queryClient.invalidateQueries({
-        queryKey: ["list-history-standard", "list-history-other"],
-      });
+      if (data.certificateName === Certificates.OTHER) {
+        queryClient.invalidateQueries({
+          queryKey: ["list-history-other"],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["list-history-standard"],
+        });
+      }
       setOpen(false);
     } else {
       toast.error(message);
@@ -68,7 +77,7 @@ export default function CreateRequestForm({
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <FieldGroup>
-          <UserSelect />
+          {isAdminUser && <UserSelect />}
           <CertificateSelect />
           <ActivitySelect />
           {certificate === Certificates.OTHER && (
@@ -83,15 +92,24 @@ export default function CreateRequestForm({
         </FieldGroup>
         <DialogFooter className="gap-4 pt-4">
           <DialogClose asChild onClick={() => form.reset()}>
-            <Button variant="ghost">Cancelar</Button>
+            <Button
+              variant="outline"
+              className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancelar
+            </Button>
           </DialogClose>
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? (
               <>
-                <Spinner /> ...Creando petición
+                <Spinner className="mr-2 h-4 w-4" /> ...Guardando petición
               </>
             ) : (
-              "Crear"
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Guardar
+              </>
             )}
           </Button>
         </DialogFooter>

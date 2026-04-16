@@ -190,16 +190,32 @@ export async function getAvailableCertificates({ userId }: { userId: string }) {
 
   const certificates = await db.certificate.findMany({
     where: {
-      template: {
-        some: {
-          OR: [
-            {
-              role: user.role,
-            },
-            {
-              activityType: {
-                activities: {
-                  some: {
+      OR: [
+        {
+          name: Certificates.OTHER,
+        },
+        {
+          template: {
+            some: {
+              OR: [
+                {
+                  role: user.role,
+                },
+                {
+                  activityType: {
+                    activities: {
+                      some: {
+                        participants: {
+                          some: {
+                            userId: userId,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                {
+                  participantType: {
                     participants: {
                       some: {
                         userId: userId,
@@ -207,20 +223,11 @@ export async function getAvailableCertificates({ userId }: { userId: string }) {
                     },
                   },
                 },
-              },
+              ],
             },
-            {
-              participantType: {
-                participants: {
-                  some: {
-                    userId: userId,
-                  },
-                },
-              },
-            },
-          ],
+          },
         },
-      },
+      ],
     },
     select: {
       name: true,

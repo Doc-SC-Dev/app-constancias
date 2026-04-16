@@ -1,25 +1,14 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { redirect } from "next/navigation";
-import { DataTable } from "@/components/data-table";
-import { LazyCreateUserDialog } from "@/components/dyamic-dialogs";
-import { auth, isAuthenticated } from "@/lib/auth";
+import { hasPermission } from "@/lib/auth";
+import type { Role } from "@/lib/authorization/permissions";
 import getQueryClient from "@/lib/query-client";
 import type { PaginationResponse } from "@/lib/types/pagination";
 import type { User } from "@/lib/types/users";
-import { columns } from "./_components/colums";
+import { UsersTable } from "./_components/users-table";
 import { listUsers } from "./actions";
 
 export default async function UsersPage() {
-  const session = await isAuthenticated();
-  const permission = await auth.api.userHasPermission({
-    body: {
-      userId: session.user.id,
-      permissions: { user: ["list"] },
-    },
-  });
-  if (!permission.success) {
-    redirect("/dashboard");
-  }
+  const { user } = await hasPermission({ user: ["list"] });
 
   const queryClient = getQueryClient();
 
@@ -27,25 +16,14 @@ export default async function UsersPage() {
     queryKey: ["list-users"],
     queryFn: ({ pageParam }) => listUsers({ pageParam }),
     initialPageParam: 0,
-    getNextPageParam: (
-      _lastPage: PaginationResponse<User>,
-      groups: PaginationResponse<User>[],
-    ) => groups.length,
+    getNextPageParam: (_lastPage: PaginationResponse<User>) =>
+      _lastPage.nextPage,
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="container max-h-full mx-auto flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Usuarios</h2>
-        <DataTable<User>
-          emptyTitle="No hay usuarios"
-          emptyDescription="No hay usuarios disponibles. Para iniciar debe crear un usuario"
-          createDialog={LazyCreateUserDialog}
-          columns={columns}
-          queryKey="list-users"
-          queryFn={listUsers}
-          placeholder="Filtrar por Nombre, Rol, Email y RUT"
-          containerClassName="h-fit max-h-full"
-        />
+        <UsersTable userRole={user.role as Role} />
       </div>
     </HydrationBoundary>
   );

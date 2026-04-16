@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
+import { LogOut, X } from "lucide-react";
 import { logoutAction } from "../action";
 
 export default function LogoutDialog() {
@@ -21,14 +22,26 @@ export default function LogoutDialog() {
         eliminados. Deberá iniciar sesión nuevamente para acceder al sistema.
       </DialogDescription>
       <DialogFooter className="flex gap-4">
-        <DialogClose>Cancelar</DialogClose>
+        <DialogClose asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="hover:bg-destructive hover:text-destructive-foreground active:bg-destructive active:text-destructive-foreground"
+          >
+            <X className="mr-2 h-4 w-4" />
+            Cancelar
+          </Button>
+        </DialogClose>
         <Button
           type="button"
-          className="bg-destructive hover:bg-destructive/75"
           onClick={form.handleSubmit(logoutAction)}
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting && <Spinner />}
+          {form.formState.isSubmitting ? (
+            <Spinner />
+          ) : (
+            <LogOut className="mr-2 h-4 w-4" />
+          )}
           Cerrar sesión
         </Button>
       </DialogFooter>

@@ -3,7 +3,8 @@
 FROM node:24.14.0-slim AS deps
 
 RUN apt-get update -y && apt-get install -y openssl
-RUN npm install -g pnpm@10.31.0
+RUN corepack enable && corepack prepare pnpm@10.31.0 --activate
+
 WORKDIR /app
 
 # Copiar archivos de dependencias
@@ -11,13 +12,16 @@ COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma/
 
 # Instalar dependencias
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --shamefully-hoist
+
 
 # Etapa 2: Builder
 FROM node:24.14.0-slim AS builder
 
 RUN apt-get update -y && apt-get install -y openssl
-RUN npm install -g pnpm@10.31.0
+
+RUN corepack enable && corepack prepare pnpm@10.31.0 --activate
+
 WORKDIR /app
 
 # Copiar dependencias instaladas
@@ -79,6 +83,13 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+
+RUN npm install -g prisma@7.5.0 
+
+# Script de inicio — debe copiarse antes del USER nextjs
+COPY scripts/start.sh ./scripts/start.sh
+RUN chmod +x ./scripts/start.sh
 
 # Cambiar permisos
 RUN chown -R nextjs:nodejs /app
@@ -90,4 +101,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["./scripts/start.sh"]

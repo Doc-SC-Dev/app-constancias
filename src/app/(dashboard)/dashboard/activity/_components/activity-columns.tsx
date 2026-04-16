@@ -12,7 +12,11 @@ export const columns: ColumnDef<ActivityDTO>[] = [
     accessorKey: "name",
     header: "Nombre",
     cell({ getValue }) {
-      return <TableCell>{formatTitle(getValue<string>())}</TableCell>;
+      return (
+        <TableCell>
+          <p className="truncate max-w-[500px]">{getValue<string>()}</p>
+        </TableCell>
+      );
     },
   },
   {

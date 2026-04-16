@@ -32,12 +32,12 @@ export default function TemplateEditor({
   const [preview, setPreview] = useState<boolean>(false);
   const certificateTags = [
     {
-      id: "director.academicDegree.title[0].abbrev director.name ",
+      id: "director.academicDegree.title[0].abbrev director.name",
       display: "Nombre (Director)",
       description: "Nombre completo del director.",
     },
     {
-      id: "user.academicDegree.title[0].abbrev user.name ",
+      id: "user.academicDegree.title[0].abbrev user.name",
       display: "Nombre (Usuario)",
       description: "Nombre completo del usuario participante.",
     },

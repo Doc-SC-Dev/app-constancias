@@ -24,7 +24,7 @@ export function EditAcademicDegreeForm({
 }) {
   const { update } = useAcademicDegree();
 
-  const form = useForm({
+  const form = useForm<UpdateAcademicDegreeInput>({
     resolver: arktypeResolver(UpdateAcademicDegreeSchema),
     mode: "onChange",
     reValidateMode: "onSubmit",
@@ -65,22 +65,22 @@ export function EditAcademicDegreeForm({
         <SheetClose asChild>
           <Button
             type="button"
-            variant="destructive"
-            className="w-full"
+            variant="outline"
+            className="w-full hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
             onClick={() => form.reset()}
           >
-            <X className="mr-2" />
+            <X className="mr-2 h-4 w-4" />
             Cancelar
           </Button>
         </SheetClose>
         <Button type="submit" className="w-full">
           {form.formState.isSubmitting ? (
             <>
-              <Spinner className="mr-2" /> Guardando
+              <Spinner className="mr-2 h-4 w-4" /> Guardando...
             </>
           ) : (
             <>
-              <Save className="mr-2" /> Guardar
+              <Save className="mr-2 h-4 w-4" /> Guardar
             </>
           )}
         </Button>

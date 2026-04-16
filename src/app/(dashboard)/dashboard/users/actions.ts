@@ -72,7 +72,7 @@ export async function createUser(userData: UserCreate) {
       if (session.user.role === Roles.STUDENT && studentId) {
         const student = await tx.student.create({
           data: {
-            studentId: parseInt(studentId, 10),
+            studentId: studentId,
             isRegularStudent: false,
             user: {
               connect: {
@@ -165,17 +165,40 @@ export async function listUsers({
 }): Promise<PaginationResponse<User>> {
   const { user } = await isAuthenticated();
 
-  const { users, total } = await auth.api.listUsers({
-    headers: await headers(),
-    query: {
-      filterField: "id",
-      filterOperator: "ne",
-      filterValue: user.id,
-      limit: PAGE_SIZE,
-      offset: pageParam * PAGE_SIZE,
-    },
-  });
-  return { data: users as User[], nextPage: pageParam + 1, totalRows: total };
+  try {
+    const [count, users] = await db.$transaction([
+      db.user.count({
+        where: {
+          id: {
+            not: user.id,
+          },
+        },
+      }),
+      db.user.findMany({
+        where: {
+          id: {
+            not: user.id,
+          },
+        },
+        take: PAGE_SIZE,
+        skip: pageParam * PAGE_SIZE,
+        orderBy: [{ createdAt: "desc" }],
+      }),
+    ]);
+
+    // Convertimos los objetos nativos de Prisma a objetos planos para evitar
+    // errores de serialización "Only plain objects can be passed..." en Next.js
+    const safeUsers = JSON.parse(JSON.stringify(users));
+
+    return {
+      data: safeUsers as User[],
+      nextPage: users.length === PAGE_SIZE ? pageParam + 1 : undefined,
+      totalRows: count,
+    };
+  } catch (error) {
+    console.error("Error fetching listUsers:", error);
+    return { data: [], nextPage: undefined, totalRows: 0 };
+  }
 }
 
 export async function listUsersAdmin(): Promise<User[]> {
@@ -241,7 +264,11 @@ export const listUserActivities = async ({
     typeId: participant.type.id,
     typeName: participant.type.name,
   }));
-  return { data: participants, nextPage: pageParam + 1, totalRows: count };
+  return {
+    data: participants,
+    nextPage: participants.length === PAGE_SIZE ? pageParam + 1 : undefined,
+    totalRows: count,
+  };
 };
 
 export async function getUserById(id: string): Promise<UserWithAcademicDegree> {
@@ -295,11 +322,11 @@ export async function listUserRequest({
   return {
     data: data.map((request) => ({
       id: request.id,
-      name: request.certificate.name,
+      name: request.certificate ? request.certificate.name : "",
       createdAt: request.createdAt,
       state: request.state,
     })),
-    nextPage: pageParam + 1,
+    nextPage: data.length === PAGE_SIZE ? pageParam + 1 : undefined,
     totalRows: count,
   };
 }

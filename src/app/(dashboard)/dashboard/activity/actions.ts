@@ -209,9 +209,11 @@ export const getActivitiesPaginated = async ({
       startAt: activity.startAt.toISOString(),
       endAt: activity.endAt ? activity.endAt.toISOString() : undefined,
       nParticipants: activity.nParticipants,
-      encargado: activity.participants[0].user.name,
+      encargado: activity.participants[0]
+        ? activity.participants[0].user.name
+        : "Sin Encargado",
     })),
-    nextPage: pageParam + 1,
+    nextPage: data.length < PAGE_SIZE ? undefined : pageParam + 1,
     totalRows: count,
   };
 };

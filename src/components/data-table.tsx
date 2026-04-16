@@ -9,15 +9,13 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
-  type Row,
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-/* ----------- */
 import {
   Table,
   TableBody,
@@ -48,6 +46,18 @@ export interface DataTableProps<TData> {
   size?: "bg" | "md" | "sm";
   containerClassName?: string;
 }
+const SIZE_MAP = { bg: 600, md: 300, sm: 200 } as const;
+
+const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
+  // Rank the item
+  const itemRank = rankItem(row.getValue(columnId), value);
+
+  // Store the itemRank info
+  addMeta({ itemRank });
+
+  // Return if the item should be filtered in/out
+  return itemRank.passed;
+};
 
 export function DataTable<TData>({
   columns,
@@ -61,75 +71,77 @@ export function DataTable<TData>({
   size = "bg",
   containerClassName,
 }: DataTableProps<TData>) {
+  const height = SIZE_MAP[size] ?? 600;
+
+  const sentinelRef = useRef<HTMLTableRowElement>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const [globalFilter, setGlobalFilter] = useState<"">("");
+  const [globalFilter, setGlobalFilter] = useState<string>("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
   /* ----------- */
-  const { data, fetchNextPage, isFetching, isLoading } = useInfiniteQuery({
-    /* ----------- */
-    queryKey: [queryKey],
-    queryFn: async ({ pageParam }) => await queryFn({ pageParam }),
-    initialPageParam: 0,
-    getNextPageParam: (
-      _lastPage: PaginationResponse<TData>,
-      allPages: PaginationResponse<TData>[],
-    ) => allPages.length,
-    refetchOnWindowFocus: false,
-    placeholderData: keepPreviousData,
-  });
+  const { data, fetchNextPage, isFetching, isLoading, hasNextPage } =
+    useInfiniteQuery({
+      /* ----------- */
+      queryKey: [queryKey, sorting],
+      queryFn: async ({ pageParam }) => await queryFn({ pageParam }),
+      initialPageParam: 0,
+      getNextPageParam: (_lastPage: PaginationResponse<TData>) =>
+        _lastPage.nextPage,
+      refetchOnWindowFocus: false,
+      placeholderData: keepPreviousData,
+    });
 
+  const isFetchingRef = useRef(isFetching);
+  const hasNextPageRef = useRef(hasNextPage);
   const flatData = useMemo(
     () => data?.pages.flatMap((page) => page.data) || [],
     [data],
   );
 
-  const totalDBRowCount = data?.pages.at(0)?.totalRows || 0;
-  const totalFetched = flatData.length;
+  useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
 
-  const fetchMoreOnBottomReached = useCallback(
-    (containerRefElement?: HTMLDivElement | null) => {
-      if (containerRefElement) {
-        const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
-        //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
+  useEffect(() => {
+    hasNextPageRef.current = hasNextPage;
+  }, [hasNextPage]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
         if (
-          scrollHeight - scrollTop - clientHeight < 500 &&
-          !isFetching &&
-          totalFetched < totalDBRowCount
+          entry.isIntersecting &&
+          hasNextPageRef.current &&
+          !isFetchingRef.current
         ) {
           fetchNextPage();
         }
-      }
-    },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
-  );
-  useEffect(() => {
-    fetchMoreOnBottomReached(tableContainerRef.current);
-  }, [fetchMoreOnBottomReached]);
+      },
+      {
+        root: tableContainerRef.current,
+        rootMargin: "0px 0px 100px 0px",
+        threshold: 0,
+      },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchNextPage]);
 
-  const memoColumns = useMemo(() => columns, [columns]);
-  const fuzzyFilter: FilterFn<TData> = (row, columnId, value, addMeta) => {
-    // Rank the item
-    const itemRank = rankItem(row.getValue(columnId), value);
-
-    // Store the itemRank info
-    addMeta({ itemRank });
-
-    // Return if the item should be filtered in/out
-    return itemRank.passed;
-  };
-  const table = useReactTable({
+  const table = useReactTable<TData>({
     data: flatData,
-    columns: memoColumns,
+    columns: columns,
     filterFns: {
       fuzzy: fuzzyFilter,
     },
-    globalFilterFn: fuzzyFilter,
     getCoreRowModel: getCoreRowModel(),
     onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
     state: {
       globalFilter,
       sorting,
@@ -140,8 +152,9 @@ export function DataTable<TData>({
 
   const columnWidths = useMemo(() => {
     const widths: Record<string, number> = {};
+    const simple = flatData.slice(0, 200);
 
-    memoColumns.forEach((col: ColumnDef<TData>) => {
+    columns.forEach((col: ColumnDef<TData>) => {
       const colId =
         col.id || (col as { accessorKey?: string; id: string }).accessorKey;
       if (!colId) return;
@@ -149,7 +162,7 @@ export function DataTable<TData>({
       let maxLen = typeof col.header === "string" ? col.header.length : 11;
       const colKey = (col as { accessorKey?: string; id: string }).accessorKey;
       if (colKey) {
-        flatData.forEach((row: TData) => {
+        simple.forEach((row: TData) => {
           const val = (row as Record<string, unknown>)[colKey];
           if (typeof val === "string") {
             maxLen = Math.max(maxLen, val.length);
@@ -164,7 +177,7 @@ export function DataTable<TData>({
       widths[colId] = estimated;
     });
     return widths;
-  }, [flatData, memoColumns]);
+  }, [flatData, columns]);
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
@@ -173,24 +186,12 @@ export function DataTable<TData>({
     //measure dynamic row height, except in firefox because it measures table border height incorrectly
     measureElement:
       typeof window !== "undefined" &&
+      typeof navigator !== "undefined" &&
       navigator.userAgent.indexOf("Firefox") === -1
         ? (element) => element?.getBoundingClientRect().height
         : undefined,
     overscan: 5,
   });
-
-  const getHeight = () => {
-    switch (size) {
-      case "bg":
-        return 600;
-      case "md":
-        return 300;
-      case "sm":
-        return 200;
-      default:
-        return 600;
-    }
-  };
 
   if (data?.pages.at(0)?.totalRows === 0) {
     return (
@@ -228,10 +229,9 @@ export function DataTable<TData>({
             ? {
                 overflow: "auto",
               }
-            : { height: `${getHeight()}px`, overflow: "auto" }
+            : { height: `${height}px`, overflow: "auto" }
         }
         ref={tableContainerRef}
-        onScroll={(e) => fetchMoreOnBottomReached(e.currentTarget)}
       >
         <Table className="grid">
           <TableHeader
@@ -285,7 +285,7 @@ export function DataTable<TData>({
                 rowVirtualizer
                   .getVirtualItems()
                   .map((virtualRow) => {
-                    const row = rows[virtualRow.index] as Row<TData>;
+                    const row = rows[virtualRow.index];
                     return (
                       <TableRow
                         data-index={virtualRow.index}
@@ -334,8 +334,18 @@ export function DataTable<TData>({
                     </TableCell>
                   </TableRow>
                 )}
+            <tr
+              ref={sentinelRef}
+              style={{
+                width: "1px",
+                pointerEvents: "none",
+              }}
+            >
+              <td />
+            </tr>
           </TableBody>
         </Table>
+
         {isFetching && !isLoading && (
           <span className="flex flex-1 justify-center items-center gap-4 pb-4">
             <Spinner /> Cargando...
