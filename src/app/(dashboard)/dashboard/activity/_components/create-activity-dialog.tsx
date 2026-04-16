@@ -1,7 +1,7 @@
 "use client";
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   type FieldErrors,
@@ -178,13 +178,25 @@ export default function CreateActivityDialog() {
             </FieldGroup>
             <DialogFooter className="gap-6 mt-6">
               <DialogClose onClick={() => form.reset()} asChild>
-                <Button type="button" variant="ghost">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+                >
+                  <X className="mr-2 h-4 w-4" />
                   Cancelar
                 </Button>
               </DialogClose>
               <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting && <Spinner />}
-                {form.formState.isSubmitting ? "Guardando..." : "Guardar"}
+                {form.formState.isSubmitting ? (
+                  <>
+                    <Spinner className="mr-2 h-4 w-4" /> Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" /> Guardar
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </FormProvider>

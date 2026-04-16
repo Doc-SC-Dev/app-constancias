@@ -31,7 +31,7 @@ export default function ActivitySelect() {
         <AlertDescription>
           {error?.message ||
             data?.error ||
-            "Ocurrio un error durante la carga de actividades intente nuevamente."}
+            "Ocurrió un error durante la carga de actividades, intente nuevamente."}
         </AlertDescription>
       </Alert>
     );

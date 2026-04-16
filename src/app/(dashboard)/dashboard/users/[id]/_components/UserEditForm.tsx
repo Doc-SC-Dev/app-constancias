@@ -69,7 +69,11 @@ export default function UserEditForm({
       </FieldGroup>
       <SheetFooter>
         <SheetClose asChild>
-          <Button variant="outline" type="button">
+          <Button 
+            variant="outline" 
+            type="button"
+            className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+          >
             <X className="mr-2 h-4 w-4" />
             Cancelar
           </Button>

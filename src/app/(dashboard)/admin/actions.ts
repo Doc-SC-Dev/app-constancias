@@ -74,7 +74,7 @@ export const updateAcademicPeriods = async (
   }
 
   revalidatePath("/admin");
-  return { success: true, message: "Períodos actualizados exitosamente" };
+  return { success: true, message: "Periodos actualizados exitosamente" };
 };
 
 export const getNonDirectorUsers = async () => {

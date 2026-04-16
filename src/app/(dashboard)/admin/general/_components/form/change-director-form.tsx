@@ -3,6 +3,7 @@
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQueryClient } from "@tanstack/react-query";
 import { type } from "arktype";
+import { Save, X } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -63,19 +64,26 @@ export default function ChangeDirectorForm({
             disabled={form.formState.isSubmitting}
           />
         </FieldGroup>
-        <DialogFooter className="mt-6">
+        <DialogFooter className="mt-6 gap-2">
           <DialogClose asChild>
-            <Button variant="destructive" type="button">
+            <Button
+              variant="outline"
+              type="button"
+              className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
+            >
+              <X className="mr-2 h-4 w-4" />
               Cancelar
             </Button>
           </DialogClose>
-          <Button type="submit" variant="outline">
+          <Button type="submit" variant="default" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? (
               <>
-                <Spinner /> Guardando
+                <Spinner className="mr-2 h-4 w-4" /> Guardando...
               </>
             ) : (
-              "Guardar"
+              <>
+                <Save className="mr-2 h-4 w-4" /> Guardar
+              </>
             )}
           </Button>
         </DialogFooter>

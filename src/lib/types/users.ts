@@ -44,7 +44,7 @@ export const userEditSchema = type({
   }),
   rut: rutSchema,
   email: type("string.email").configure({
-    message: "Ingrese un email valido.",
+    message: "Ingrese un email válido.",
   }),
   role: roleSchema,
 });
@@ -66,7 +66,7 @@ const nameSchema = type("string").narrow((s, ctx) => {
 });
 
 const emailSchema = type("string.email").configure({
-  message: "Debe ingresar un email valido",
+  message: "Debe ingresar un email válido",
 });
 
 export const userCreateSchema = type({
@@ -80,7 +80,7 @@ export const userCreateSchema = type({
   }),
   "admissionDate?": "Date",
   academicGrade: type("string > 1").configure({
-    message: "El grado academico es un campo requerido",
+    message: "El grado académico es un campo requerido",
   }),
 }).narrow((val, ctx) => {
   if (val.role === Roles.STUDENT && val.admissionDate === undefined) {

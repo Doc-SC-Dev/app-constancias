@@ -3,7 +3,7 @@
 import { arktypeResolver } from "@hookform/resolvers/arktype";
 import { useQueryClient } from "@tanstack/react-query";
 import { type } from "arktype";
-import { Loader2 } from "lucide-react";
+import { Loader2, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -199,12 +199,22 @@ export function EditExamDialog({
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
                 disabled={isPending}
+                className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground"
               >
+                <X className="mr-2 h-4 w-4" />
                 Cancelar
               </Button>
               <Button type="submit" disabled={isPending || !exam.studentId}>
-                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Guardar
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" /> Guardar
+                  </>
+                )}
               </Button>
             </div>
           </form>
