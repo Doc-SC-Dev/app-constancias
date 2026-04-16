@@ -322,7 +322,7 @@ export async function listUserRequest({
   return {
     data: data.map((request) => ({
       id: request.id,
-      name: request.certificate.name,
+      name: request.certificate ? request.certificate.name : "",
       createdAt: request.createdAt,
       state: request.state,
     })),
