@@ -49,19 +49,18 @@ export default function DeleteActionButton({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>
-            <X className="mr-2" />
+          <AlertDialogCancel className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive active:bg-destructive/90 active:border-destructive/90 active:text-destructive-foreground">
+            <X className="mr-2 h-4 w-4" />
             Cancelar
           </AlertDialogCancel>
-          <Button variant="destructive" onClick={onDelete} disabled={isPending}>
+          <Button variant="default" onClick={onDelete} disabled={isPending}>
             {isPending ? (
               <>
-                <Spinner className="mr-2" /> Eliminando
+                <Spinner className="mr-2 h-4 w-4" /> Eliminando...
               </>
             ) : (
               <>
-                <Trash className="mr-2" />
-                Eliminar
+                <Trash className="mr-2 h-4 w-4" /> Eliminar
               </>
             )}
           </Button>

@@ -29,7 +29,7 @@ export default function UserSelect() {
         <AlertDescription>
           {error?.message ||
             users?.error ||
-            "Ocurrio un error durante la carga de usuario intente nuevamente."}
+            "Ocurrió un error durante la carga de usuarios, intente nuevamente."}
         </AlertDescription>
       </Alert>
     );
